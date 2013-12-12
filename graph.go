@@ -14,11 +14,17 @@ const (
 
 type Vertex interface{}
 
+type Edge struct {
+	Tail, Head Vertex
+}
+
 type Graph interface {
 	EachVertex(f func(vertex Vertex))
-	EachEdge(f func(source Vertex, target Vertex))
+	EachEdge(f func(edge Edge))
 	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
 	HasVertex(vertex Vertex) bool
+	Order() uint
+	Size() uint
 	GetSubgraph([]Vertex) Graph
 }
 
@@ -40,9 +46,4 @@ type MutableDirectedGraph interface {
 	DirectedGraph
 	addDirectedEdge(source interface{}, target interface{}) bool
 	removeDirectedEdge(source interface{}, target interface{}) bool
-}
-
-type Edge interface {
-	Tail() Vertex
-	Head() Vertex
 }
