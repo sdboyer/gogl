@@ -8,7 +8,8 @@ type adjacencyList map[Vertex]VertexSet
 
 type AdjacencyList struct {
 	adjacencyList
-	mu sync.RWMutex
+	size uint
+	mu   sync.RWMutex
 }
 
 // Composite literal to create a new AdjacencyList.
@@ -27,12 +28,12 @@ func (g AdjacencyList) EachVertex(f func(vertex Vertex)) {
 	g.mu.RUnlock()
 }
 
-func (g AdjacencyList) EachEdge(f func(source Vertex, target Vertex)) {
+func (g AdjacencyList) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 
 	for source, adjacent := range g.adjacencyList {
 		for _, target := range adjacent {
-			f(source, target)
+			f(Edge{Tail: source, Head: target})
 		}
 	}
 }
@@ -56,6 +57,14 @@ func (g AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	return
 }
 
+func (g AdjacencyList) Order() uint {
+	return uint(len(g.adjacencyList))
+}
+
+func (g AdjacencyList) Size() uint {
+	return g.size
+}
+
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 
@@ -76,24 +85,13 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 		// while read-locked?
 		delete(g.adjacencyList, vertex)
 
-		var wg sync.WaitGroup
+		// TODO consider chunking the list and parallelizing into goroutines
 		for _, adjacent := range g.adjacencyList {
-			// TODO parallelization here will probably have some cost for sparse graphs
-			// but considerable benefit for dense graphs
-			wg.Add(1)
-			go func(haystack VertexSet) {
-				defer wg.Done()
-
-				for adj := range haystack {
-					if adj == vertex {
-						delete(haystack, adj)
-					}
-				}
-			}(adjacent)
-
+			if _, has := adjacent[vertex]; has {
+				delete(adjacent, vertex)
+				g.size--
+			}
 		}
-		// Wait for all vertex pruning to complete.
-		wg.Wait()
 	}
 
 	g.mu.Unlock()

@@ -3,13 +3,13 @@ package gogl
 
 // Constants defining graph capabilities and behaviors.
 const (
-  E_DIRECTED, EM_DIRECTED = 1 << iota, 1 << iota - 1
-  E_UNDIRECTED, EM_UNDIRECTED
-  E_WEIGHTED, EM_WEIGHTED
-  E_TYPED, EM_TYPED
-  E_SIGNED, EM_SIGNED
-  E_LOOPS, EM_LOOPS
-  E_MULTIGRAPH, EM_MULTIGRAPH
+	E_DIRECTED, EM_DIRECTED = 1 << iota, 1<<iota - 1
+	E_UNDIRECTED, EM_UNDIRECTED
+	E_WEIGHTED, EM_WEIGHTED
+	E_TYPED, EM_TYPED
+	E_SIGNED, EM_SIGNED
+	E_LOOPS, EM_LOOPS
+	E_MULTIGRAPH, EM_MULTIGRAPH
 )
 
 type Vertex interface{}
