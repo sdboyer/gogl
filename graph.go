@@ -25,11 +25,6 @@ type Graph interface {
 	HasVertex(vertex Vertex) bool
 	Order() uint
 	Size() uint
-	GetSubgraph([]Vertex) Graph
-}
-
-type MutableGraph interface {
-	Graph
 	AddVertex(v interface{}) bool
 	RemoveVertex(v interface{}) bool
 }
@@ -39,11 +34,6 @@ type DirectedGraph interface {
 	Transpose() DirectedGraph
 	IsAcyclic() bool
 	GetCycles() [][]interface{}
-}
-
-type MutableDirectedGraph interface {
-	MutableGraph
-	DirectedGraph
 	addDirectedEdge(source interface{}, target interface{}) bool
 	removeDirectedEdge(source interface{}, target interface{}) bool
 }
