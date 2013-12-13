@@ -25,15 +25,16 @@ type Graph interface {
 	HasVertex(vertex Vertex) bool
 	Order() uint
 	Size() uint
-	AddVertex(v interface{}) bool
-	RemoveVertex(v interface{}) bool
+	AddVertex(v Vertex) bool
+	RemoveVertex(v Vertex) bool
+	AddEdge(edge Edge) (bool, error)
 }
 
 type DirectedGraph interface {
 	Graph
 	Transpose() DirectedGraph
 	IsAcyclic() bool
-	GetCycles() [][]interface{}
-	addDirectedEdge(source interface{}, target interface{}) bool
-	removeDirectedEdge(source interface{}, target interface{}) bool
+	GetCycles() [][]Vertex
+	addDirectedEdge(source Vertex, target Vertex) bool
+	removeDirectedEdge(source Vertex, target Vertex) bool
 }
