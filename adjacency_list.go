@@ -33,7 +33,7 @@ func (g AdjacencyList) EachEdge(f func(edge Edge)) {
 
 	for source, adjacent := range g.adjacencyList {
 		for _, target := range adjacent {
-			f(Edge{Tail: source, Head: target})
+			f(Edge{u: source, v: target})
 		}
 	}
 }
