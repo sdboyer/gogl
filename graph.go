@@ -65,13 +65,13 @@ type Graph interface {
 	Size() uint
 	AddVertex(v Vertex) bool
 	RemoveVertex(v Vertex) bool
-	AddEdge(edge Edge) (bool, error)
+	AddEdge(edge Edge) bool
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops
 // and parallel edges.
 type SimpleGraph interface {
-    Density() float64
+	Density() float64
 }
 
 type DirectedGraph interface {

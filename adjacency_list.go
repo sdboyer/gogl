@@ -2,9 +2,14 @@ package gogl
 
 import "sync"
 
-// VertexSet uses maps to express a value-less (empty struct), indexed unordered list
+// VertexSet uses maps to express a value-less (empty struct), indexed
+// unordered list. See
+// https://groups.google.com/forum/#!searchin/golang-nuts/map/golang-nuts/H2cXpwisEUE/1X2FV-rODfIJ
 type VertexSet map[Vertex]struct{}
 type adjacencyList map[Vertex]VertexSet
+
+// Helper to not have to write struct{} everywhere.
+var keyExists = struct{}{}
 
 type AdjacencyList struct {
 	adjacencyList
@@ -33,9 +38,11 @@ func (g AdjacencyList) EachEdge(f func(edge Edge)) {
 
 	for source, adjacent := range g.adjacencyList {
 		for _, target := range adjacent {
-			f(Edge{u: source, v: target})
+			f(BaseEdge{u: source, v: target})
 		}
 	}
+
+	g.mu.RUnlock()
 }
 
 func (g AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
@@ -52,22 +59,34 @@ func (g AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 
 func (g AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
+
 	_, exists = g.adjacencyList[vertex]
+
 	g.mu.RUnlock()
 	return
 }
 
-func (g AdjacencyList) Order() uint {
-	return uint(len(g.adjacencyList))
+func (g AdjacencyList) Order() (length uint) {
+	g.mu.RLock()
+
+	length = uint(len(g.adjacencyList))
+
+	g.mu.RUnlock()
+	return
 }
 
 func (g AdjacencyList) Size() uint {
 	return g.size
 }
 
-func (g AdjacencyList) Density() float64 {
-  order := g.Order()
-  return (2*g.Size()) / (order * (order - 1))
+func (g AdjacencyList) Density() (density float64) {
+	g.mu.RLock()
+
+	order := float64(g.Order())
+	density = (2 * float64(g.Size())) / (order * (order - 1))
+
+	g.mu.RUnlock()
+	return
 }
 
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
@@ -103,15 +122,18 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	return
 }
 
-func (g AdjacencyList) AddEdge(edge Edge) {
+func (g AdjacencyList) AddEdge(edge Edge) (exists bool) {
 	g.mu.Lock()
 
 	g.AddVertex(edge.Source())
 	g.AddVertex(edge.Target())
 
-	g.adjacencyList[edge.Source()][edge.Target()] = nil
+	if _, exists = g.adjacencyList[edge.Source()][edge.Target]; !exists {
+		g.adjacencyList[edge.Source()][edge.Target()] = keyExists
+	}
 
 	g.mu.Unlock()
+	return !exists
 }
 
 func (g AdjacencyList) RemoveEdge(edge Edge) {
