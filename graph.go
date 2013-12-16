@@ -68,6 +68,12 @@ type Graph interface {
 	AddEdge(edge Edge) (bool, error)
 }
 
+// A simple graph is in opposition to a multigraph: it disallows loops
+// and parallel edges.
+type SimpleGraph interface {
+    Density() float64
+}
+
 type DirectedGraph interface {
 	Graph
 	Transpose() DirectedGraph

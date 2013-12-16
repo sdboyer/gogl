@@ -65,6 +65,11 @@ func (g AdjacencyList) Size() uint {
 	return g.size
 }
 
+func (g AdjacencyList) Density() float64 {
+  order := g.Order()
+  return (2*g.Size()) / (order * (order - 1))
+}
+
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 
