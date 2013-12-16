@@ -92,7 +92,7 @@ func (g AdjacencyList) Density() (density float64) {
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 
-	if exists := g.HasVertex(vertex); !exists {
+	if _, exists := g.adjacencyList[vertex]; !exists {
 		// TODO experiment with different lengths...possibly by analyzing existing density?
 		g.adjacencyList[vertex] = make(VertexSet, 10)
 		success = true
