@@ -97,3 +97,22 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	g.mu.Unlock()
 	return
 }
+
+func (g AdjacencyList) AddEdge(edge Edge) {
+	g.mu.Lock()
+
+	g.AddVertex(edge.Source())
+	g.AddVertex(edge.Target())
+
+	g.adjacencyList[edge.Source()][edge.Target()] = nil
+
+	g.mu.Unlock()
+}
+
+func (g AdjacencyList) RemoveEdge(edge Edge) {
+	g.mu.Lock()
+
+	delete(g.adjacencyList, edge.Source())
+
+	g.mu.Unlock()
+}
