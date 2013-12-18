@@ -25,44 +25,40 @@ func NewAdjacencyList() *AdjacencyList {
 
 func (g AdjacencyList) EachVertex(f func(vertex Vertex)) {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	for v := range g.adjacencyList {
 		f(v)
 	}
-
-	g.mu.RUnlock()
 }
 
 func (g AdjacencyList) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.adjacencyList {
 		for _, target := range adjacent {
 			f(BaseEdge{u: source, v: target})
 		}
 	}
-
-	g.mu.RUnlock()
 }
 
 func (g AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	if _, exists := g.adjacencyList[vertex]; exists {
 		for adjacent, _ := range g.adjacencyList[vertex] {
 			f(adjacent)
 		}
 	}
-
-	g.mu.RUnlock()
 }
 
 func (g AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	exists = g.hasVertex(vertex)
-
-	g.mu.RUnlock()
 	return
 }
 
@@ -73,6 +69,7 @@ func (g AdjacencyList) hasVertex(vertex Vertex) (exists bool) {
 
 func (g AdjacencyList) Order() (length uint) {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	length = uint(len(g.adjacencyList))
 
@@ -84,22 +81,19 @@ func (g AdjacencyList) Size() uint {
 	return g.size
 }
 
-func (g AdjacencyList) Density() (density float64) {
+func (g AdjacencyList) Density() float64 {
 	g.mu.RLock()
+	defer g.mu.RUnlock()
 
 	order := float64(g.Order())
-	density = (2 * float64(g.Size())) / (order * (order - 1))
-
-	g.mu.RUnlock()
-	return
+	return (2 * float64(g.Size())) / (order * (order - 1))
 }
 
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	success = g.addVertex(vertex)
-
-	g.mu.Unlock()
 	return
 }
 
@@ -115,6 +109,7 @@ func (g AdjacencyList) addVertex(vertex Vertex) (success bool) {
 
 func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	if g.hasVertex(vertex) {
 		// TODO Is the expensive search good to do here and now...
@@ -131,13 +126,12 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 
 		success = true
 	}
-
-	g.mu.Unlock()
 	return
 }
 
 func (g AdjacencyList) AddEdge(edge Edge) (exists bool) {
 	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	g.addVertex(edge.Source())
 	g.addVertex(edge.Target())
@@ -145,15 +139,12 @@ func (g AdjacencyList) AddEdge(edge Edge) (exists bool) {
 	if _, exists = g.adjacencyList[edge.Source()][edge.Target]; !exists {
 		g.adjacencyList[edge.Source()][edge.Target()] = keyExists
 	}
-
-	g.mu.Unlock()
 	return !exists
 }
 
 func (g AdjacencyList) RemoveEdge(edge Edge) {
 	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	delete(g.adjacencyList, edge.Source())
-
-	g.mu.Unlock()
 }
