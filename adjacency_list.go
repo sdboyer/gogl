@@ -60,9 +60,14 @@ func (g AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 func (g AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 
-	_, exists = g.adjacencyList[vertex]
+	exists = g.hasVertex(vertex)
 
 	g.mu.RUnlock()
+	return
+}
+
+func (g AdjacencyList) hasVertex(vertex Vertex) (exists bool) {
+	_, exists = g.adjacencyList[vertex]
 	return
 }
 
@@ -92,7 +97,7 @@ func (g AdjacencyList) Density() (density float64) {
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 
-	if _, exists := g.adjacencyList[vertex]; !exists {
+	if exists := g.hasVertex(vertex); !exists {
 		// TODO experiment with different lengths...possibly by analyzing existing density?
 		g.adjacencyList[vertex] = make(VertexSet, 10)
 		success = true
@@ -104,7 +109,8 @@ func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 
 func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
-	if g.HasVertex(vertex) {
+
+	if g.hasVertex(vertex) {
 		// TODO Is the expensive search good to do here and now...
 		// while read-locked?
 		delete(g.adjacencyList, vertex)
