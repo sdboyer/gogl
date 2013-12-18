@@ -63,6 +63,8 @@ type Graph interface {
 	HasVertex(vertex Vertex) bool
 	Order() uint
 	Size() uint
+	InDegree(vertex Vertex) (uint, bool)
+	OutDegree(vertex Vertex) (uint, bool)
 	AddVertex(v Vertex) bool
 	RemoveVertex(v Vertex) bool
 	AddEdge(edge Edge) bool

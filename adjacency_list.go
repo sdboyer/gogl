@@ -62,6 +62,32 @@ func (g *AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	return
 }
 
+func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if exists = g.hasVertex(vertex); exists {
+		degree = uint(len(g.adjacencyList[vertex]))
+	}
+	return
+}
+
+// Getting InDegree is highly inefficient for directed adjacency lists
+func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
+	// locking done by the called methods
+	if exists = g.HasVertex(vertex); exists {
+
+		f := func(v Vertex) {
+			if v == vertex {
+				degree++
+			}
+		}
+		g.EachVertex(f)
+	}
+
+	return
+}
+
 func (g *AdjacencyList) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.adjacencyList[vertex]
 	return
