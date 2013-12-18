@@ -49,7 +49,7 @@ func (g AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
 
 	if _, exists := g.adjacencyList[vertex]; exists {
-		for _, adjacent := range g.adjacencyList[vertex] {
+		for adjacent, _ := range g.adjacencyList[vertex] {
 			f(adjacent)
 		}
 	}
@@ -97,13 +97,19 @@ func (g AdjacencyList) Density() (density float64) {
 func (g AdjacencyList) AddVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 
+	success = g.addVertex(vertex)
+
+	g.mu.Unlock()
+	return
+}
+
+func (g AdjacencyList) addVertex(vertex Vertex) (success bool) {
 	if exists := g.hasVertex(vertex); !exists {
 		// TODO experiment with different lengths...possibly by analyzing existing density?
 		g.adjacencyList[vertex] = make(VertexSet, 10)
 		success = true
 	}
 
-	g.mu.Unlock()
 	return
 }
 
@@ -122,6 +128,8 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 				g.size--
 			}
 		}
+
+		success = true
 	}
 
 	g.mu.Unlock()
@@ -131,8 +139,8 @@ func (g AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 func (g AdjacencyList) AddEdge(edge Edge) (exists bool) {
 	g.mu.Lock()
 
-	g.AddVertex(edge.Source())
-	g.AddVertex(edge.Target())
+	g.addVertex(edge.Source())
+	g.addVertex(edge.Target())
 
 	if _, exists = g.adjacencyList[edge.Source()][edge.Target]; !exists {
 		g.adjacencyList[edge.Source()][edge.Target()] = keyExists
