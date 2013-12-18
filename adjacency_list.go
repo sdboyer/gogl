@@ -162,7 +162,7 @@ func (g *AdjacencyList) AddEdge(edge Edge) (exists bool) {
 	g.addVertex(edge.Source())
 	g.addVertex(edge.Target())
 
-	if _, exists = g.adjacencyList[edge.Source()][edge.Target]; !exists {
+	if _, exists = g.adjacencyList[edge.Source()][edge.Target()]; !exists {
 		g.adjacencyList[edge.Source()][edge.Target()] = keyExists
 	}
 	return !exists
@@ -172,5 +172,5 @@ func (g *AdjacencyList) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	delete(g.adjacencyList, edge.Source())
+	delete(g.adjacencyList[edge.Source()], edge.Target())
 }
