@@ -23,7 +23,7 @@ type AdjacencyList struct {
 
 // Composite literal to create a new AdjacencyList.
 func NewAdjacencyList() *AdjacencyList {
-    // Cannot assign to promoted fields in a composite literals.
+	// Cannot assign to promoted fields in a composite literals.
 	list := &AdjacencyList{}
 	list.list = make(map[Vertex]VertexSet)
 	return list
