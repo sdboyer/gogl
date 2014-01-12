@@ -89,3 +89,79 @@ func TestAddEdge(t *testing.T) {
 
 	g.EachAdjacent("foo", f)
 }
+
+func TestOutDegree(t *testing.T) {
+	g := NewAdjacencyList()
+
+	g.AddEdge(&BaseEdge{"foo", "bar"})
+
+	var count uint
+	var exists bool
+	count, exists = g.OutDegree("foo")
+
+	if count != 1 {
+		t.Error("Vertex should have outdegree of one, but", count, "was reported.")
+	}
+
+	if exists != true {
+		t.Error("Vertex should exist.")
+	}
+
+	count, exists = g.OutDegree("bar")
+
+	if count != 0 {
+		t.Error("Vertex should have outdegree of zero, but", count, "was reported.")
+	}
+
+	if exists != true {
+		t.Error("Vertex should exist.")
+	}
+
+	count, exists = g.OutDegree("baz")
+
+	if count != 0 {
+		t.Error("Zero outdegree count is reported when vertex does not exist.")
+	}
+
+	if exists != false {
+		t.Error("Vertex should not exist.")
+	}
+}
+
+func TestInDegree(t *testing.T) {
+	g := NewAdjacencyList()
+
+	g.AddEdge(&BaseEdge{"bar", "foo"})
+
+	var count uint
+	var exists bool
+	count, exists = g.InDegree("foo")
+
+	if count != 1 {
+		t.Error("Vertex should have indegree of one, but", count, "was reported.")
+	}
+
+	if exists != true {
+		t.Error("Vertex should exist.")
+	}
+
+	count, exists = g.InDegree("bar")
+
+	if count != 0 {
+		t.Error("Vertex should have indegree of zero, but", count, "was reported.")
+	}
+
+	if exists != true {
+		t.Error("Vertex should exist.")
+	}
+
+	count, exists = g.InDegree("baz")
+
+	if count != 0 {
+		t.Error("Zero indegree count is reported when vertex does not exist.")
+	}
+
+	if exists != false {
+		t.Error("Vertex should not exist.")
+	}
+}

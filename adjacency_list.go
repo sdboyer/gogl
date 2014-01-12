@@ -78,17 +78,23 @@ func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
 	return
 }
 
-// Getting InDegree is highly inefficient for directed adjacency lists
+// Getting InDegree is inefficient, O(n), for directed adjacency lists
 func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
-	// locking done by the called methods
-	if exists = g.HasVertex(vertex); exists {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if exists = g.hasVertex(vertex); exists {
 
 		f := func(v Vertex) {
 			if v == vertex {
 				degree++
 			}
 		}
-		g.EachVertex(f)
+
+		// This results in a double read-lock. Should be fine.
+		for e := range g.list {
+			g.EachAdjacent(e, f)
+		}
 	}
 
 	return
