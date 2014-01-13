@@ -115,14 +115,11 @@ func (g *AdjacencyList) hasVertex(vertex Vertex) (exists bool) {
 	return
 }
 
-func (g *AdjacencyList) Order() (length uint) {
+func (g *AdjacencyList) Order() uint {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	length = uint(len(g.list))
-
-	g.mu.RUnlock()
-	return
+	return uint(len(g.list))
 }
 
 func (g *AdjacencyList) Size() uint {
