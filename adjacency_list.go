@@ -29,6 +29,16 @@ func NewAdjacencyList() *AdjacencyList {
 	return list
 }
 
+func NewAdjacencyListFromEdgeSet(set []Edge) *AdjacencyList {
+	g := NewAdjacencyList()
+
+	for _, edge := range set {
+		g.addEdge(edge)
+	}
+
+	return g
+}
+
 func (g *AdjacencyList) EachVertex(f func(vertex Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -78,7 +88,7 @@ func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
 	return
 }
 
-// Getting InDegree is inefficient, O(n), for directed adjacency lists
+// Getting InDegree is inefficient for directed adjacency lists
 func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -167,10 +177,14 @@ func (g *AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	return
 }
 
-func (g *AdjacencyList) AddEdge(edge Edge) (exists bool) {
+func (g *AdjacencyList) AddEdge(edge Edge) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
+	return g.addEdge(edge)
+}
+
+func (g *AdjacencyList) addEdge(edge Edge) (exists bool) {
 	g.addVertex(edge.Source())
 	g.addVertex(edge.Target())
 
