@@ -58,6 +58,16 @@ func TestVertexMembership(t *testing.T) {
 	}
 }
 
+func TestRemoveVertexWithEdges(t *testing.T) {
+	g := NewAdjacencyListFromEdgeSet(edgeSet)
+
+	g.RemoveVertex("bar")
+
+	if count, _ := g.OutDegree("foo"); count != 0 {
+		t.Error("Removal of vertex in edge pair does not result in decrement of outdegree of the other vertex.")
+	}
+}
+
 func TestEachVertex(t *testing.T) {
 	g := NewAdjacencyList()
 
@@ -189,4 +199,3 @@ func TestEachEdge(t *testing.T) {
 		t.Error("Edge iterator should have been called twice, was called", hit, "times.")
 	}
 }
-
