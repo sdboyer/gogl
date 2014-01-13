@@ -53,8 +53,8 @@ func (g *AdjacencyList) EachEdge(f func(edge Edge)) {
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for _, target := range adjacent {
-			f(BaseEdge{u: source, v: target})
+		for target, _ := range adjacent {
+			f(&BaseEdge{u: source, v: target})
 		}
 	}
 }

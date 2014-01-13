@@ -174,3 +174,19 @@ func TestInDegree(t *testing.T) {
 		t.Error("Vertex should not exist.")
 	}
 }
+
+func TestEachEdge(t *testing.T) {
+	g := NewAdjacencyListFromEdgeSet(edgeSet)
+
+	var hit uint
+	f := func(e Edge) {
+		hit++
+	}
+
+	g.EachEdge(f)
+
+	if hit != 2 {
+		t.Error("Edge iterator should have been called twice, was called", hit, "times.")
+	}
+}
+
