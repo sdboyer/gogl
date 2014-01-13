@@ -49,6 +49,7 @@ const (
 type Edge interface {
 	Source() Vertex
 	Target() Vertex
+	Both() (Vertex, Vertex)
 	//  Properties() uint
 }
 
@@ -68,6 +69,10 @@ func (e BaseEdge) Source() Vertex {
 
 func (e BaseEdge) Target() Vertex {
 	return e.v
+}
+
+func (e BaseEdge) Both() (Vertex, Vertex) {
+	return e.u, e.v
 }
 
 /* Graph structures */

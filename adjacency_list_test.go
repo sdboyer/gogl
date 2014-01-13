@@ -21,9 +21,6 @@ func TestEnsureIsGraph(t *testing.T) {
 func TestGraphZeroValues(t *testing.T) {
 	g := NewAdjacencyList()
 
-	if g.Size() != 0 {
-		t.Error("Initializes with non-zero size.")
-	}
 
 	if g.Order() != 0 {
 		t.Error("Initializes with non-zero order.")
@@ -199,3 +196,24 @@ func TestEachEdge(t *testing.T) {
 		t.Error("Edge iterator should have been called twice, was called", hit, "times.")
 	}
 }
+
+func TestSize(t *testing.T) {
+	g := NewAdjacencyList()
+
+	if g.Size() != 0 {
+		t.Error("Graph initializes with non-zero size.")
+	}
+
+	g.AddEdge(&BaseEdge{"foo", "bar"})
+
+	if g.Size() != 1 {
+		t.Error("Graph does not increment size properly on edge addition.")
+	}
+
+	g.RemoveEdge(&BaseEdge{"foo", "bar"})
+
+	if g.Size() != 0 {
+		t.Error("Graph does not decrement size properly on edge removal.")
+	}
+}
+

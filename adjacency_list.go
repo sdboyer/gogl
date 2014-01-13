@@ -187,6 +187,7 @@ func (g *AdjacencyList) addEdge(edge Edge) (exists bool) {
 
 	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
 		g.list[edge.Source()][edge.Target()] = keyExists
+		g.size++
 	}
 	return !exists
 }
@@ -195,5 +196,10 @@ func (g *AdjacencyList) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	delete(g.list[edge.Source()], edge.Target())
+	s, t := edge.Both()
+	if _, exists := g.list[s][t]; exists {
+		delete(g.list[s], t)
+		g.size--
+	}
 }
+
