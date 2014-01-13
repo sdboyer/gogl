@@ -3,6 +3,7 @@ package gogl
 import (
 	"testing"
 	"fmt"
+	"math"
 )
 
 var fml = fmt.Println
@@ -15,16 +16,8 @@ var edgeSet = []Edge{
 func TestEnsureIsGraph(t *testing.T) {
 	// What is Go's best practice for ensuring the implementation of an interface?
 	_ = Graph(NewAdjacencyList())
+	_ = SimpleGraph(NewAdjacencyList())
 	t.Log("Implements Graph interface as expected.")
-}
-
-func TestGraphZeroValues(t *testing.T) {
-	g := NewAdjacencyList()
-
-
-	if g.Order() != 0 {
-		t.Error("Initializes with non-zero order.")
-	}
 }
 
 func TestVertexMembership(t *testing.T) {
@@ -217,3 +210,45 @@ func TestSize(t *testing.T) {
 	}
 }
 
+func TestOrder(t *testing.T) {
+	g := NewAdjacencyList()
+
+	if g.Order() != 0 {
+		t.Error("Graph initializes with non-zero order.")
+	}
+
+	g.AddVertex("foo")
+
+	if g.Order() != 1 {
+		t.Error("Adding a vertex does not increment order properly.")
+	}
+
+	g.RemoveVertex("foo")
+
+	if g.Order() != 0 {
+		t.Error("Removing a vertex does not decrement order properly.")
+	}
+}
+
+func TestDensity(t *testing.T) {
+	g := NewAdjacencyList()
+	var density float64
+
+	if !math.IsNaN(g.Density()) {
+		t.Error("On graph initialize, Density should be NaN (divides zero by zero)).")
+	}
+
+	g.AddEdge(&BaseEdge{"foo", "bar"})
+
+	density = g.Density()
+	if density != 1 {
+		t.Error("In undirected graph of V = 2 and E = 1, density should be 1; was", density)
+	}
+
+	g.AddEdge(&BaseEdge{"baz", "qux"})
+
+	density = g.Density()
+	if density != float64(1) / float64(3) {
+		t.Error("In undirected graph of V = 4 and E = 2, density should be 0.3333; was", density)
+	}
+}

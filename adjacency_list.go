@@ -130,16 +130,15 @@ func (g *AdjacencyList) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	order := float64(g.Order())
-	return (2 * float64(g.Size())) / (order * (order - 1))
+	order := g.Order()
+	return 2 * float64(g.Size()) / float64(order * (order - 1))
 }
 
-func (g *AdjacencyList) AddVertex(vertex Vertex) (success bool) {
+func (g *AdjacencyList) AddVertex(vertex Vertex) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	success = g.addVertex(vertex)
-	return
+	return g.addVertex(vertex)
 }
 
 func (g *AdjacencyList) addVertex(vertex Vertex) (success bool) {
