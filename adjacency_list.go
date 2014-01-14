@@ -2,10 +2,6 @@ package gogl
 
 import "sync"
 
-// VertexSet uses maps to express a value-less (empty struct), indexed
-// unordered list. See
-// https://groups.google.com/forum/#!searchin/golang-nuts/map/golang-nuts/H2cXpwisEUE/1X2FV-rODfIJ
-type VertexSet map[Vertex]struct{}
 type adjacencyList map[Vertex]VertexSet
 
 // Helper to not have to write struct{} everywhere.

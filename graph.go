@@ -10,6 +10,12 @@ package gogl
 // themselves. Your use case cares about the content of your vertices, but gogl
 // does not.  Consequently, anything can act as a vertex.
 type Vertex interface {}
+type VertexList []Vertex
+
+// VertexSet uses maps to express a value-less (empty struct), indexed
+// unordered list. See
+// https://groups.google.com/forum/#!searchin/golang-nuts/map/golang-nuts/H2cXpwisEUE/1X2FV-rODfIJ
+type VertexSet map[Vertex]struct{}
 
 // However, as a practical, internal matter, some approaches to representing
 // graphs may benefit significantly (in terms of memory use) from having a uint
@@ -21,7 +27,6 @@ type Vertex interface {}
 type IdentifiableVertex interface {
 	id() uint64
 }
-
 
 /* Edge structures */
 
@@ -52,6 +57,9 @@ type Edge interface {
 	Both() (Vertex, Vertex)
 	//  Properties() uint
 }
+
+type EdgeList []Edge
+type Path []Edge
 
 // BaseEdge is a struct used internally to represent edges and meet the Edge
 // interface requirements. It uses the standard notation, (u,v), for vertex
@@ -91,10 +99,15 @@ type Graph interface {
 	AddEdge(edge Edge) bool
 }
 
-// A simple graph is in opposition to a multigraph: it disallows loops
-// and parallel edges.
+// A simple graph is in opposition to a multigraph: it disallows loops and
+// parallel edges.
 type SimpleGraph interface {
 	Density() float64
+}
+
+type UndirectedGraph interface {
+	AddEdge(edge Edge) bool
+	RemoveEdge(edge Edge)
 }
 
 type DirectedGraph interface {
