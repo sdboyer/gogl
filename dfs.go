@@ -75,40 +75,89 @@ func (s *vstack) length() int {
 	return s.count
 }
 
-type walker struct {
-	vis DFVisitor
-	walker dfWalker
-	g Graph
-	visited map[Vertex]struct{}
-	visiting map[Vertex]struct{}
-	ll linkedlist
-}
-
 type DFVisitor interface {
-	BindGraph(g Graph) bool
-	HasGraph() bool
-	OnInitializeVertex(vertex Vertex)
-	OnBackEdge(vertex Vertex)
-	OnStartVertex(vertex Vertex)
-	OnExamineEdge(edge Edge)
-	OnFinishVertex(vertex Vertex)
+	onInitializeVertex(vertex Vertex)
+	onBackEdge(vertex Vertex)
+	onStartVertex(vertex Vertex)
+	onExamineEdge(edge Edge)
+	onFinishVertex(vertex Vertex)
 }
 
-type dfWalker func (v Vertex)
+type DFTslVisitor struct {
+	g   Graph
+	tsl []Vertex
+}
+
+func (vis *DFTslVisitor) onInitializeVertex(vertex Vertex) {}
+
+func (vis *DFTslVisitor) onBackEdge(vertex Vertex) {}
+
+func (vis *DFTslVisitor) onStartVertex(vertex Vertex) {}
+
+func (vis *DFTslVisitor) onExamineEdge(edge Edge) {}
+
+func (vis *DFTslVisitor) onFinishVertex(vertex Vertex) {
+	vis.tsl = append(vis.tsl, vertex)
+}
+
+func (vis *DFTslVisitor) GetTsl() []Vertex {
+	return vis.tsl
+}
+
+type EdgeFilterer interface {
+	FilterEdge(edge Edge) bool
+	FilterEdges(edges []Edge) []Edge
+}
+
+type walker struct {
+	vis      DFVisitor
+	g        Graph
+	visited  map[Vertex]struct{}
+	visiting map[Vertex]struct{}
+	ll       linkedlist
+}
+
+func DepthFirstFromVertices(g Graph, vis DFVisitor, vertices ...Vertex) error {
+	stack := vstack{}
+	for _, v := range vertices {
+		stack.push(v)
+	}
+
+	if stack.length() == 0 {
+		return errors.New("No vertices provided as start points, cannot traverse.")
+	}
+
+	w := walker{
+		vis:      vis,
+		g:        g,
+		visited:  make(map[Vertex]struct{}),
+		visiting: make(map[Vertex]struct{}),
+	}
+
+	for v := stack.pop(); ; {
+		w.dfrecursive(v)
+
+		if stack.length() == 0 {
+			break
+		}
+	}
+
+	return nil
+}
 
 func (w *walker) dfrecursive(v Vertex) {
 	if _, visiting := w.visiting[v]; visiting {
-		w.vis.OnBackEdge(v)
+		w.vis.onBackEdge(v)
 	} else if _, visited := w.visited[v]; !visited {
 		w.visiting[v] = struct{}{}
-		w.vis.OnStartVertex(v)
+		w.vis.onStartVertex(v)
 
 		w.g.EachAdjacent(v, func(to Vertex) {
-			w.vis.OnExamineEdge(&BaseEdge{v, to})
+			w.vis.onExamineEdge(&BaseEdge{v, to})
 			w.dfrecursive(to)
 		})
 
-		w.vis.OnFinishVertex(v)
+		w.vis.onFinishVertex(v)
 		w.visited[v] = struct{}{}
 		delete(w.visiting, v)
 	}
@@ -118,11 +167,9 @@ func (w *walker) dflist() {
 	var v Vertex
 	for v = w.ll.pop(); v != nil; v = w.ll.pop() {
 		if _, visiting := w.visiting[v]; visiting {
-			w.vis.OnBackEdge(v)
+			w.vis.onBackEdge(v)
 		} else {
-			
+
 		}
 	}
 }
-
-
