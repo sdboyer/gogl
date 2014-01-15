@@ -127,7 +127,7 @@ func (g *AdjacencyList) Density() float64 {
 	defer g.mu.RUnlock()
 
 	order := g.Order()
-	return 2 * float64(g.Size()) / float64(order * (order - 1))
+	return 2 * float64(g.Size()) / float64(order*(order-1))
 }
 
 func (g *AdjacencyList) AddVertex(vertex Vertex) bool {
@@ -197,4 +197,3 @@ func (g *AdjacencyList) RemoveEdge(edge Edge) {
 		g.size--
 	}
 }
-

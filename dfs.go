@@ -1,20 +1,22 @@
 package gogl
 
+import "errors"
+
 // Contains algos and logic related to depth-first traversal.
 
 type vnode struct {
-	v Vertex
+	v    Vertex
 	next *vnode
 }
 
 type vqueue struct {
 	front *vnode
-	back *vnode
+	back  *vnode
 	count int
 }
 
 type vstack struct {
-	top *vnode
+	top   *vnode
 	count int
 }
 
@@ -25,7 +27,7 @@ type linkedlist interface {
 }
 
 func (q *vqueue) push(v Vertex) {
-	n  := &vnode{v: v}
+	n := &vnode{v: v}
 
 	if q.back == nil {
 		q.front = n
@@ -51,7 +53,7 @@ func (q *vqueue) length() int {
 }
 
 func (s *vstack) push(v Vertex) {
-	n  := &vnode{v: v}
+	n := &vnode{v: v}
 
 	if s.top == nil {
 		s.top = n

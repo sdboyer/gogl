@@ -9,7 +9,7 @@ package gogl
 // characteristics of the edges connecting the points than the points
 // themselves. Your use case cares about the content of your vertices, but gogl
 // does not.  Consequently, anything can act as a vertex.
-type Vertex interface {}
+type Vertex interface{}
 type VertexList []Vertex
 
 // VertexSet uses maps to express a value-less (empty struct), indexed

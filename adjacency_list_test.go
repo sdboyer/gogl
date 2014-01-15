@@ -1,9 +1,9 @@
 package gogl
 
 import (
-	"testing"
 	"fmt"
 	"math"
+	"testing"
 )
 
 var fml = fmt.Println
@@ -248,7 +248,7 @@ func TestDensity(t *testing.T) {
 	g.AddEdge(&BaseEdge{"baz", "qux"})
 
 	density = g.Density()
-	if density != float64(1) / float64(3) {
+	if density != float64(1)/float64(3) {
 		t.Error("In undirected graph of V = 4 and E = 2, density should be 0.3333; was", density)
 	}
 }
