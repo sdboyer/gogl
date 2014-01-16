@@ -2,19 +2,19 @@ package gogl
 
 import "sync"
 
-type adjacencyList map[Vertex]VertexSet
+type al map[Vertex]VertexSet
 
 // Helper to not have to write struct{} everywhere.
 var keyExists = struct{}{}
 
-type al struct {
-	list adjacencyList
+type adjacencyList struct {
+	list al
+	size uint
+	mu   sync.RWMutex
 }
 
 type AdjacencyList struct {
-	al
-	size uint
-	mu   sync.RWMutex
+	adjacencyList
 }
 
 // Composite literal to create a new AdjacencyList.
@@ -35,7 +35,9 @@ func NewAdjacencyListFromEdgeSet(set []Edge) *AdjacencyList {
 	return g
 }
 
-func (g *AdjacencyList) EachVertex(f func(vertex Vertex)) {
+/* Base adjacencyList methods */
+
+func (g *adjacencyList) EachVertex(f func(vertex Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -44,18 +46,7 @@ func (g *AdjacencyList) EachVertex(f func(vertex Vertex)) {
 	}
 }
 
-func (g *AdjacencyList) EachEdge(f func(edge Edge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
-			f(&BaseEdge{u: source, v: target})
-		}
-	}
-}
-
-func (g *AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *adjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -66,13 +57,48 @@ func (g *AdjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	}
 }
 
-func (g *AdjacencyList) HasVertex(vertex Vertex) (exists bool) {
+func (g *adjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	exists = g.hasVertex(vertex)
 	return
 }
+
+func (g *adjacencyList) hasVertex(vertex Vertex) (exists bool) {
+	_, exists = g.list[vertex]
+	return
+}
+
+func (g *adjacencyList) Order() uint {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	return uint(len(g.list))
+}
+
+func (g *adjacencyList) Size() uint {
+	return g.size
+}
+
+func (g *adjacencyList) AddVertex(vertex Vertex) bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	return g.addVertex(vertex)
+}
+
+func (g *adjacencyList) addVertex(vertex Vertex) (success bool) {
+	if exists := g.hasVertex(vertex); !exists {
+		// TODO experiment with different lengths...possibly by analyzing existing density?
+		g.list[vertex] = make(VertexSet, 10)
+		success = true
+	}
+
+	return
+}
+
+/* AdjacencyList additions (TODO - call it Directed) */
 
 func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
 	g.mu.RLock()
@@ -106,20 +132,15 @@ func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
 	return
 }
 
-func (g *AdjacencyList) hasVertex(vertex Vertex) (exists bool) {
-	_, exists = g.list[vertex]
-	return
-}
-
-func (g *AdjacencyList) Order() uint {
+func (g *AdjacencyList) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	return uint(len(g.list))
-}
-
-func (g *AdjacencyList) Size() uint {
-	return g.size
+	for source, adjacent := range g.list {
+		for target, _ := range adjacent {
+			f(&BaseEdge{u: source, v: target})
+		}
+	}
 }
 
 func (g *AdjacencyList) Density() float64 {
@@ -128,23 +149,6 @@ func (g *AdjacencyList) Density() float64 {
 
 	order := g.Order()
 	return 2 * float64(g.Size()) / float64(order*(order-1))
-}
-
-func (g *AdjacencyList) AddVertex(vertex Vertex) bool {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-
-	return g.addVertex(vertex)
-}
-
-func (g *AdjacencyList) addVertex(vertex Vertex) (success bool) {
-	if exists := g.hasVertex(vertex); !exists {
-		// TODO experiment with different lengths...possibly by analyzing existing density?
-		g.list[vertex] = make(VertexSet, 10)
-		success = true
-	}
-
-	return
 }
 
 func (g *AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
