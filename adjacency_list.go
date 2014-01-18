@@ -13,20 +13,20 @@ type adjacencyList struct {
 	mu   sync.RWMutex
 }
 
-type AdjacencyList struct {
+type DirectedAdjacencyList struct {
 	adjacencyList
 }
 
-// Composite literal to create a new AdjacencyList.
-func NewAdjacencyList() *AdjacencyList {
+// Composite literal to create a new DirectedAdjacencyList.
+func NewDirectedAdjacencyList() *DirectedAdjacencyList {
 	// Cannot assign to promoted fields in a composite literals.
-	list := &AdjacencyList{}
+	list := &DirectedAdjacencyList{}
 	list.list = make(map[Vertex]VertexSet)
 	return list
 }
 
-func NewAdjacencyListFromEdgeSet(set []Edge) *AdjacencyList {
-	g := NewAdjacencyList()
+func NewDirectedAdjacencyListFromEdgeSet(set []Edge) *DirectedAdjacencyList {
+	g := NewDirectedAdjacencyList()
 
 	for _, edge := range set {
 		g.addEdge(edge)
@@ -98,9 +98,9 @@ func (g *adjacencyList) addVertex(vertex Vertex) (success bool) {
 	return
 }
 
-/* AdjacencyList additions (TODO - call it Directed) */
+/* DirectedAdjacencyList additions (TODO - call it Directed) */
 
-func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
+func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -111,7 +111,7 @@ func (g *AdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
 }
 
 // Getting InDegree is inefficient for directed adjacency lists
-func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
+func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -132,7 +132,7 @@ func (g *AdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
 	return
 }
 
-func (g *AdjacencyList) EachEdge(f func(edge Edge)) {
+func (g *DirectedAdjacencyList) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -143,7 +143,7 @@ func (g *AdjacencyList) EachEdge(f func(edge Edge)) {
 	}
 }
 
-func (g *AdjacencyList) Density() float64 {
+func (g *DirectedAdjacencyList) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -151,7 +151,7 @@ func (g *AdjacencyList) Density() float64 {
 	return 2 * float64(g.Size()) / float64(order*(order-1))
 }
 
-func (g *AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
+func (g *DirectedAdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -173,14 +173,14 @@ func (g *AdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
 	return
 }
 
-func (g *AdjacencyList) AddEdge(edge Edge) bool {
+func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	return g.addEdge(edge)
 }
 
-func (g *AdjacencyList) addEdge(edge Edge) (exists bool) {
+func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
 	g.addVertex(edge.Source())
 	g.addVertex(edge.Target())
 
@@ -191,7 +191,7 @@ func (g *AdjacencyList) addEdge(edge Edge) (exists bool) {
 	return !exists
 }
 
-func (g *AdjacencyList) RemoveEdge(edge Edge) {
+func (g *DirectedAdjacencyList) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 

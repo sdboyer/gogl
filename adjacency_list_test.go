@@ -15,13 +15,13 @@ var edgeSet = []Edge{
 
 func TestEnsureIsGraph(t *testing.T) {
 	// What is Go's best practice for ensuring the implementation of an interface?
-	_ = Graph(NewAdjacencyList())
-	_ = SimpleGraph(NewAdjacencyList())
+	_ = Graph(NewDirectedAdjacencyList())
+	_ = SimpleGraph(NewDirectedAdjacencyList())
 	t.Log("Implements Graph interface as expected.")
 }
 
 func TestVertexMembership(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	if g.HasVertex("foo") != false {
 		t.Error("Incorrectly reports nonexistent vertex as present.")
@@ -49,7 +49,7 @@ func TestVertexMembership(t *testing.T) {
 }
 
 func TestRemoveVertexWithEdges(t *testing.T) {
-	g := NewAdjacencyListFromEdgeSet(edgeSet)
+	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
 
 	g.RemoveVertex("bar")
 
@@ -59,7 +59,7 @@ func TestRemoveVertexWithEdges(t *testing.T) {
 }
 
 func TestEachVertex(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	var hit uint
 	f := func(v Vertex) {
@@ -82,7 +82,7 @@ func TestEachVertex(t *testing.T) {
 }
 
 func TestAddEdge(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	g.AddEdge(&BaseEdge{"foo", "bar"})
 
@@ -100,7 +100,7 @@ func TestAddEdge(t *testing.T) {
 }
 
 func TestOutDegree(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	g.AddEdge(&BaseEdge{"foo", "bar"})
 
@@ -138,7 +138,7 @@ func TestOutDegree(t *testing.T) {
 }
 
 func TestInDegree(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	g.AddEdge(&BaseEdge{"bar", "foo"})
 
@@ -176,7 +176,7 @@ func TestInDegree(t *testing.T) {
 }
 
 func TestEachEdge(t *testing.T) {
-	g := NewAdjacencyListFromEdgeSet(edgeSet)
+	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
 
 	var hit uint
 	f := func(e Edge) {
@@ -191,7 +191,7 @@ func TestEachEdge(t *testing.T) {
 }
 
 func TestSize(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	if g.Size() != 0 {
 		t.Error("Graph initializes with non-zero size.")
@@ -211,7 +211,7 @@ func TestSize(t *testing.T) {
 }
 
 func TestOrder(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 
 	if g.Order() != 0 {
 		t.Error("Graph initializes with non-zero order.")
@@ -231,7 +231,7 @@ func TestOrder(t *testing.T) {
 }
 
 func TestDensity(t *testing.T) {
-	g := NewAdjacencyList()
+	g := NewDirectedAdjacencyList()
 	var density float64
 
 	if !math.IsNaN(g.Density()) {

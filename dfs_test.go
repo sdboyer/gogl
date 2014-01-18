@@ -24,7 +24,7 @@ func sliceEquals(a, b []Vertex) bool {
 }
 
 func TestTslGeneration(t *testing.T) {
-	g := NewAdjacencyListFromEdgeSet(dfEdgeSet)
+	g := NewDirectedAdjacencyListFromEdgeSet(dfEdgeSet)
 
 	vis := &DFTslVisitor{}
 	DepthFirstFromVertices(g, vis, "foo")
