@@ -2,6 +2,7 @@ package gogl
 
 import (
 	"fmt"
+	. "github.com/smartystreets/goconvey/convey"
 	"math"
 	"testing"
 )
@@ -13,7 +14,7 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
-func TestEnsureIsGraph(t *testing.T) {
+func TestEnsureGraphInterfaces(t *testing.T) {
 	// What is Go's best practice for ensuring the implementation of an interface?
 	_ = Graph(NewDirectedAdjacencyList())
 	_ = SimpleGraph(NewDirectedAdjacencyList())
@@ -23,39 +24,49 @@ func TestEnsureIsGraph(t *testing.T) {
 func TestVertexMembership(t *testing.T) {
 	g := NewDirectedAdjacencyList()
 
-	if g.HasVertex("foo") != false {
-		t.Error("Incorrectly reports nonexistent vertex as present.")
-	}
+	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
+		So(g.HasVertex("foo"), ShouldEqual, false)
+		So(g.AddVertex("foo"), ShouldEqual, true)
+		So(g.AddVertex("foo"), ShouldEqual, false)
+		So(g.HasVertex("foo"), ShouldEqual, true)
+		So(g.RemoveVertex("foo"), ShouldEqual, true)
+		So(g.HasVertex("foo"), ShouldEqual, false)
+	})
 
-	if g.AddVertex("foo") != true {
-		t.Error("Fails to add string vertex correctly.")
-	}
+	Convey("Test adding, removal, and membership of int literal vertex.", t, func() {
+		So(g.HasVertex(1), ShouldEqual, false)
+		So(g.AddVertex(1), ShouldEqual, true)
+		So(g.AddVertex(1), ShouldEqual, false)
+		So(g.HasVertex(1), ShouldEqual, true)
+		So(g.RemoveVertex(1), ShouldEqual, true)
+		So(g.HasVertex(1), ShouldEqual, false)
+	})
 
-	if g.HasVertex("foo") != true {
-		t.Error("Fails to locate existing string vertex.")
-	}
+	Convey("Test adding, removal, and membership of composite literal vertex.", t, func() {
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
+		So(g.AddVertex(edgeSet[0]), ShouldEqual, true)
+		So(g.AddVertex(edgeSet[0]), ShouldEqual, false)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
 
-	if g.AddVertex(1) != true {
-		t.Error("Fails to add int vertex correctly.")
-	}
+		Convey("No membership match on new struct with same values or new pointer", func() {
+			So(g.HasVertex(BaseEdge{"foo", "bar"}), ShouldEqual, false)
+			So(g.HasVertex(&BaseEdge{"foo", "bar"}), ShouldEqual, false)
+		})
 
-	if g.RemoveVertex("foo") != true {
-		t.Error("Reports incorrect failure on removing existing vertex.")
-	}
-
-	if g.HasVertex("foo") != false {
-		t.Error("Reports vertex still present after removal.")
-	}
+		So(g.RemoveVertex(edgeSet[0]), ShouldEqual, true)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
+	})
 }
 
 func TestRemoveVertexWithEdges(t *testing.T) {
 	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
 
-	g.RemoveVertex("bar")
-
-	if count, _ := g.OutDegree("foo"); count != 0 {
-		t.Error("Removal of vertex in edge pair does not result in decrement of outdegree of the other vertex.")
-	}
+	Convey("Ensure outdegree is decremented when vertex is removed.", t, func() {
+		g.RemoveVertex("bar")
+		count, exists := g.OutDegree("foo")
+		So(count, ShouldEqual, 0)
+		So(exists, ShouldEqual, true)
+	})
 }
 
 func TestEachVertex(t *testing.T) {
