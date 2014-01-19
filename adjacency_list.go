@@ -81,11 +81,17 @@ func (g *adjacencyList) Size() uint {
 	return g.size
 }
 
-func (g *adjacencyList) AddVertex(vertex Vertex) bool {
+func (g *adjacencyList) AddVertex(vertices ...Vertex) {
+	if len(vertices) == 0 {
+		return
+	}
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	return g.addVertex(vertex)
+	for _, vertex := range vertices {
+		g.addVertex(vertex)
+	}
 }
 
 func (g *adjacencyList) addVertex(vertex Vertex) (success bool) {
@@ -151,24 +157,28 @@ func (g *DirectedAdjacencyList) Density() float64 {
 	return 2 * float64(g.Size()) / float64(order*(order-1))
 }
 
-func (g *DirectedAdjacencyList) RemoveVertex(vertex Vertex) (success bool) {
+func (g *DirectedAdjacencyList) RemoveVertex(vertices ...Vertex) {
+	if len(vertices) == 0 {
+		return
+	}
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	if g.hasVertex(vertex) {
-		// TODO Is the expensive search good to do here and now...
-		// while read-locked?
-		delete(g.list, vertex)
+	for _, vertex := range vertices {
+		if g.hasVertex(vertex) {
+			// TODO Is the expensive search good to do here and now...
+			// while read-locked?
+			delete(g.list, vertex)
 
-		// TODO consider chunking the list and parallelizing into goroutines
-		for _, adjacent := range g.list {
-			if _, has := adjacent[vertex]; has {
-				delete(adjacent, vertex)
-				g.size--
+			// TODO consider chunking the list and parallelizing into goroutines
+			for _, adjacent := range g.list {
+				if _, has := adjacent[vertex]; has {
+					delete(adjacent, vertex)
+					g.size--
+				}
 			}
 		}
-
-		success = true
 	}
 	return
 }

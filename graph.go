@@ -94,9 +94,8 @@ type Graph interface {
 	Size() uint
 	InDegree(vertex Vertex) (uint, bool)
 	OutDegree(vertex Vertex) (uint, bool)
-	AddVertex(v Vertex) bool
-	RemoveVertex(v Vertex) bool
-	AddEdge(edge Edge) bool
+	AddVertex(vertices ...Vertex)
+	RemoveVertex(vertices ...Vertex)
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops and
@@ -106,6 +105,7 @@ type SimpleGraph interface {
 }
 
 type UndirectedGraph interface {
+	Graph
 	AddEdge(edge Edge) bool
 	RemoveEdge(edge Edge)
 }

@@ -26,26 +26,23 @@ func TestVertexMembership(t *testing.T) {
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
 		So(g.HasVertex("foo"), ShouldEqual, false)
-		So(g.AddVertex("foo"), ShouldEqual, true)
-		So(g.AddVertex("foo"), ShouldEqual, false)
+		g.AddVertex("foo")
 		So(g.HasVertex("foo"), ShouldEqual, true)
-		So(g.RemoveVertex("foo"), ShouldEqual, true)
+		g.RemoveVertex("foo")
 		So(g.HasVertex("foo"), ShouldEqual, false)
 	})
 
 	Convey("Test adding, removal, and membership of int literal vertex.", t, func() {
 		So(g.HasVertex(1), ShouldEqual, false)
-		So(g.AddVertex(1), ShouldEqual, true)
-		So(g.AddVertex(1), ShouldEqual, false)
+		g.AddVertex(1)
 		So(g.HasVertex(1), ShouldEqual, true)
-		So(g.RemoveVertex(1), ShouldEqual, true)
+		g.RemoveVertex(1)
 		So(g.HasVertex(1), ShouldEqual, false)
 	})
 
 	Convey("Test adding, removal, and membership of composite literal vertex.", t, func() {
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
-		So(g.AddVertex(edgeSet[0]), ShouldEqual, true)
-		So(g.AddVertex(edgeSet[0]), ShouldEqual, false)
+		g.AddVertex(edgeSet[0])
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
 
 		Convey("No membership match on new struct with same values or new pointer", func() {
@@ -53,7 +50,7 @@ func TestVertexMembership(t *testing.T) {
 			So(g.HasVertex(&BaseEdge{"foo", "bar"}), ShouldEqual, false)
 		})
 
-		So(g.RemoveVertex(edgeSet[0]), ShouldEqual, true)
+		g.RemoveVertex(edgeSet[0])
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
 	})
 }
