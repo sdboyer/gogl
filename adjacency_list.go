@@ -90,11 +90,11 @@ func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 	defer g.mu.Unlock()
 
 	for _, vertex := range vertices {
-		g.addVertex(vertex)
+		g.ensureVertex(vertex)
 	}
 }
 
-func (g *adjacencyList) addVertex(vertex Vertex) (success bool) {
+func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 	if exists := g.hasVertex(vertex); !exists {
 		// TODO experiment with different lengths...possibly by analyzing existing density?
 		g.list[vertex] = make(VertexSet, 10)
@@ -191,8 +191,8 @@ func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
 }
 
 func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
-	g.addVertex(edge.Source())
-	g.addVertex(edge.Target())
+	g.ensureVertex(edge.Source())
+	g.ensureVertex(edge.Target())
 
 	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
 		g.list[edge.Source()][edge.Target()] = keyExists
