@@ -55,6 +55,29 @@ func TestVertexMembership(t *testing.T) {
 	})
 }
 
+func TestNonSingleAddRemoveVertex(t *testing.T) {
+	g := NewDirectedAdjacencyList()
+
+	Convey("Add and remove multiple vertices at once.", t, func() {
+		g.EnsureVertex("foo", 1, edgeSet[0])
+		So(g.HasVertex("foo"), ShouldEqual, true)
+		So(g.HasVertex(1), ShouldEqual, true)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
+
+		g.RemoveVertex("foo", 1, edgeSet[0])
+		So(g.HasVertex("foo"), ShouldEqual, false)
+		So(g.HasVertex(1), ShouldEqual, false)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
+	})
+
+	Convey("Ensure zero-length param to add/remove work correctly as no-ops.", t, func() {
+		g.EnsureVertex()
+		So(g.Order(), ShouldEqual, 0)
+		g.RemoveVertex()
+		So(g.Order(), ShouldEqual, 0)
+	})
+}
+
 func TestRemoveVertexWithEdges(t *testing.T) {
 	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
 
