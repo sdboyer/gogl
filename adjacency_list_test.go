@@ -26,7 +26,7 @@ func TestVertexMembership(t *testing.T) {
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
 		So(g.HasVertex("foo"), ShouldEqual, false)
-		g.AddVertex("foo")
+		g.EnsureVertex("foo")
 		So(g.HasVertex("foo"), ShouldEqual, true)
 		g.RemoveVertex("foo")
 		So(g.HasVertex("foo"), ShouldEqual, false)
@@ -34,7 +34,7 @@ func TestVertexMembership(t *testing.T) {
 
 	Convey("Test adding, removal, and membership of int literal vertex.", t, func() {
 		So(g.HasVertex(1), ShouldEqual, false)
-		g.AddVertex(1)
+		g.EnsureVertex(1)
 		So(g.HasVertex(1), ShouldEqual, true)
 		g.RemoveVertex(1)
 		So(g.HasVertex(1), ShouldEqual, false)
@@ -42,7 +42,7 @@ func TestVertexMembership(t *testing.T) {
 
 	Convey("Test adding, removal, and membership of composite literal vertex.", t, func() {
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
-		g.AddVertex(edgeSet[0])
+		g.EnsureVertex(edgeSet[0])
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
 
 		Convey("No membership match on new struct with same values or new pointer", func() {
@@ -80,8 +80,8 @@ func TestEachVertex(t *testing.T) {
 		t.Error("EachVertex did not call provided closure expected number of times.")
 	}
 
-	g.AddVertex("foo")
-	g.AddVertex("bar")
+	g.EnsureVertex("foo")
+	g.EnsureVertex("bar")
 	g.EachVertex(f)
 
 	if hit != 2 {
@@ -225,7 +225,7 @@ func TestOrder(t *testing.T) {
 		t.Error("Graph initializes with non-zero order.")
 	}
 
-	g.AddVertex("foo")
+	g.EnsureVertex("foo")
 
 	if g.Order() != 1 {
 		t.Error("Adding a vertex does not increment order properly.")

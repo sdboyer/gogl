@@ -94,7 +94,7 @@ type Graph interface {
 	Size() uint
 	InDegree(vertex Vertex) (uint, bool)
 	OutDegree(vertex Vertex) (uint, bool)
-	AddVertex(vertices ...Vertex)
+	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
 }
 

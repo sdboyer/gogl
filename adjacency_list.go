@@ -81,7 +81,7 @@ func (g *adjacencyList) Size() uint {
 	return g.size
 }
 
-func (g *adjacencyList) AddVertex(vertices ...Vertex) {
+func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
