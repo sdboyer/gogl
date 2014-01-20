@@ -92,7 +92,7 @@ func TestRemoveVertexWithEdges(t *testing.T) {
 func TestEachVertex(t *testing.T) {
 	g := NewDirectedAdjacencyList()
 
-	var hit uint
+	var hit int
 	f := func(v Vertex) {
 		hit++
 	}
@@ -135,7 +135,7 @@ func TestOutDegree(t *testing.T) {
 
 	g.AddEdge(&BaseEdge{"foo", "bar"})
 
-	var count uint
+	var count int
 	var exists bool
 	count, exists = g.OutDegree("foo")
 
@@ -173,7 +173,7 @@ func TestInDegree(t *testing.T) {
 
 	g.AddEdge(&BaseEdge{"bar", "foo"})
 
-	var count uint
+	var count int
 	var exists bool
 	count, exists = g.InDegree("foo")
 
@@ -209,7 +209,7 @@ func TestInDegree(t *testing.T) {
 func TestEachEdge(t *testing.T) {
 	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
 
-	var hit uint
+	var hit int
 	f := func(e Edge) {
 		hit++
 	}

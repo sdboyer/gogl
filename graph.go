@@ -90,10 +90,10 @@ type Graph interface {
 	EachEdge(f func(edge Edge))
 	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
 	HasVertex(vertex Vertex) bool
-	Order() uint
-	Size() uint
-	InDegree(vertex Vertex) (uint, bool)
-	OutDegree(vertex Vertex) (uint, bool)
+	Order() int
+	Size() int
+	InDegree(vertex Vertex) (int, bool)
+	OutDegree(vertex Vertex) (int, bool)
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
 }

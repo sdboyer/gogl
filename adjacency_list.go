@@ -9,7 +9,7 @@ var keyExists = struct{}{}
 
 type adjacencyList struct {
 	list al
-	size uint
+	size int
 	mu   sync.RWMutex
 }
 
@@ -70,14 +70,14 @@ func (g *adjacencyList) hasVertex(vertex Vertex) (exists bool) {
 	return
 }
 
-func (g *adjacencyList) Order() uint {
+func (g *adjacencyList) Order() int {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	return uint(len(g.list))
+	return len(g.list)
 }
 
-func (g *adjacencyList) Size() uint {
+func (g *adjacencyList) Size() int {
 	return g.size
 }
 
@@ -106,18 +106,18 @@ func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 
 /* DirectedAdjacencyList additions (TODO - call it Directed) */
 
-func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree uint, exists bool) {
+func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	if exists = g.hasVertex(vertex); exists {
-		degree = uint(len(g.list[vertex]))
+		degree = len(g.list[vertex])
 	}
 	return
 }
 
 // Getting InDegree is inefficient for directed adjacency lists
-func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree uint, exists bool) {
+func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
