@@ -36,7 +36,8 @@ func NewDirectedAdjacencyListFromEdgeSet(set []Edge) *DirectedAdjacencyList {
 }
 
 /* Base adjacencyList methods */
-
+// Traverses the graph's vertices in random order, passing each vertex to the
+// provided closure.
 func (g *adjacencyList) EachVertex(f func(vertex Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -46,6 +47,8 @@ func (g *adjacencyList) EachVertex(f func(vertex Vertex)) {
 	}
 }
 
+// Given a vertex present in the graph, passes each vertex adjacent to the
+// provided vertex to the provided closure.
 func (g *adjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -57,6 +60,7 @@ func (g *adjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	}
 }
 
+// Indicates whether or not the given vertex is present in the graph.
 func (g *adjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -65,11 +69,13 @@ func (g *adjacencyList) HasVertex(vertex Vertex) (exists bool) {
 	return
 }
 
+// Indicates whether or not the given vertex is present in the graph.
 func (g *adjacencyList) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.list[vertex]
 	return
 }
 
+// Returns the order (number of vertices) in the graph.
 func (g *adjacencyList) Order() int {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -77,10 +83,13 @@ func (g *adjacencyList) Order() int {
 	return len(g.list)
 }
 
+// Returns the size (number of edges) in the graph.
 func (g *adjacencyList) Size() int {
 	return g.size
 }
 
+// Adds the provided vertices to the graph. If a provided vertex is
+// already present in the graph, it is a no-op (for that vertex only).
 func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
@@ -94,6 +103,8 @@ func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 	}
 }
 
+// Adds the provided vertices to the graph. If a provided vertex is
+// already present in the graph, it is a no-op (for that vertex only).
 func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 	if exists := g.hasVertex(vertex); !exists {
 		// TODO experiment with different lengths...possibly by analyzing existing density?
@@ -106,6 +117,8 @@ func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 
 /* DirectedAdjacencyList additions (TODO - call it Directed) */
 
+// Returns the outdegree of the provided vertex. If the vertex is not present in the
+// graph, the second return value will be false.
 func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -116,7 +129,11 @@ func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree int, exists boo
 	return
 }
 
-// Getting InDegree is inefficient for directed adjacency lists
+// Returns the indegree of the provided vertex. If the vertex is not present in the
+// graph, the second return value will be false.
+//
+// Note that getting indegree is inefficient for directed adjacency lists; it requires
+// a full scan of the graph's edge set.
 func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -138,6 +155,8 @@ func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree int, exists bool
 	return
 }
 
+// Traverses the set of edges in the graph, passing each edge to the
+// provided closure.
 func (g *DirectedAdjacencyList) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -149,6 +168,8 @@ func (g *DirectedAdjacencyList) EachEdge(f func(edge Edge)) {
 	}
 }
 
+// Returns the density of the graph. Density is the ratio of edge count to the
+// number of edges there would be in complete graph (maximum edge count).
 func (g *DirectedAdjacencyList) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -157,6 +178,8 @@ func (g *DirectedAdjacencyList) Density() float64 {
 	return 2 * float64(g.Size()) / float64(order*(order-1))
 }
 
+// Removes a vertex from the graph. Also removes any edges of which that
+// vertex is a member.
 func (g *DirectedAdjacencyList) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
@@ -183,6 +206,7 @@ func (g *DirectedAdjacencyList) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
+// Adds a new edge to the graph.
 func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -190,6 +214,7 @@ func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
 	return g.addEdge(edge)
 }
 
+// Adds a new edge to the graph.
 func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
 	g.ensureVertex(edge.Source())
 	g.ensureVertex(edge.Target())
@@ -201,6 +226,8 @@ func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
 	return !exists
 }
 
+// Removes an edge from the graph. This does NOT remove vertex members of the
+// removed edge.
 func (g *DirectedAdjacencyList) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
