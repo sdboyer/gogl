@@ -94,8 +94,13 @@ type Graph interface {
 	Size() int
 	InDegree(vertex Vertex) (int, bool)
 	OutDegree(vertex Vertex) (int, bool)
+}
+
+type MutableGraph interface {
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
+	AddEdge(edge Edge) bool
+	RemoveEdge(edge Edge)
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops and
@@ -104,17 +109,14 @@ type SimpleGraph interface {
 	Density() float64
 }
 
-type UndirectedGraph interface {
-	Graph
-	AddEdge(edge Edge) bool
-	RemoveEdge(edge Edge)
-}
-
 type DirectedGraph interface {
 	Graph
 	Transpose() DirectedGraph
 	IsAcyclic() bool
 	GetCycles() [][]Vertex
-	addDirectedEdge(source Vertex, target Vertex) bool
-	removeDirectedEdge(source Vertex, target Vertex) bool
+}
+
+type MutableDirectedGraph interface {
+	AddDirectedEdge(source Vertex, target Vertex) bool
+	RemoveDirectedEdge(source Vertex, target Vertex) bool
 }

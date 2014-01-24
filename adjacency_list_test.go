@@ -16,13 +16,14 @@ var edgeSet = []Edge{
 
 func TestEnsureGraphInterfaces(t *testing.T) {
 	// What is Go's best practice for ensuring the implementation of an interface?
-	_ = Graph(NewDirectedAdjacencyList())
-	_ = SimpleGraph(NewDirectedAdjacencyList())
+	_ = Graph(NewDirected())
+	_ = SimpleGraph(NewDirected())
+	_ = MutableGraph(NewDirected())
 	t.Log("Implements Graph interface as expected.")
 }
 
 func TestVertexMembership(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
 		So(g.HasVertex("foo"), ShouldEqual, false)
@@ -56,7 +57,7 @@ func TestVertexMembership(t *testing.T) {
 }
 
 func TestNonSingleAddRemoveVertex(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	Convey("Add and remove multiple vertices at once.", t, func() {
 		g.EnsureVertex("foo", 1, edgeSet[0])
@@ -79,7 +80,7 @@ func TestNonSingleAddRemoveVertex(t *testing.T) {
 }
 
 func TestRemoveVertexWithEdges(t *testing.T) {
-	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
+	g := NewDirectedFromEdgeSet(edgeSet)
 
 	Convey("Ensure outdegree is decremented when vertex is removed.", t, func() {
 		g.RemoveVertex("bar")
@@ -90,7 +91,7 @@ func TestRemoveVertexWithEdges(t *testing.T) {
 }
 
 func TestEachVertex(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	var hit int
 	f := func(v Vertex) {
@@ -113,7 +114,7 @@ func TestEachVertex(t *testing.T) {
 }
 
 func TestAddEdge(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	g.AddEdge(&BaseEdge{"foo", "bar"})
 
@@ -131,7 +132,7 @@ func TestAddEdge(t *testing.T) {
 }
 
 func TestOutDegree(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	g.AddEdge(&BaseEdge{"foo", "bar"})
 
@@ -169,7 +170,7 @@ func TestOutDegree(t *testing.T) {
 }
 
 func TestInDegree(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	g.AddEdge(&BaseEdge{"bar", "foo"})
 
@@ -207,7 +208,7 @@ func TestInDegree(t *testing.T) {
 }
 
 func TestEachEdge(t *testing.T) {
-	g := NewDirectedAdjacencyListFromEdgeSet(edgeSet)
+	g := NewDirectedFromEdgeSet(edgeSet)
 
 	var hit int
 	f := func(e Edge) {
@@ -222,7 +223,7 @@ func TestEachEdge(t *testing.T) {
 }
 
 func TestSize(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	if g.Size() != 0 {
 		t.Error("Graph initializes with non-zero size.")
@@ -242,7 +243,7 @@ func TestSize(t *testing.T) {
 }
 
 func TestOrder(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 
 	if g.Order() != 0 {
 		t.Error("Graph initializes with non-zero order.")
@@ -262,7 +263,7 @@ func TestOrder(t *testing.T) {
 }
 
 func TestDensity(t *testing.T) {
-	g := NewDirectedAdjacencyList()
+	g := NewDirected()
 	var density float64
 
 	if !math.IsNaN(g.Density()) {

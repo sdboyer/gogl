@@ -13,20 +13,20 @@ type adjacencyList struct {
 	mu   sync.RWMutex
 }
 
-type DirectedAdjacencyList struct {
+type Directed struct {
 	adjacencyList
 }
 
-// Composite literal to create a new DirectedAdjacencyList.
-func NewDirectedAdjacencyList() *DirectedAdjacencyList {
+// Composite literal to create a new Directed.
+func NewDirected() *Directed {
 	// Cannot assign to promoted fields in a composite literals.
-	list := &DirectedAdjacencyList{}
+	list := &Directed{}
 	list.list = make(map[Vertex]VertexSet)
 	return list
 }
 
-func NewDirectedAdjacencyListFromEdgeSet(set []Edge) *DirectedAdjacencyList {
-	g := NewDirectedAdjacencyList()
+func NewDirectedFromEdgeSet(set []Edge) *Directed {
+	g := NewDirected()
 
 	for _, edge := range set {
 		g.addEdge(edge)
@@ -115,11 +115,11 @@ func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 	return
 }
 
-/* DirectedAdjacencyList additions (TODO - call it Directed) */
+/* Directed additions */
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *Directed) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -134,7 +134,7 @@ func (g *DirectedAdjacencyList) OutDegree(vertex Vertex) (degree int, exists boo
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -157,7 +157,7 @@ func (g *DirectedAdjacencyList) InDegree(vertex Vertex) (degree int, exists bool
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *DirectedAdjacencyList) EachEdge(f func(edge Edge)) {
+func (g *Directed) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -170,7 +170,7 @@ func (g *DirectedAdjacencyList) EachEdge(f func(edge Edge)) {
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *DirectedAdjacencyList) Density() float64 {
+func (g *Directed) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -180,7 +180,7 @@ func (g *DirectedAdjacencyList) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *DirectedAdjacencyList) RemoveVertex(vertices ...Vertex) {
+func (g *Directed) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -207,7 +207,7 @@ func (g *DirectedAdjacencyList) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds a new edge to the graph.
-func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
+func (g *Directed) AddEdge(edge Edge) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -215,7 +215,7 @@ func (g *DirectedAdjacencyList) AddEdge(edge Edge) bool {
 }
 
 // Adds a new edge to the graph.
-func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
+func (g *Directed) addEdge(edge Edge) (exists bool) {
 	g.ensureVertex(edge.Source())
 	g.ensureVertex(edge.Target())
 
@@ -228,7 +228,7 @@ func (g *DirectedAdjacencyList) addEdge(edge Edge) (exists bool) {
 
 // Removes an edge from the graph. This does NOT remove vertex members of the
 // removed edge.
-func (g *DirectedAdjacencyList) RemoveEdge(edge Edge) {
+func (g *Directed) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -238,3 +238,4 @@ func (g *DirectedAdjacencyList) RemoveEdge(edge Edge) {
 		g.size--
 	}
 }
+
