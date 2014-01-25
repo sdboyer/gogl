@@ -14,14 +14,6 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
-func TestEnsureGraphInterfaces(t *testing.T) {
-	// What is Go's best practice for ensuring the implementation of an interface?
-	_ = Graph(NewDirected())
-	_ = SimpleGraph(NewDirected())
-	_ = MutableGraph(NewDirected())
-	t.Log("Implements Graph interface as expected.")
-}
-
 func TestVertexMembership(t *testing.T) {
 	g := NewDirected()
 

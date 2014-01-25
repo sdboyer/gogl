@@ -19,9 +19,15 @@ type Directed struct {
 
 // Composite literal to create a new Directed.
 func NewDirected() *Directed {
-	// Cannot assign to promoted fields in a composite literals.
 	list := &Directed{}
+	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]VertexSet)
+
+	// Type assertions to ensure interfaces are met
+	var _ Graph = list
+	var _ SimpleGraph = list
+	var _ MutableGraph = list
+
 	return list
 }
 
