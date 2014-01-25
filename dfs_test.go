@@ -2,6 +2,7 @@ package gogl
 
 import (
 	"testing"
+	. "github.com/sdboyer/gogl/adjacency_list"
 )
 
 var dfEdgeSet = []Edge{

@@ -67,20 +67,20 @@ type Path []Edge
 // TODO what does having non-exported fields, and no write methods, mean
 // for mutability outside of the package?
 type BaseEdge struct {
-	u Vertex
-	v Vertex
+	U Vertex
+	V Vertex
 }
 
 func (e BaseEdge) Source() Vertex {
-	return e.u
+	return e.U
 }
 
 func (e BaseEdge) Target() Vertex {
-	return e.v
+	return e.V
 }
 
 func (e BaseEdge) Both() (Vertex, Vertex) {
-	return e.u, e.v
+	return e.U, e.V
 }
 
 /* Graph structures */
@@ -97,6 +97,7 @@ type Graph interface {
 }
 
 type MutableGraph interface {
+	Graph
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
 	AddEdge(edge Edge) bool
@@ -106,6 +107,7 @@ type MutableGraph interface {
 // A simple graph is in opposition to a multigraph: it disallows loops and
 // parallel edges.
 type SimpleGraph interface {
+	Graph
 	Density() float64
 }
 
@@ -116,7 +118,3 @@ type DirectedGraph interface {
 	GetCycles() [][]Vertex
 }
 
-type MutableDirectedGraph interface {
-	AddDirectedEdge(source Vertex, target Vertex) bool
-	RemoveDirectedEdge(source Vertex, target Vertex) bool
-}

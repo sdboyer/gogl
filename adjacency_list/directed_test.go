@@ -1,7 +1,8 @@
-package gogl
+package adjacency_list
 
 import (
 	"fmt"
+	. "github.com/sdboyer/gogl"
 	. "github.com/smartystreets/goconvey/convey"
 	"math"
 	"testing"

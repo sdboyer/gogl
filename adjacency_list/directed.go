@@ -1,6 +1,9 @@
-package gogl
+package adjacency_list
 
-import "sync"
+import (
+	"sync"
+	. "github.com/sdboyer/gogl"
+)
 
 type al map[Vertex]VertexSet
 
@@ -169,7 +172,7 @@ func (g *Directed) EachEdge(f func(edge Edge)) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(&BaseEdge{u: source, v: target})
+			f(&BaseEdge{U: source, V: target})
 		}
 	}
 }
