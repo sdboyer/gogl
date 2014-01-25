@@ -1,6 +1,9 @@
 package gogl
 
-import "errors"
+import (
+	"errors"
+	. "github.com/sdboyer/gogl"
+)
 
 // Contains algos and logic related to depth-first traversal.
 
@@ -175,3 +178,4 @@ func (w *walker) dflist() {
 		}
 	}
 }
+

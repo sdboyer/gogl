@@ -64,8 +64,6 @@ type Path []Edge
 // BaseEdge is a struct used internally to represent edges and meet the Edge
 // interface requirements. It uses the standard notation, (u,v), for vertex
 // pairs in an edge.
-// TODO what does having non-exported fields, and no write methods, mean
-// for mutability outside of the package?
 type BaseEdge struct {
 	U Vertex
 	V Vertex
