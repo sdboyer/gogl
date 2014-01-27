@@ -1,4 +1,3 @@
-// gogl provides a framework for representing and working with graphs.
 package gogl
 
 /* Vertex structures */
