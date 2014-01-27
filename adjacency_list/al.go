@@ -34,6 +34,11 @@ func (g *adjacencyList) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
+	g.eachAdjacent(vertex, f)
+}
+
+// Internal adjacency traverser that bypasses locking.
+func (g *adjacencyList) eachAdjacent(vertex Vertex, f func(target Vertex)) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			f(adjacent)
