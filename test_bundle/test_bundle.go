@@ -15,6 +15,8 @@ var edgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"bar", "baz"},
 }
 
+type factoryMutableGraph func (...gogl.Edge) gogl.MutableGraph
+
 /*
 func EnsureBasicGraphBehaviors(g gogl.Graph, t *testing.T) {
 	fml("Type:", reflect.TypeOf(g))
@@ -40,7 +42,7 @@ func DoItWithFCF(f func(...gogl.Edge) gogl.MutableGraph, t *testing.T) {
 }
 */
 
-func GraphTestVertexMembership(f func(...gogl.Edge) gogl.MutableGraph, t *testing.T) {
+func GraphTestVertexMembership(f factoryMutableGraph, t *testing.T) {
 	g := f()
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
