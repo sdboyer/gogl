@@ -1,8 +1,8 @@
 package adjacency_list
 
 import (
-	"sync"
 	. "github.com/sdboyer/gogl"
+	"sync"
 )
 
 type al map[Vertex]VertexSet
@@ -100,4 +100,3 @@ func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
 
 	return
 }
-

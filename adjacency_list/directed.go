@@ -156,4 +156,3 @@ func (g *Directed) RemoveEdge(edge Edge) {
 		g.size--
 	}
 }
-

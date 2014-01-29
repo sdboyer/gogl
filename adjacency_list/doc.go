@@ -1,4 +1,3 @@
-
 /*
 Adjacency lists are a relatively simple graph representation. They maintain
 a list of vertices, storing information about edge membership relative to

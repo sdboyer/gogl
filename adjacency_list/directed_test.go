@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var fml = fmt.Println
+var _ = fmt.Println
 
 var edgeSet = []Edge{
 	&BaseEdge{"foo", "bar"},

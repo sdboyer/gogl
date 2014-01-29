@@ -1,8 +1,8 @@
 package adjacency_list
 
 import (
-	. "github.com/sdboyer/gogl"
 	"github.com/fatih/set"
+	. "github.com/sdboyer/gogl"
 )
 
 type Undirected struct {
@@ -138,4 +138,3 @@ func (g *Undirected) RemoveEdge(edge Edge) {
 		g.size--
 	}
 }
-
