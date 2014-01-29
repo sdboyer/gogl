@@ -4,4 +4,5 @@ go:
   - tip
 install:
   - go get -t github.com/smartystreets/goconvey
+  - go get -t launchpad.net/gocheck
   - go get github.com/fatih/set
