@@ -3,6 +3,7 @@ package adjacency_list
 import (
 	"fmt"
 	. "github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl/test_bundle"
 	. "github.com/smartystreets/goconvey/convey"
 	"math"
 	"testing"
@@ -15,38 +16,17 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
+var d_fact = &GraphFactory{
+	CreateMutableGraph: func() MutableGraph {
+		return NewUndirected()
+	},
+	CreateGraph: func(edges []Edge) Graph {
+		return NewUndirectedFromEdgeSet(edges)
+	},
+}
+
 func TestVertexMembership(t *testing.T) {
-	g := NewDirected()
-
-	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
-		So(g.HasVertex("foo"), ShouldEqual, false)
-		g.EnsureVertex("foo")
-		So(g.HasVertex("foo"), ShouldEqual, true)
-		g.RemoveVertex("foo")
-		So(g.HasVertex("foo"), ShouldEqual, false)
-	})
-
-	Convey("Test adding, removal, and membership of int literal vertex.", t, func() {
-		So(g.HasVertex(1), ShouldEqual, false)
-		g.EnsureVertex(1)
-		So(g.HasVertex(1), ShouldEqual, true)
-		g.RemoveVertex(1)
-		So(g.HasVertex(1), ShouldEqual, false)
-	})
-
-	Convey("Test adding, removal, and membership of composite literal vertex.", t, func() {
-		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
-		g.EnsureVertex(edgeSet[0])
-		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
-
-		Convey("No membership match on new struct with same values or new pointer", func() {
-			So(g.HasVertex(BaseEdge{"foo", "bar"}), ShouldEqual, false)
-			So(g.HasVertex(&BaseEdge{"foo", "bar"}), ShouldEqual, false)
-		})
-
-		g.RemoveVertex(edgeSet[0])
-		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
-	})
+	test_bundle.GraphTestVertexMembership(d_fact, t)
 }
 
 func TestNonSingleAddRemoveVertex(t *testing.T) {

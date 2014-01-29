@@ -10,7 +10,7 @@ import (
 
 var _ = fmt.Println
 
-var factory = test_bundle.GraphFactory{
+var u_fact = &GraphFactory{
 	CreateMutableGraph: func() MutableGraph {
 		return NewUndirected()
 	},
@@ -18,7 +18,19 @@ var factory = test_bundle.GraphFactory{
 		return NewUndirectedFromEdgeSet(edges)
 	},
 }
-
 func Test_UVertexMembership(t *testing.T) {
-	test_bundle.GraphTestVertexMembership(factory, t)
+	test_bundle.GraphTestVertexMembership(u_fact, t)
 }
+
+func Test_UVertexMultiOps(t *testing.T) {
+	test_bundle.GraphTestVertexMultiOps(u_fact, t)
+}
+
+func Test_UVertexRemoveVertexWithEdges(t *testing.T) {
+	test_bundle.GraphTestRemoveVertexWithEdges(u_fact, t)
+}
+
+func Test_UVertexTestEachVertex(t *testing.T) {
+	test_bundle.GraphTestEachVertex(u_fact, t)
+}
+

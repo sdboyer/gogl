@@ -2,7 +2,7 @@ package test_bundle
 
 import (
 	"fmt"
-	"github.com/sdboyer/gogl"
+	. "github.com/sdboyer/gogl"
 	//"github.com/sdboyer/gogl/adjacency_list"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
@@ -10,29 +10,24 @@ import (
 
 var _ = fmt.Println
 
-var edgeSet = []gogl.Edge{
-	&gogl.BaseEdge{"foo", "bar"},
-	&gogl.BaseEdge{"bar", "baz"},
-}
-
-type GraphFactory struct {
-	CreateMutableGraph func() gogl.MutableGraph
-	CreateGraph        func([]gogl.Edge) gogl.Graph
+var edgeSet = []Edge{
+	&BaseEdge{"foo", "bar"},
+	&BaseEdge{"bar", "baz"},
 }
 
 /*
-func EnsureBasicGraphBehaviors(g gogl.Graph, t *testing.T) {
+func EnsureBasicGraphBehaviors(g Graph, t *testing.T) {
 	fml("Type:", reflect.TypeOf(g))
 }
 
-func DoItWithFCF(f func(...gogl.Edge) gogl.MutableGraph, t *testing.T) {
+func DoItWithFCF(f func(...Edge) MutableGraph, t *testing.T) {
 	g := f()
 	fml("FCF Type:", reflect.TypeOf(g))
 	fml("FCF Value:", reflect.ValueOf(g))
 
 	g.EnsureVertex("foo")
 	g.EnsureVertex("bar")
-	ff := func(v gogl.Vertex) {
+	ff := func(v Vertex) {
 		fml(v.(string))
 	}
 	g.EachVertex(ff)
@@ -45,7 +40,7 @@ func DoItWithFCF(f func(...gogl.Edge) gogl.MutableGraph, t *testing.T) {
 }
 */
 
-func GraphTestVertexMembership(f GraphFactory, t *testing.T) {
+func GraphTestVertexMembership(f *GraphFactory, t *testing.T) {
 	g := f.CreateMutableGraph()
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
@@ -70,8 +65,8 @@ func GraphTestVertexMembership(f GraphFactory, t *testing.T) {
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
 
 		Convey("No membership match on new struct with same values or new pointer", func() {
-			So(g.HasVertex(gogl.BaseEdge{"foo", "bar"}), ShouldEqual, false)
-			So(g.HasVertex(&gogl.BaseEdge{"foo", "bar"}), ShouldEqual, false)
+			So(g.HasVertex(BaseEdge{"foo", "bar"}), ShouldEqual, false)
+			So(g.HasVertex(&BaseEdge{"foo", "bar"}), ShouldEqual, false)
 		})
 
 		g.RemoveVertex(edgeSet[0])
@@ -80,7 +75,7 @@ func GraphTestVertexMembership(f GraphFactory, t *testing.T) {
 
 }
 
-func GraphTestNonSingleAddRemoveVertex(f GraphFactory, t *testing.T) {
+func GraphTestVertexMultiOps(f *GraphFactory, t *testing.T) {
 	g := f.CreateMutableGraph()
 
 	Convey("Add and remove multiple vertices at once.", t, func() {
@@ -103,7 +98,7 @@ func GraphTestNonSingleAddRemoveVertex(f GraphFactory, t *testing.T) {
 	})
 }
 
-func GraphTestRemoveVertexWithEdges(f GraphFactory, t *testing.T) {
+func GraphTestRemoveVertexWithEdges(f *GraphFactory, t *testing.T) {
 	g := f.CreateMutableGraph()
 
 	g.AddEdge(edgeSet[0])
@@ -117,6 +112,26 @@ func GraphTestRemoveVertexWithEdges(f GraphFactory, t *testing.T) {
 	})
 }
 
-func GraphTestEachVertex(f GraphFactory, t *testing.T) {
+func GraphTestEachVertex(f *GraphFactory, t *testing.T) {
+	g := f.CreateMutableGraph()
 
+	var hit int
+	it := func(v Vertex) {
+		hit++
+	}
+
+	Convey("With no vertices, EachVertex does not call the injected closure at all.", t, func() {
+		g.EachVertex(it)
+		So(hit, ShouldEqual, 0)
+	})
+
+	// Ensure clean state, since goconvey failures do not stop the test
+	hit = 0
+
+	Convey("With two vertices, EachVertex calls the injected closure twice.", t, func() {
+		g.EnsureVertex("foo")
+		g.EnsureVertex("bar")
+		g.EachVertex(it)
+		So(hit, ShouldEqual, 2)
+	})
 }

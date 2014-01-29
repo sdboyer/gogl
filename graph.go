@@ -114,4 +114,3 @@ type DirectedGraph interface {
 	IsAcyclic() bool
 	GetCycles() [][]Vertex
 }
-

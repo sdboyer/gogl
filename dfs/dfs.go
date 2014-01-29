@@ -178,4 +178,3 @@ func (w *walker) dflist() {
 		}
 	}
 }
-
