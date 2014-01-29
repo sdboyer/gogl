@@ -15,7 +15,10 @@ var edgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"bar", "baz"},
 }
 
-type factoryMutableGraph func (...gogl.Edge) gogl.MutableGraph
+type GraphFactory struct {
+	CreateMutableGraph func() gogl.MutableGraph
+	CreateGraph        func([]gogl.Edge) gogl.Graph
+}
 
 /*
 func EnsureBasicGraphBehaviors(g gogl.Graph, t *testing.T) {
@@ -42,8 +45,8 @@ func DoItWithFCF(f func(...gogl.Edge) gogl.MutableGraph, t *testing.T) {
 }
 */
 
-func GraphTestVertexMembership(f factoryMutableGraph, t *testing.T) {
-	g := f()
+func GraphTestVertexMembership(f GraphFactory, t *testing.T) {
+	g := f.CreateMutableGraph()
 
 	Convey("Test adding, removal, and membership of string literal vertex.", t, func() {
 		So(g.HasVertex("foo"), ShouldEqual, false)
@@ -74,5 +77,46 @@ func GraphTestVertexMembership(f factoryMutableGraph, t *testing.T) {
 		g.RemoveVertex(edgeSet[0])
 		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
 	})
+
+}
+
+func GraphTestNonSingleAddRemoveVertex(f GraphFactory, t *testing.T) {
+	g := f.CreateMutableGraph()
+
+	Convey("Add and remove multiple vertices at once.", t, func() {
+		g.EnsureVertex("foo", 1, edgeSet[0])
+		So(g.HasVertex("foo"), ShouldEqual, true)
+		So(g.HasVertex(1), ShouldEqual, true)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, true)
+
+		g.RemoveVertex("foo", 1, edgeSet[0])
+		So(g.HasVertex("foo"), ShouldEqual, false)
+		So(g.HasVertex(1), ShouldEqual, false)
+		So(g.HasVertex(edgeSet[0]), ShouldEqual, false)
+	})
+
+	Convey("Ensure zero-length param to add/remove work correctly as no-ops.", t, func() {
+		g.EnsureVertex()
+		So(g.Order(), ShouldEqual, 0)
+		g.RemoveVertex()
+		So(g.Order(), ShouldEqual, 0)
+	})
+}
+
+func GraphTestRemoveVertexWithEdges(f GraphFactory, t *testing.T) {
+	g := f.CreateMutableGraph()
+
+	g.AddEdge(edgeSet[0])
+	g.AddEdge(edgeSet[1])
+
+	Convey("Ensure outdegree is decremented when vertex is removed.", t, func() {
+		g.RemoveVertex("bar")
+		count, exists := g.OutDegree("foo")
+		So(count, ShouldEqual, 0)
+		So(exists, ShouldEqual, true)
+	})
+}
+
+func GraphTestEachVertex(f GraphFactory, t *testing.T) {
 
 }

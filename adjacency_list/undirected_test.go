@@ -8,26 +8,17 @@ import (
 	"testing"
 )
 
-var fml = fmt.Println
+var _ = fmt.Println
 
-func newUndirected(edges ...Edge) (g MutableGraph) {
-	if len(edges) > 0 {
-		g = NewUndirectedFromEdgeSet(edges)
-	} else {
-		g = NewUndirected()
-	}
-	return g
-}
-
-func newDirected(edges ...Edge) (g MutableGraph) {
-	if len(edges) > 0 {
-		g = NewDirectedFromEdgeSet(edges)
-	} else {
-		g = NewDirected()
-	}
-	return g
+var factory = test_bundle.GraphFactory{
+	CreateMutableGraph: func() MutableGraph {
+		return NewUndirected()
+	},
+	CreateGraph: func(edges []Edge) Graph {
+		return NewUndirectedFromEdgeSet(edges)
+	},
 }
 
 func Test_UVertexMembership(t *testing.T) {
-	test_bundle.GraphTestVertexMembership(newUndirected, t)
+	test_bundle.GraphTestVertexMembership(factory, t)
 }
