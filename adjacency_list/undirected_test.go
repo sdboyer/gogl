@@ -3,8 +3,9 @@ package adjacency_list
 import (
 	"fmt"
 	. "github.com/sdboyer/gogl"
-	"github.com/sdboyer/gogl/test_bundle"
+	. "github.com/sdboyer/gogl/test_bundle"
 	//"math"
+	. "launchpad.net/gocheck"
 	"testing"
 )
 
@@ -18,19 +19,28 @@ var u_fact = &GraphFactory{
 		return NewUndirectedFromEdgeSet(edges)
 	},
 }
+
+func Test_undirected(t *testing.T) {TestingT(t) }
+
+var u_suite = &MutableGraphSuite{
+	Factory: u_fact,
+}
+
+var _ = Suite(u_suite)
+
 func Test_UVertexMembership(t *testing.T) {
-	test_bundle.GraphTestVertexMembership(u_fact, t)
+	GraphTestVertexMembership(u_fact, t)
 }
 
 func Test_UVertexMultiOps(t *testing.T) {
-	test_bundle.GraphTestVertexMultiOps(u_fact, t)
+	GraphTestVertexMultiOps(u_fact, t)
 }
 
 func Test_UVertexRemoveVertexWithEdges(t *testing.T) {
-	test_bundle.GraphTestRemoveVertexWithEdges(u_fact, t)
+	GraphTestRemoveVertexWithEdges(u_fact, t)
 }
 
 func Test_UVertexTestEachVertex(t *testing.T) {
-	test_bundle.GraphTestEachVertex(u_fact, t)
+	GraphTestEachVertex(u_fact, t)
 }
 

@@ -3,9 +3,9 @@ package test_bundle
 import (
 	"fmt"
 	. "github.com/sdboyer/gogl"
-	//"github.com/sdboyer/gogl/adjacency_list"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+	. "launchpad.net/gocheck"
 )
 
 var _ = fmt.Println
@@ -15,30 +15,48 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
-/*
-func EnsureBasicGraphBehaviors(g Graph, t *testing.T) {
-	fml("Type:", reflect.TypeOf(g))
+type GraphFactory struct {
+	CreateMutableGraph func() MutableGraph
+	CreateGraph        func([]Edge) Graph
 }
 
-func DoItWithFCF(f func(...Edge) MutableGraph, t *testing.T) {
-	g := f()
-	fml("FCF Type:", reflect.TypeOf(g))
-	fml("FCF Value:", reflect.ValueOf(g))
-
-	g.EnsureVertex("foo")
-	g.EnsureVertex("bar")
-	ff := func(v Vertex) {
-		fml(v.(string))
-	}
-	g.EachVertex(ff)
-	fml(g)
-	//fml(g2)
-
-	rg := reflect.New(reflect.TypeOf(g))
-	fml("FCF2 Type:", reflect.TypeOf(rg))
-	fml(rg)
+type GraphSuite struct {
+	Graph   Graph
+	Factory *GraphFactory
 }
-*/
+
+type MutableGraphSuite struct {
+	Graph   MutableGraph
+	Factory *GraphFactory
+}
+
+func (s *MutableGraphSuite) SetUpTest(c *C) {
+	s.Graph = s.Factory.CreateMutableGraph()
+}
+
+func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
+	s.Graph.EnsureVertex("foo")
+	c.Assert(s.Graph.HasVertex("foo"), Equals, true)
+}
+
+func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
+	s.Graph.EnsureVertex("bar", "baz")
+	c.Assert(s.Graph.HasVertex("bar"), Equals, true)
+	c.Assert(s.Graph.HasVertex("baz"), Equals, true)
+}
+
+func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
+	s.Graph.EnsureVertex("bar", "baz")
+	s.Graph.RemoveVertex("bar")
+	c.Assert(s.Graph.HasVertex("bar"), Equals, false)
+}
+
+func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
+	s.Graph.EnsureVertex("bar", "baz")
+	s.Graph.RemoveVertex("bar", "baz")
+	c.Assert(s.Graph.HasVertex("bar"), Equals, false)
+	c.Assert(s.Graph.HasVertex("baz"), Equals, false)
+}
 
 func GraphTestVertexMembership(f *GraphFactory, t *testing.T) {
 	g := f.CreateMutableGraph()

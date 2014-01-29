@@ -3,7 +3,7 @@ package adjacency_list
 import (
 	"fmt"
 	. "github.com/sdboyer/gogl"
-	"github.com/sdboyer/gogl/test_bundle"
+	. "github.com/sdboyer/gogl/test_bundle"
 	. "github.com/smartystreets/goconvey/convey"
 	"math"
 	"testing"
@@ -26,7 +26,7 @@ var d_fact = &GraphFactory{
 }
 
 func TestVertexMembership(t *testing.T) {
-	test_bundle.GraphTestVertexMembership(d_fact, t)
+	GraphTestVertexMembership(d_fact, t)
 }
 
 func TestNonSingleAddRemoveVertex(t *testing.T) {
