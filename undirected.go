@@ -1,16 +1,15 @@
-package adjacency_list
+package gogl
 
 import (
-	. "github.com/sdboyer/gogl"
+	"github.com/fatih/set"
 )
 
-type Directed struct {
+type Undirected struct {
 	adjacencyList
 }
 
-// Composite literal to create a new Directed.
-func NewDirected() *Directed {
-	list := &Directed{}
+func NewUndirected() *Undirected {
+	list := &Undirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]VertexSet)
 
@@ -22,9 +21,9 @@ func NewDirected() *Directed {
 	return list
 }
 
-// Creates a new Directed graph from an edge set.
-func NewDirectedFromEdgeSet(set []Edge) *Directed {
-	g := NewDirected()
+// Creates a new Undirected graph from an edge set.
+func NewUndirectedFromEdgeSet(set []Edge) *Undirected {
+	g := NewUndirected()
 
 	for _, edge := range set {
 		g.addEdge(edge)
@@ -33,11 +32,9 @@ func NewDirectedFromEdgeSet(set []Edge) *Directed {
 	return g
 }
 
-/* Directed additions */
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *Directed) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *Undirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -49,46 +46,32 @@ func (g *Directed) OutDegree(vertex Vertex) (degree int, exists bool) {
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-//
-// Note that getting indegree is inefficient for directed adjacency lists; it requires
-// a full scan of the graph's edge set.
-func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	if exists = g.hasVertex(vertex); exists {
-
-		f := func(v Vertex) {
-			if v == vertex {
-				degree++
-			}
-		}
-
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, f)
-		}
-	}
-
-	return
+func (g *Undirected) InDegree(vertex Vertex) (degree int, exists bool) {
+	return g.OutDegree(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *Directed) EachEdge(f func(edge Edge)) {
+func (g *Undirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
+	visited := set.NewNonTS()
+
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(&BaseEdge{U: source, V: target})
+			e := &BaseEdge{U: source, V: target}
+			if !visited.Has(e) {
+				visited.Add(e)
+				f(e)
+			}
 		}
 	}
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *Directed) Density() float64 {
+func (g *Undirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -98,7 +81,7 @@ func (g *Directed) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *Directed) RemoveVertex(vertices ...Vertex) {
+func (g *Undirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -108,24 +91,20 @@ func (g *Directed) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			// TODO Is the expensive search good to do here and now...
-			// while read-locked?
-			delete(g.list, vertex)
-
-			// TODO consider chunking the list and parallelizing into goroutines
-			for _, adjacent := range g.list {
-				if _, has := adjacent[vertex]; has {
-					delete(adjacent, vertex)
-					g.size--
-				}
+			f := func(adjacent Vertex) {
+				delete(g.list[adjacent], vertex)
 			}
+
+			g.eachAdjacent(vertex, f)
+			g.size = g.size - len(g.list[vertex])
+			delete(g.list, vertex)
 		}
 	}
 	return
 }
 
 // Adds a new edge to the graph.
-func (g *Directed) AddEdge(edge Edge) bool {
+func (g *Undirected) AddEdge(edge Edge) bool {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -133,12 +112,13 @@ func (g *Directed) AddEdge(edge Edge) bool {
 }
 
 // Adds a new edge to the graph.
-func (g *Directed) addEdge(edge Edge) (exists bool) {
+func (g *Undirected) addEdge(edge Edge) (exists bool) {
 	g.ensureVertex(edge.Source())
 	g.ensureVertex(edge.Target())
 
 	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
 		g.list[edge.Source()][edge.Target()] = keyExists
+		g.list[edge.Target()][edge.Source()] = keyExists
 		g.size++
 	}
 	return !exists
@@ -146,13 +126,14 @@ func (g *Directed) addEdge(edge Edge) (exists bool) {
 
 // Removes an edge from the graph. This does NOT remove vertex members of the
 // removed edge.
-func (g *Directed) RemoveEdge(edge Edge) {
+func (g *Undirected) RemoveEdge(edge Edge) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	s, t := edge.Both()
 	if _, exists := g.list[s][t]; exists {
 		delete(g.list[s], t)
+		delete(g.list[t], s)
 		g.size--
 	}
 }

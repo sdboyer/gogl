@@ -1,9 +1,7 @@
-package adjacency_list
+package gogl
 
 import (
 	"fmt"
-	. "github.com/sdboyer/gogl"
-	. "github.com/sdboyer/gogl/test_bundle"
 	. "github.com/smartystreets/goconvey/convey"
 	"math"
 	"testing"
@@ -16,18 +14,18 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
-var d_fact = &GraphFactory{
-	CreateMutableGraph: func() MutableGraph {
-		return NewUndirected()
-	},
-	CreateGraph: func(edges []Edge) Graph {
-		return NewUndirectedFromEdgeSet(edges)
-	},
-}
+//var d_fact = &GraphFactory{
+	//CreateMutableGraph: func() MutableGraph {
+		//return NewUndirected()
+	//},
+	//CreateGraph: func(edges []Edge) Graph {
+		//return NewUndirectedFromEdgeSet(edges)
+	//},
+//}
 
-func TestVertexMembership(t *testing.T) {
-	GraphTestVertexMembership(d_fact, t)
-}
+//func TestVertexMembership(t *testing.T) {
+	//GraphTestVertexMembership(d_fact, t)
+//}
 
 func TestNonSingleAddRemoveVertex(t *testing.T) {
 	g := NewDirected()

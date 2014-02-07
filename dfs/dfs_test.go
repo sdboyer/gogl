@@ -2,7 +2,6 @@ package gogl
 
 import (
 	. "github.com/sdboyer/gogl"
-	al "github.com/sdboyer/gogl/adjacency_list"
 	"testing"
 )
 
@@ -26,7 +25,7 @@ func sliceEquals(a, b []Vertex) bool {
 }
 
 func TestTslGeneration(t *testing.T) {
-	g := al.NewDirectedFromEdgeSet(dfEdgeSet)
+	g := NewDirectedFromEdgeSet(dfEdgeSet)
 
 	vis := &DFTslVisitor{}
 	DepthFirstFromVertices(g, vis, "foo")
