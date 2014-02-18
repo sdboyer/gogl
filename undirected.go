@@ -113,8 +113,7 @@ func (g *Undirected) AddEdge(edge Edge) bool {
 
 // Adds a new edge to the graph.
 func (g *Undirected) addEdge(edge Edge) (exists bool) {
-	g.ensureVertex(edge.Source())
-	g.ensureVertex(edge.Target())
+	g.ensureVertex(edge.Source(), edge.Target())
 
 	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
 		g.list[edge.Source()][edge.Target()] = keyExists

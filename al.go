@@ -97,18 +97,17 @@ func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	for _, vertex := range vertices {
-		g.ensureVertex(vertex)
-	}
+	g.ensureVertex(vertices...)
 }
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *adjacencyList) ensureVertex(vertex Vertex) (success bool) {
-	if exists := g.hasVertex(vertex); !exists {
-		// TODO experiment with different lengths...possibly by analyzing existing density?
-		g.list[vertex] = make(VertexSet, 10)
-		success = true
+func (g *adjacencyList) ensureVertex(vertices ...Vertex) {
+	for _, vertex := range vertices {
+		if !g.hasVertex(vertex) {
+			// TODO experiment with different lengths...possibly by analyzing existing density?
+			g.list[vertex] = make(VertexSet, 10)
+		}
 	}
 
 	return
