@@ -9,23 +9,18 @@ import (
 
 var _ = fmt.Println
 
-var edgeSet = []Edge{
-	&BaseEdge{"foo", "bar"},
-	&BaseEdge{"bar", "baz"},
+var d_fact = &GraphFactory{
+	CreateMutableGraph: func() MutableGraph {
+		return NewUndirected()
+	},
+	CreateGraph: func(edges []Edge) Graph {
+		return NewUndirectedFromEdgeSet(edges)
+	},
 }
 
-//var d_fact = &GraphFactory{
-	//CreateMutableGraph: func() MutableGraph {
-		//return NewUndirected()
-	//},
-	//CreateGraph: func(edges []Edge) Graph {
-		//return NewUndirectedFromEdgeSet(edges)
-	//},
-//}
-
-//func TestVertexMembership(t *testing.T) {
-	//GraphTestVertexMembership(d_fact, t)
-//}
+func TestVertexMembership(t *testing.T) {
+	GraphTestVertexMembership(d_fact, t)
+}
 
 func TestNonSingleAddRemoveVertex(t *testing.T) {
 	g := NewDirected()
