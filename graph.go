@@ -1,5 +1,10 @@
 package gogl
 
+import (
+	"fmt"
+	"reflect"
+)
+
 /* Vertex structures */
 
 // As a rule, gogl tries to place as low a requirement on its vertices as
@@ -92,7 +97,6 @@ type Graph interface {
 	InDegree(vertex Vertex) (int, bool)
 	OutDegree(vertex Vertex) (int, bool)
 }
-
 type MutableGraph interface {
 	Graph
 	EnsureVertex(vertices ...Vertex)
@@ -113,4 +117,57 @@ type DirectedGraph interface {
 	Transpose() DirectedGraph
 	IsAcyclic() bool
 	GetCycles() [][]Vertex
+}
+
+/* Initialization for immutable graphs */
+
+type ImmutableGraph interface {
+	Graph
+	ensureVertex(vertex ...Vertex)
+	addEdge(edge Edge) bool
+}
+
+var immutableGraphs map[string]ImmutableGraph
+
+func CreateImmutableGraph(name string) (*ImmutableGraphInitializer, error) {
+	template := immutableGraphs[name]
+	if template == nil {
+		return nil, fmt.Errorf("gogl: Unregistered graph type %s", name)
+	}
+
+	// Use reflection to make a copy of the graph template
+	v := reflect.New(reflect.Indirect(reflect.ValueOf(template)).Type()).Interface()
+	graph, ok := v.(ImmutableGraph)
+	if !ok {
+		panic(fmt.Sprintf("gogl: Unable to copy graph template: %s (%v)", name, reflect.ValueOf(v).Kind().String()))
+	}
+
+	initializer := &ImmutableGraphInitializer{
+		g: graph,
+	}
+
+	return initializer, nil
+}
+
+// A ImmutableGraphInitializer provides write-only methods to populate an
+// immutable graph.
+type ImmutableGraphInitializer struct {
+	g ImmutableGraph
+}
+
+func (gi *ImmutableGraphInitializer) EnsureVertex(vertices ...Vertex) {
+	gi.g.ensureVertex(vertices...)
+}
+
+func (gi *ImmutableGraphInitializer) AddEdge(edge Edge) {
+	gi.g.addEdge(edge)
+}
+
+func (gi *ImmutableGraphInitializer) GetGraph() Graph {
+	defer func() { gi.g = nil }()
+	return gi.g
+}
+
+func init() {
+	immutableGraphs = map[string]ImmutableGraph{}
 }
