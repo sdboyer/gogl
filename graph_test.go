@@ -9,6 +9,9 @@ import (
 
 var _ = fmt.Println
 
+// Hook gocheck into the go test runner
+func Test(t *testing.T) { TestingT(t) }
+
 var edgeSet = []Edge{
 	&BaseEdge{"foo", "bar"},
 	&BaseEdge{"bar", "baz"},
@@ -19,11 +22,102 @@ type GraphFactory struct {
 	CreateGraph        func([]Edge) Graph
 }
 
+/* GraphSuite - tests for non-mutable graph methods */
 type GraphSuite struct {
 	Graph   Graph
 	Factory *GraphFactory
 }
 
+func (s *GraphSuite) SetUpTest(c *C) {
+	s.Graph = s.Factory.CreateGraph(edgeSet)
+}
+
+func (s *GraphSuite) TestVertexMembership(c *C) {
+	c.Assert(s.Graph.HasVertex("foo"), Equals, true)
+}
+
+func (s *GraphSuite) TestEachVertex(c *C) {
+	var hit int
+	f := func(v Vertex) {
+		hit++
+		c.Log("EachVertex hit closure, hit count", hit)
+	}
+
+	s.Graph.EachVertex(f)
+	if !c.Check(hit, Equals, 3) {
+		c.Error("EachVertex should have called injected closure iterator 3 times, actual count was ", hit)
+	}
+}
+
+func (s *GraphSuite) TestEachEdge(c *C) {
+	var hit int
+	f := func(e Edge) {
+		hit++
+		c.Log("EachAdjacent hit closure with edge pair ", e.Source(), " ", e.Target(), " at hit count ", hit)
+	}
+
+	s.Graph.EachEdge(f)
+	if !c.Check(hit, Equals, 2) {
+		c.Error("EachEdge should have called injected closure iterator 2 times, actual count was ", hit)
+	}
+}
+
+func (s *GraphSuite) TestEachAdjacent(c *C) {
+	var hit int
+	f := func(adj Vertex) {
+		hit++
+		c.Log("EachAdjacent hit closure with vertex ", adj, " at hit count ", hit)
+	}
+
+	s.Graph.EachAdjacent("foo", f)
+	if !c.Check(hit, Equals, 1) {
+		c.Error("EachEdge should have called injected closure iterator 2 times, actual count was ", hit)
+	}
+}
+
+// This test is carefully constructed to be fully correct for directed graphs,
+// and incidentally correct for undirected graphs.
+func (s *GraphSuite) TestOutDegree(c *C) {
+	g := s.Factory.CreateGraph([]Edge{&BaseEdge{"foo", "bar"}})
+
+	count, exists := g.OutDegree("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.OutDegree("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
+}
+
+// This test is carefully constructed to be fully correct for directed graphs,
+// and incidentally correct for undirected graphs.
+func (s *GraphSuite) TestInDegree(c *C) {
+	g := s.Factory.CreateGraph([]Edge{&BaseEdge{"foo", "bar"}})
+
+	count, exists := g.OutDegree("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.OutDegree("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
+}
+
+func (s *GraphSuite) TestSize(c *C) {
+	c.Assert(s.Graph.Size(), Equals, 2)
+
+	g := s.Factory.CreateGraph([]Edge{})
+	c.Assert(g.Size(), Equals, 0)
+}
+
+func (s *GraphSuite) TestOrder(c *C) {
+	c.Assert(s.Graph.Size(), Equals, 2)
+
+	g := s.Factory.CreateGraph([]Edge{})
+	c.Assert(g.Size(), Equals, 0)
+}
+
+/* MutableGraphSuite - tests for mutable graph methods */
 type MutableGraphSuite struct {
 	Graph   MutableGraph
 	Factory *GraphFactory
