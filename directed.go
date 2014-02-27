@@ -77,7 +77,7 @@ func (g *Directed) EachEdge(f func(edge Edge)) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(&BaseEdge{U: source, V: target})
+			f(BaseEdge{U: source, V: target})
 		}
 	}
 }
