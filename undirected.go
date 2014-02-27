@@ -128,16 +128,22 @@ func (g *Undirected) addEdges(edges ...Edge) {
 	}
 }
 
-// Removes an edge from the graph. This does NOT remove vertex members of the
-// removed edge.
-func (g *Undirected) RemoveEdge(edge Edge) {
+// Removes edges from the graph. This does NOT remove vertex members of the
+// removed edges.
+func (g *Undirected) RemoveEdges(edges ...Edge) {
+	if len(edges) == 0 {
+		return
+	}
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	s, t := edge.Both()
-	if _, exists := g.list[s][t]; exists {
-		delete(g.list[s], t)
-		delete(g.list[t], s)
-		g.size--
+	for _, edge := range edges {
+		s, t := edge.Both()
+		if _, exists := g.list[s][t]; exists {
+			delete(g.list[s], t)
+			delete(g.list[t], s)
+			g.size--
+		}
 	}
 }

@@ -102,7 +102,7 @@ type MutableGraph interface {
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
 	AddEdges(edges ...Edge)
-	RemoveEdge(edge Edge)
+	RemoveEdges(edges ...Edge)
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops and
