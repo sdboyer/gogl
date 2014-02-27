@@ -3,7 +3,6 @@ package gogl
 import (
 	"fmt"
 	. "launchpad.net/gocheck"
-	"testing"
 )
 
 var _ = fmt.Println
@@ -17,26 +16,10 @@ var u_fact = &GraphFactory{
 	},
 }
 
-func Test_undirected(t *testing.T) { TestingT(t) }
-
-var u_suite = &MutableGraphSuite{
+var _ = Suite(&MutableGraphSuite{
 	Factory: u_fact,
-}
+})
 
-var _ = Suite(u_suite)
-
-func Test_UVertexMembership(t *testing.T) {
-	GraphTestVertexMembership(u_fact, t)
-}
-
-func Test_UVertexMultiOps(t *testing.T) {
-	GraphTestVertexMultiOps(u_fact, t)
-}
-
-func Test_UVertexRemoveVertexWithEdges(t *testing.T) {
-	GraphTestRemoveVertexWithEdges(u_fact, t)
-}
-
-func Test_UVertexTestEachVertex(t *testing.T) {
-	GraphTestEachVertex(u_fact, t)
-}
+var _ = Suite(&GraphSuite{
+	Factory: u_fact,
+})

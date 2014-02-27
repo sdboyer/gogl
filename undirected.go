@@ -60,8 +60,8 @@ func (g *Undirected) EachEdge(f func(edge Edge)) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			e := &BaseEdge{U: source, V: target}
-			if !visited.Has(e) {
+			e := BaseEdge{U: source, V: target}
+			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(e)
 				f(e)
 			}

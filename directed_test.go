@@ -11,10 +11,10 @@ var _ = fmt.Println
 
 var d_fact = &GraphFactory{
 	CreateMutableGraph: func() MutableGraph {
-		return NewUndirected()
+		return NewDirected()
 	},
 	CreateGraph: func(edges []Edge) Graph {
-		return NewUndirectedFromEdgeSet(edges)
+		return NewDirectedFromEdgeSet(edges)
 	},
 }
 
