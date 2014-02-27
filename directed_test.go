@@ -34,14 +34,14 @@ func TestDensity(t *testing.T) {
 		t.Error("On graph initialize, Density should be NaN (divides zero by zero)).")
 	}
 
-	g.AddEdge(&BaseEdge{"foo", "bar"})
+	g.AddEdges(&BaseEdge{"foo", "bar"})
 
 	density = g.Density()
 	if density != 1 {
 		t.Error("In undirected graph of V = 2 and E = 1, density should be 1; was", density)
 	}
 
-	g.AddEdge(&BaseEdge{"baz", "qux"})
+	g.AddEdges(&BaseEdge{"baz", "qux"})
 
 	density = g.Density()
 	if density != float64(1)/float64(3) {

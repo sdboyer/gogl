@@ -101,7 +101,7 @@ type MutableGraph interface {
 	Graph
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
-	AddEdge(edge Edge) bool
+	AddEdges(edges ...Edge)
 	RemoveEdge(edge Edge)
 }
 

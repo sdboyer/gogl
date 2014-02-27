@@ -22,9 +22,7 @@ func NewDirected() *Directed {
 func NewDirectedFromEdgeSet(set []Edge) *Directed {
 	g := NewDirected()
 
-	for _, edge := range set {
-		g.addEdge(edge)
-	}
+	g.addEdges(set...)
 
 	return g
 }
@@ -120,23 +118,28 @@ func (g *Directed) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds a new edge to the graph.
-func (g *Directed) AddEdge(edge Edge) bool {
+// Adds edges to the graph.
+func (g *Directed) AddEdges(edges ...Edge) {
+	if len(edges) == 0 {
+		return
+	}
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	return g.addEdge(edge)
+	g.addEdges(edges...)
 }
 
 // Adds a new edge to the graph.
-func (g *Directed) addEdge(edge Edge) (exists bool) {
-	g.ensureVertex(edge.Source(), edge.Target())
+func (g *Directed) addEdges(edges ...Edge) {
+	for _, edge := range edges {
+		g.ensureVertex(edge.Source(), edge.Target())
 
-	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
-		g.list[edge.Source()][edge.Target()] = keyExists
-		g.size++
+		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+			g.list[edge.Source()][edge.Target()] = keyExists
+			g.size++
+		}
 	}
-	return !exists
 }
 
 // Removes an edge from the graph. This does NOT remove vertex members of the

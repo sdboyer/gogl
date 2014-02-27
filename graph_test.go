@@ -2,6 +2,7 @@ package gogl
 
 import (
 	"fmt"
+	"github.com/fatih/set"
 	. "launchpad.net/gocheck"
 	"testing"
 )
@@ -149,3 +150,27 @@ func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
 	c.Assert(s.Graph.HasVertex("bar"), Equals, false)
 	c.Assert(s.Graph.HasVertex("baz"), Equals, false)
 }
+
+func (s *MutableGraphSuite) TestAddEdge(c *C) {
+	s.Graph.AddEdges(&BaseEdge{1, 2})
+
+	f := func(e Edge) {
+		c.Assert(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{1, 2})
+	}
+
+	s.Graph.EachEdge(f)
+}
+
+func (s *MutableGraphSuite) TestMultiAddEdge(c *C) {
+	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	set := set.NewNonTS()
+
+	f := func(e Edge) {
+		set.Add(e)
+	}
+
+	s.Graph.EachEdge(f)
+	c.Assert(set.Has(BaseEdge{1, 2}), Equals, true)
+	c.Assert(set.Has(BaseEdge{2, 3}), Equals, true)
+}
+

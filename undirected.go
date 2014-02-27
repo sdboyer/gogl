@@ -26,7 +26,7 @@ func NewUndirectedFromEdgeSet(set []Edge) *Undirected {
 	g := NewUndirected()
 
 	for _, edge := range set {
-		g.addEdge(edge)
+		g.addEdges(edge)
 	}
 
 	return g
@@ -103,24 +103,29 @@ func (g *Undirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds a new edge to the graph.
-func (g *Undirected) AddEdge(edge Edge) bool {
+// Adds edges to the graph.
+func (g *Undirected) AddEdges(edges ...Edge) {
+	if len(edges) == 0 {
+		return
+	}
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	return g.addEdge(edge)
+	g.addEdges(edges...)
 }
 
 // Adds a new edge to the graph.
-func (g *Undirected) addEdge(edge Edge) (exists bool) {
-	g.ensureVertex(edge.Source(), edge.Target())
+func (g *Undirected) addEdges(edges ...Edge) {
+	for _, edge := range edges {
+		g.ensureVertex(edge.Source(), edge.Target())
 
-	if _, exists = g.list[edge.Source()][edge.Target()]; !exists {
-		g.list[edge.Source()][edge.Target()] = keyExists
-		g.list[edge.Target()][edge.Source()] = keyExists
-		g.size++
+		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+			g.list[edge.Source()][edge.Target()] = keyExists
+			g.list[edge.Target()][edge.Source()] = keyExists
+			g.size++
+		}
 	}
-	return !exists
 }
 
 // Removes an edge from the graph. This does NOT remove vertex members of the
