@@ -189,3 +189,10 @@ func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	s.Graph.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
 	s.Graph.EachEdge(f)
 }
+
+func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
+	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	s.Graph.RemoveVertex(1)
+
+	c.Assert(s.Graph.Size(), Equals, 1)
+}

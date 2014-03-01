@@ -96,7 +96,7 @@ func (g *Undirected) RemoveVertex(vertices ...Vertex) {
 			}
 
 			g.eachAdjacent(vertex, f)
-			g.size = g.size - len(g.list[vertex])
+			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)
 		}
 	}
