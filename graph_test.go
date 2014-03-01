@@ -151,7 +151,7 @@ func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
 	c.Assert(s.Graph.HasVertex("baz"), Equals, false)
 }
 
-func (s *MutableGraphSuite) TestAddEdge(c *C) {
+func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
 	s.Graph.AddEdges(&BaseEdge{1, 2})
 
 	f := func(e Edge) {
@@ -159,9 +159,17 @@ func (s *MutableGraphSuite) TestAddEdge(c *C) {
 	}
 
 	s.Graph.EachEdge(f)
+
+	// Now test removal
+	f = func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	}
+
+	s.Graph.RemoveEdges(&BaseEdge{1, 2})
+	s.Graph.EachEdge(f)
 }
 
-func (s *MutableGraphSuite) TestMultiAddEdge(c *C) {
+func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
 	set := set.NewNonTS()
 
@@ -172,5 +180,12 @@ func (s *MutableGraphSuite) TestMultiAddEdge(c *C) {
 	s.Graph.EachEdge(f)
 	c.Assert(set.Has(BaseEdge{1, 2}), Equals, true)
 	c.Assert(set.Has(BaseEdge{2, 3}), Equals, true)
-}
 
+	// Now test removal
+	f = func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	}
+
+	s.Graph.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	s.Graph.EachEdge(f)
+}
