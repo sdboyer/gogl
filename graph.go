@@ -121,10 +121,16 @@ type DirectedGraph interface {
 
 /* Initialization for immutable graphs */
 
+type IGInitializer interface {
+	EnsureVertex(vertex ...Vertex)
+	AddEdges(edges ...Edge) bool
+	GetGraph() Graph
+}
+
 type ImmutableGraph interface {
 	Graph
-	ensureVertex(vertex ...Vertex)
-	addEdge(edge Edge) bool
+	EnsureVertex(vertex ...Vertex)
+	AddEdges(edges ...Edge)
 }
 
 var immutableGraphs map[string]ImmutableGraph
@@ -143,7 +149,7 @@ func CreateImmutableGraph(name string) (*ImmutableGraphInitializer, error) {
 	}
 
 	initializer := &ImmutableGraphInitializer{
-		g: graph,
+		Graph: graph,
 	}
 
 	return initializer, nil
@@ -152,22 +158,24 @@ func CreateImmutableGraph(name string) (*ImmutableGraphInitializer, error) {
 // A ImmutableGraphInitializer provides write-only methods to populate an
 // immutable graph.
 type ImmutableGraphInitializer struct {
-	g ImmutableGraph
+	Graph ImmutableGraph
 }
 
 func (gi *ImmutableGraphInitializer) EnsureVertex(vertices ...Vertex) {
-	gi.g.ensureVertex(vertices...)
+	gi.Graph.EnsureVertex(vertices...)
 }
 
-func (gi *ImmutableGraphInitializer) AddEdge(edge Edge) {
-	gi.g.addEdge(edge)
+func (gi *ImmutableGraphInitializer) AddEdges(edges ...Edge) {
+	gi.Graph.AddEdges(edges...)
 }
 
 func (gi *ImmutableGraphInitializer) GetGraph() Graph {
-	defer func() { gi.g = nil }()
-	return gi.g
+	defer func() { gi.Graph = nil }()
+	return gi.Graph
 }
 
 func init() {
-	immutableGraphs = map[string]ImmutableGraph{}
+	immutableGraphs = map[string]ImmutableGraph{
+		"ual": NewUndirected(),
+	}
 }
