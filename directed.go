@@ -104,7 +104,9 @@ func (g *Directed) RemoveVertex(vertices ...Vertex) {
 		if g.hasVertex(vertex) {
 			// TODO Is the expensive search good to do here and now...
 			// while read-locked?
+			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)
+
 
 			// TODO consider chunking the list and parallelizing into goroutines
 			for _, adjacent := range g.list {
