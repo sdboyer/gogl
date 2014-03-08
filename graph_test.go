@@ -190,8 +190,10 @@ func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	s.Graph.EachEdge(f)
 }
 
+// Checks to ensure that removal works for both in-edges and out-edges.
+// TODO - make the edge membership check a little more robust.
 func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
-	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
 	s.Graph.RemoveVertex(1)
 
 	c.Assert(s.Graph.Size(), Equals, 1)
