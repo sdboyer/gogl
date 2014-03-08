@@ -16,10 +16,18 @@ var u_fact = &GraphFactory{
 	},
 }
 
-var _ = Suite(&MutableGraphSuite{
-	Factory: u_fact,
+type UndirectedMutableGraphSuite struct {
+	MutableGraphSuite
+}
+
+type UndirectedGraphSuite struct {
+	GraphSuite
+}
+
+var _ = Suite(&UndirectedMutableGraphSuite{
+	MutableGraphSuite{Factory: u_fact},
 })
 
-var _ = Suite(&GraphSuite{
-	Factory: u_fact,
+var _ = Suite(&UndirectedGraphSuite{
+	GraphSuite{Factory: u_fact},
 })

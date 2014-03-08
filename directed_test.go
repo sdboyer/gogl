@@ -18,12 +18,20 @@ var d_fact = &GraphFactory{
 	},
 }
 
-var _ = Suite(&MutableGraphSuite{
-	Factory: d_fact,
+type DirectedMutableGraphSuite struct {
+	MutableGraphSuite
+}
+
+type DirectedGraphSuite struct {
+	GraphSuite
+}
+
+var _ = Suite(&DirectedMutableGraphSuite{
+	MutableGraphSuite{Factory: d_fact},
 })
 
-var _ = Suite(&GraphSuite{
-	Factory: d_fact,
+var _ = Suite(&DirectedGraphSuite{
+	GraphSuite{Factory: d_fact},
 })
 
 func TestDensity(t *testing.T) {
