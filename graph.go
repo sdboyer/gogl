@@ -59,10 +59,13 @@ type Edge interface {
 	Source() Vertex
 	Target() Vertex
 	Both() (Vertex, Vertex)
-	//  Properties() uint
 }
 
-type EdgeList []Edge
+type WeightedEdge interface {
+	Edge
+	Weight() int
+}
+
 type Path []Edge
 
 // BaseEdge is a struct used internally to represent edges and meet the Edge
@@ -85,6 +88,15 @@ func (e BaseEdge) Both() (Vertex, Vertex) {
 	return e.U, e.V
 }
 
+type BaseWeightedEdge struct {
+	BaseEdge
+	W int
+}
+
+func (e BaseWeightedEdge) Weight() int {
+	return e.W
+}
+
 /* Graph structures */
 
 type Graph interface {
@@ -97,6 +109,7 @@ type Graph interface {
 	InDegree(vertex Vertex) (int, bool)
 	OutDegree(vertex Vertex) (int, bool)
 }
+
 type MutableGraph interface {
 	Graph
 	EnsureVertex(vertices ...Vertex)
@@ -117,6 +130,17 @@ type DirectedGraph interface {
 	Transpose() DirectedGraph
 	IsAcyclic() bool
 	GetCycles() [][]Vertex
+}
+
+type WeightedGraph interface {
+	Graph
+	EachWeightedEdge(f func(edge WeightedEdge))
+}
+
+type MutableWeightedGraph interface {
+	WeightedGraph
+	AddEdges(edges ...WeightedEdge)
+	RemoveEdges(edges ...WeightedEdge)
 }
 
 /* Initialization for immutable graphs */
