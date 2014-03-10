@@ -156,7 +156,17 @@ func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
 	s.Graph.AddEdges(&BaseEdge{1, 2})
 
 	f := func(e Edge) {
-		c.Assert(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{1, 2})
+		// Undirected graphs provide no guarantee of vertex output ordering,
+		// and as such either {1,2} or {2,1} are valid outputs.
+		// TODO this can be removed once a HasEdge() is implemented.
+		if !c.Check(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{1, 2}) {
+			if c.Check(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{2, 1}) {
+				c.Succeed()
+			} else {
+				c.Log("Neither acceptable edge vertex ordering pair was provided.")
+				c.FailNow()
+			}
+		}
 	}
 
 	s.Graph.EachEdge(f)
