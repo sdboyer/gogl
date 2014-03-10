@@ -2,6 +2,7 @@ package gogl
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/fatih/set"
@@ -18,19 +19,83 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
+// This function automatically sets up suites of tests for graphs according to
+// they implement.
+func SetUpSimpleGraphTests(g Graph) bool {
+	gf := &GraphFactory2{g}
+
+	// Set up the basic Graph suite unconditionally
+	_ = Suite(&GraphSuite{Graph: g, F2: gf})
+
+	mg, ok := g.(MutableGraph)
+	if ok {
+		_ = Suite(&MutableGraphSuite{Graph: mg, F2: gf})
+	}
+
+	return true
+}
+
 type GraphFactory struct {
 	CreateMutableGraph func() MutableGraph
 	CreateGraph        func([]Edge) Graph
 }
 
+type GraphFactory2 struct {
+	sourceGraph Graph
+}
+
+func (gf *GraphFactory2) create() interface{} {
+	return reflect.New(reflect.Indirect(reflect.ValueOf(gf.sourceGraph)).Type()).Interface()
+}
+
+func (gf *GraphFactory2) CreateEmptyGraph() Graph {
+	return gf.create().(Graph)
+}
+
+func (gf *GraphFactory2) CreateGraphFromEdges(edges ...Edge) Graph {
+	// For now just cheat and work through a Mutable interface
+	base := gf.create()
+
+	if mg, ok := base.(MutableGraph); ok {
+		mg.AddEdges(edges...)
+	} else if mwg, ok := base.(MutableWeightedGraph); ok {
+		weighted_edges := make([]WeightedEdge, 0, len(edges))
+		for _, edge := range edges {
+			weighted_edges = append(weighted_edges, BaseWeightedEdge{BaseEdge{edge.Source(), edge.Target()}, 0})
+		}
+		mwg.AddEdges(weighted_edges...)
+	} else {
+		panic("Until GraphInitializers are made to work properly, all graphs have to be mutable for this testing harness to work.")
+	}
+
+	return base.(Graph)
+}
+
+func (gf *GraphFactory2) CreateMutableGraph() MutableGraph {
+	return gf.create().(MutableGraph)
+}
+
+/* Factory interfaces for tests */
+
+type GraphCreator interface {
+	CreateEmptyGraph() Graph
+	CreateGraphFromEdges(edges ...Edge) Graph
+}
+
+type MutableGraphCreator interface {
+	CreateMutableGraph() MutableGraph
+}
+
 /* GraphSuite - tests for non-mutable graph methods */
+
 type GraphSuite struct {
 	Graph   Graph
 	Factory *GraphFactory
+	F2      GraphCreator
 }
 
 func (s *GraphSuite) SetUpTest(c *C) {
-	s.Graph = s.Factory.CreateGraph(edgeSet)
+	s.Graph = s.F2.CreateGraphFromEdges(edgeSet...)
 }
 
 func (s *GraphSuite) TestVertexMembership(c *C) {
@@ -79,7 +144,7 @@ func (s *GraphSuite) TestEachAdjacent(c *C) {
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
 func (s *GraphSuite) TestOutDegree(c *C) {
-	g := s.Factory.CreateGraph([]Edge{&BaseEdge{"foo", "bar"}})
+	g := s.F2.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
 	count, exists := g.OutDegree("foo")
 	c.Assert(exists, Equals, true)
@@ -93,7 +158,7 @@ func (s *GraphSuite) TestOutDegree(c *C) {
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
 func (s *GraphSuite) TestInDegree(c *C) {
-	g := s.Factory.CreateGraph([]Edge{&BaseEdge{"foo", "bar"}})
+	g := s.F2.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
 	count, exists := g.InDegree("bar")
 	c.Assert(exists, Equals, true)
@@ -107,14 +172,14 @@ func (s *GraphSuite) TestInDegree(c *C) {
 func (s *GraphSuite) TestSize(c *C) {
 	c.Assert(s.Graph.Size(), Equals, 2)
 
-	g := s.Factory.CreateGraph([]Edge{})
+	g := s.F2.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
 }
 
 func (s *GraphSuite) TestOrder(c *C) {
 	c.Assert(s.Graph.Size(), Equals, 2)
 
-	g := s.Factory.CreateGraph([]Edge{})
+	g := s.F2.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
 }
 
@@ -122,10 +187,12 @@ func (s *GraphSuite) TestOrder(c *C) {
 type MutableGraphSuite struct {
 	Graph   MutableGraph
 	Factory *GraphFactory
+	F2      MutableGraphCreator
 }
 
 func (s *MutableGraphSuite) SetUpTest(c *C) {
-	s.Graph = s.Factory.CreateMutableGraph()
+	s.Graph = s.F2.CreateMutableGraph()
+	//s.Graph = s.Factory.CreateMutableGraph()
 }
 
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {

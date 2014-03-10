@@ -1,38 +1,11 @@
 package gogl
 
 import (
-	"fmt"
 	"math"
 	"testing"
-	. "launchpad.net/gocheck"
 )
 
-var _ = fmt.Println
-
-var d_fact = &GraphFactory{
-	CreateMutableGraph: func() MutableGraph {
-		return NewDirected()
-	},
-	CreateGraph: func(edges []Edge) Graph {
-		return NewDirectedFromEdgeSet(edges)
-	},
-}
-
-type DirectedMutableGraphSuite struct {
-	MutableGraphSuite
-}
-
-type DirectedGraphSuite struct {
-	GraphSuite
-}
-
-var _ = Suite(&DirectedMutableGraphSuite{
-	MutableGraphSuite{Factory: d_fact},
-})
-
-var _ = Suite(&DirectedGraphSuite{
-	GraphSuite{Factory: d_fact},
-})
+var _ = SetUpSimpleGraphTests(NewDirected())
 
 func TestDensity(t *testing.T) {
 	g := NewDirected()

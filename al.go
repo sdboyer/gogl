@@ -103,6 +103,11 @@ func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
 func (g *adjacencyList) ensureVertex(vertices ...Vertex) {
+	// TODO this is horrible, but the reflection approach in the testing harness requires it...for now
+	if g.list == nil {
+		g.list = make(map[Vertex]VertexSet)
+	}
+
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?

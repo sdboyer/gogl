@@ -139,6 +139,8 @@ type WeightedGraph interface {
 
 type MutableWeightedGraph interface {
 	WeightedGraph
+	EnsureVertex(vertices ...Vertex)
+	RemoveVertex(vertices ...Vertex)
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
 }
