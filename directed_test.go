@@ -2,9 +2,9 @@ package gogl
 
 import (
 	"fmt"
-	. "launchpad.net/gocheck"
 	"math"
 	"testing"
+	. "launchpad.net/gocheck"
 )
 
 var _ = fmt.Println

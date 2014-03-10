@@ -2,9 +2,10 @@ package gogl
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/fatih/set"
 	. "launchpad.net/gocheck"
-	"testing"
 )
 
 var _ = fmt.Println

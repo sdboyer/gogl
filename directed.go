@@ -107,7 +107,6 @@ func (g *Directed) RemoveVertex(vertices ...Vertex) {
 			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)
 
-
 			// TODO consider chunking the list and parallelizing into goroutines
 			for _, adjacent := range g.list {
 				if _, has := adjacent[vertex]; has {

@@ -1,8 +1,8 @@
 package gogl
 
 import (
-	. "github.com/sdboyer/gogl"
 	"testing"
+	. "github.com/sdboyer/gogl"
 )
 
 var dfEdgeSet = []Edge{

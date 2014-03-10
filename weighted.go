@@ -1,8 +1,9 @@
 package gogl
 
 import (
-	"github.com/fatih/set"
 	"sync"
+
+	"github.com/fatih/set"
 )
 
 // This is implemented as an adjacency list, because those are simple.
