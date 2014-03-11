@@ -109,7 +109,7 @@ type weightedDirected struct {
 	baseWeighted
 }
 
-func NewDirectedWeighted() MutableWeightedGraph {
+func NewWeightedDirected() MutableWeightedGraph {
 	list := &weightedDirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]int)
@@ -268,12 +268,12 @@ func (g *weightedDirected) RemoveEdges(edges ...WeightedEdge) {
 
 /* UndirectedWeighted implementation */
 
-type undirectedWeighted struct {
+type weightedUndirected struct {
 	baseWeighted
 }
 
-func NewUndirectedWeighted() MutableWeightedGraph {
-	g := &undirectedWeighted{}
+func NewWeightedUndirected() MutableWeightedGraph {
+	g := &weightedUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	g.list = make(map[Vertex]map[Vertex]int)
 
@@ -288,7 +288,7 @@ func NewUndirectedWeighted() MutableWeightedGraph {
 
 // Creates a new Undirected graph from an edge set.
 func NewWeightedUndirectedFromEdges(edges ...WeightedEdge) MutableWeightedGraph {
-	g := &undirectedWeighted{}
+	g := &weightedUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	g.list = make(map[Vertex]map[Vertex]int)
 	g.addEdges(edges...)
@@ -298,7 +298,7 @@ func NewWeightedUndirectedFromEdges(edges ...WeightedEdge) MutableWeightedGraph 
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *undirectedWeighted) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *weightedUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -310,13 +310,13 @@ func (g *undirectedWeighted) OutDegree(vertex Vertex) (degree int, exists bool) 
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *undirectedWeighted) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *weightedUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
 	return g.OutDegree(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *undirectedWeighted) EachEdge(f func(edge Edge)) {
+func (g *weightedUndirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -335,7 +335,7 @@ func (g *undirectedWeighted) EachEdge(f func(edge Edge)) {
 
 // Traverses the set of edges in the graph, passing each edge and its weight
 // to the provided closure.
-func (g *undirectedWeighted) EachWeightedEdge(f func(edge WeightedEdge)) {
+func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -354,7 +354,7 @@ func (g *undirectedWeighted) EachWeightedEdge(f func(edge WeightedEdge)) {
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *undirectedWeighted) Density() float64 {
+func (g *weightedUndirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -364,7 +364,7 @@ func (g *undirectedWeighted) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *undirectedWeighted) RemoveVertex(vertices ...Vertex) {
+func (g *weightedUndirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -387,7 +387,7 @@ func (g *undirectedWeighted) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *undirectedWeighted) AddEdges(edges ...WeightedEdge) {
+func (g *weightedUndirected) AddEdges(edges ...WeightedEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -399,7 +399,7 @@ func (g *undirectedWeighted) AddEdges(edges ...WeightedEdge) {
 }
 
 // Adds a new edge to the graph.
-func (g *undirectedWeighted) addEdges(edges ...WeightedEdge) {
+func (g *weightedUndirected) addEdges(edges ...WeightedEdge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
@@ -414,7 +414,7 @@ func (g *undirectedWeighted) addEdges(edges ...WeightedEdge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *undirectedWeighted) RemoveEdges(edges ...WeightedEdge) {
+func (g *weightedUndirected) RemoveEdges(edges ...WeightedEdge) {
 	if len(edges) == 0 {
 		return
 	}
