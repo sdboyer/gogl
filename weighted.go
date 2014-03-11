@@ -345,7 +345,7 @@ func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 		for target, weight := range adjacent {
 			e := BaseWeightedEdge{BaseEdge{U: source, V: target}, weight}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(e)
+				visited.Add(BaseEdge{U: source, V: target})
 				f(e)
 			}
 		}

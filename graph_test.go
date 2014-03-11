@@ -220,36 +220,42 @@ type MutableGraphSuite struct {
 	Factory MutableGraphCreator
 }
 
-func (s *MutableGraphSuite) SetUpTest(c *C) {
-	s.Graph = s.Factory.CreateMutableGraph()
-}
-
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
-	s.Graph.EnsureVertex("foo")
-	c.Assert(s.Graph.HasVertex("foo"), Equals, true)
+	g := s.Factory.CreateMutableGraph()
+
+	g.EnsureVertex("foo")
+	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
-	s.Graph.EnsureVertex("bar", "baz")
-	c.Assert(s.Graph.HasVertex("bar"), Equals, true)
-	c.Assert(s.Graph.HasVertex("baz"), Equals, true)
+	g := s.Factory.CreateMutableGraph()
+
+	g.EnsureVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, true)
+	c.Assert(g.HasVertex("baz"), Equals, true)
 }
 
 func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
-	s.Graph.EnsureVertex("bar", "baz")
-	s.Graph.RemoveVertex("bar")
-	c.Assert(s.Graph.HasVertex("bar"), Equals, false)
+	g := s.Factory.CreateMutableGraph()
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar")
+	c.Assert(g.HasVertex("bar"), Equals, false)
 }
 
 func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
-	s.Graph.EnsureVertex("bar", "baz")
-	s.Graph.RemoveVertex("bar", "baz")
-	c.Assert(s.Graph.HasVertex("bar"), Equals, false)
-	c.Assert(s.Graph.HasVertex("baz"), Equals, false)
+	g := s.Factory.CreateMutableGraph()
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+	c.Assert(g.HasVertex("baz"), Equals, false)
 }
 
 func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
-	s.Graph.AddEdges(&BaseEdge{1, 2})
+	g := s.Factory.CreateMutableGraph()
+
+	g.AddEdges(&BaseEdge{1, 2})
 
 	f := func(e Edge) {
 		// Undirected graphs provide no guarantee of vertex output ordering,
@@ -265,26 +271,28 @@ func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
 		}
 	}
 
-	s.Graph.EachEdge(f)
+	g.EachEdge(f)
 
 	// Now test removal
 	f = func(e Edge) {
 		c.Error("Graph should not contain any edges after removal.")
 	}
 
-	s.Graph.RemoveEdges(&BaseEdge{1, 2})
-	s.Graph.EachEdge(f)
+	g.RemoveEdges(&BaseEdge{1, 2})
+	g.EachEdge(f)
 }
 
 func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	g := s.Factory.CreateMutableGraph()
+
+	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
 	set := set.NewNonTS()
 
 	f := func(e Edge) {
 		set.Add(e)
 	}
 
-	s.Graph.EachEdge(f)
+	g.EachEdge(f)
 	c.Assert(set.Has(BaseEdge{1, 2}), Equals, true)
 	c.Assert(set.Has(BaseEdge{2, 3}), Equals, true)
 
@@ -293,17 +301,19 @@ func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 		c.Error("Graph should not contain any edges after removal.")
 	}
 
-	s.Graph.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
-	s.Graph.EachEdge(f)
+	g.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	g.EachEdge(f)
 }
 
 // Checks to ensure that removal works for both in-edges and out-edges.
 // TODO - make the edge membership check a little more robust.
 func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
-	s.Graph.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
-	s.Graph.RemoveVertex(1)
+	g := s.Factory.CreateMutableGraph()
 
-	c.Assert(s.Graph.Size(), Equals, 1)
+	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
+	g.RemoveVertex(1)
+
+	c.Assert(g.Size(), Equals, 1)
 }
 
 /* WeightedGraphSuite - tests for weighted graphs */
@@ -344,7 +354,8 @@ func (s *MutableWeightedGraphSuite) SetUpTest(c *C) {
 func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
 	s.Graph.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
 
-	f := func(e Edge) {
+	edgeset := set.NewNonTS()
+	s.Graph.EachEdge(func(e Edge) {
 		// Undirected graphs provide no guarantee of vertex output ordering,
 		// and as such either {1,2} or {2,1} are valid outputs.
 		// TODO this can be removed once a HasEdge() is implemented.
@@ -356,37 +367,29 @@ func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
 				c.FailNow()
 			}
 		}
-	}
+	})
 
-	edgeset := set.NewNonTS()
-	s.Graph.EachEdge(f)
 
-	wf := func(e WeightedEdge) {
-		edgeset.Add(e)
-	}
-
-	s.Graph.EachWeightedEdge(wf)
-	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) || edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, false)
+		s.Graph.EachWeightedEdge(func(e WeightedEdge) {
+			edgeset.Add(e)
+		})
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) || edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
 
 	// Now test removal
-	f = func(e Edge) {
-		c.Error("Graph should not contain any edges after removal.")
-	}
-
 	s.Graph.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
-	s.Graph.EachEdge(f)
+	s.Graph.EachEdge(func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	})
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	s.Graph.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
 	edgeset := set.NewNonTS()
 
-	f := func(e Edge) {
-		edgeset.Add(e)
-	}
-
 	// First test with generic edge iteration method
-	s.Graph.EachEdge(f)
+	s.Graph.EachEdge(func(e Edge) {
+		edgeset.Add(e)
+	})
 
 	// Check both directed and undirected edge permutations
 	c.Assert(edgeset.Has(BaseEdge{1, 2}) != edgeset.Has(BaseEdge{2, 1}), Equals, true)
@@ -396,25 +399,20 @@ func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 
 	edgeset2 := set.NewNonTS()
 	// Now with weighted edge iteration method
-	wf := func(e WeightedEdge) {
+	s.Graph.EachWeightedEdge(func(e WeightedEdge) {
 		edgeset2.Add(e)
-	}
-
-	s.Graph.EachWeightedEdge(wf)
+	})
 	c.Assert(edgeset2.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset2.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
 	c.Assert(edgeset2.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset2.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
 	c.Assert(edgeset2.Has(BaseEdge{1, 2}) || edgeset2.Has(BaseEdge{2, 1}), Equals, false)
 	c.Assert(edgeset2.Has(BaseEdge{2, 3}) || edgeset2.Has(BaseEdge{3, 2}), Equals, false)
 
 	// Now test removal
-	f = func(e Edge) {
-		c.Error("Graph should not contain any edges after removal.")
-	}
-	wf = func(e WeightedEdge) {
-		c.Error("Graph should not contain any edges after removal.")
-	}
-
 	s.Graph.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
-	s.Graph.EachEdge(f)
-	s.Graph.EachWeightedEdge(wf)
+	s.Graph.EachEdge(func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	})
+	s.Graph.EachWeightedEdge(func(e WeightedEdge) {
+		c.Error("Graph should not contain any edges after removal.")
+	})
 }
