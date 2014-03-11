@@ -1,3 +1,4 @@
 package gogl
 
-var _ = SetUpSimpleGraphTests(NewDirectedWeighted())
+var _ = SetUpSimpleGraphTests(NewWeightedDirected())
+var _ = SetUpSimpleGraphTests(NewWeightedUndirected())

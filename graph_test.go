@@ -22,37 +22,42 @@ var edgeSet = []Edge{
 // This function automatically sets up suites of tests for graphs according to
 // they implement.
 func SetUpSimpleGraphTests(g Graph) bool {
-	gf := &GraphFactory2{g}
+	gf := &GraphFactory{g}
 
 	// Set up the basic Graph suite unconditionally
-	_ = Suite(&GraphSuite{Graph: g, F2: gf})
+	_ = Suite(&GraphSuite{Graph: g, Factory: gf})
 
 	mg, ok := g.(MutableGraph)
 	if ok {
-		_ = Suite(&MutableGraphSuite{Graph: mg, F2: gf})
+		_ = Suite(&MutableGraphSuite{Graph: mg, Factory: gf})
+	}
+
+	wg, ok := g.(WeightedGraph)
+	if ok {
+		_ = Suite(&WeightedGraphSuite{Graph: wg, Factory: gf})
+	}
+
+	mwg, ok := g.(MutableWeightedGraph)
+	if ok {
+		_ = Suite(&MutableWeightedGraphSuite{mwg, gf, MutableGraphSuite{Factory: gf}})
 	}
 
 	return true
 }
 
 type GraphFactory struct {
-	CreateMutableGraph func() MutableGraph
-	CreateGraph        func([]Edge) Graph
-}
-
-type GraphFactory2 struct {
 	sourceGraph Graph
 }
 
-func (gf *GraphFactory2) create() interface{} {
+func (gf *GraphFactory) create() interface{} {
 	return reflect.New(reflect.Indirect(reflect.ValueOf(gf.sourceGraph)).Type()).Interface()
 }
 
-func (gf *GraphFactory2) CreateEmptyGraph() Graph {
+func (gf *GraphFactory) CreateEmptyGraph() Graph {
 	return gf.create().(Graph)
 }
 
-func (gf *GraphFactory2) CreateGraphFromEdges(edges ...Edge) Graph {
+func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
 	// For now just cheat and work through a Mutable interface
 	base := gf.create()
 
@@ -71,8 +76,26 @@ func (gf *GraphFactory2) CreateGraphFromEdges(edges ...Edge) Graph {
 	return base.(Graph)
 }
 
-func (gf *GraphFactory2) CreateMutableGraph() MutableGraph {
+func (gf *GraphFactory) CreateMutableGraph() MutableGraph {
 	return gf.create().(MutableGraph)
+}
+
+func (gf *GraphFactory) CreateWeightedGraphFromEdges(edges ...WeightedEdge) WeightedGraph {
+	base := gf.create()
+	if mwg, ok := base.(MutableWeightedGraph); ok {
+		mwg.AddEdges(edges...)
+		return mwg
+	}
+
+	panic("Until GraphInitializers are made to work properly, all graphs have to be mutable for this testing harness to work.")
+}
+
+func (gf *GraphFactory) CreateEmptyWeightedGraph() WeightedGraph {
+	return gf.create().(WeightedGraph)
+}
+
+func (gf *GraphFactory) CreateMutableWeightedGraph() MutableWeightedGraph {
+	return gf.create().(MutableWeightedGraph)
 }
 
 /* Factory interfaces for tests */
@@ -86,16 +109,24 @@ type MutableGraphCreator interface {
 	CreateMutableGraph() MutableGraph
 }
 
+type WeightedGraphCreator interface {
+	CreateEmptyWeightedGraph() WeightedGraph
+	CreateWeightedGraphFromEdges(edges ...WeightedEdge) WeightedGraph
+}
+
+type MutableWeightedGraphCreator interface {
+	CreateMutableWeightedGraph() MutableWeightedGraph
+}
+
 /* GraphSuite - tests for non-mutable graph methods */
 
 type GraphSuite struct {
 	Graph   Graph
-	Factory *GraphFactory
-	F2      GraphCreator
+	Factory GraphCreator
 }
 
 func (s *GraphSuite) SetUpTest(c *C) {
-	s.Graph = s.F2.CreateGraphFromEdges(edgeSet...)
+	s.Graph = s.Factory.CreateGraphFromEdges(edgeSet...)
 }
 
 func (s *GraphSuite) TestVertexMembership(c *C) {
@@ -144,7 +175,7 @@ func (s *GraphSuite) TestEachAdjacent(c *C) {
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
 func (s *GraphSuite) TestOutDegree(c *C) {
-	g := s.F2.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
+	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
 	count, exists := g.OutDegree("foo")
 	c.Assert(exists, Equals, true)
@@ -158,7 +189,7 @@ func (s *GraphSuite) TestOutDegree(c *C) {
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
 func (s *GraphSuite) TestInDegree(c *C) {
-	g := s.F2.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
+	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
 	count, exists := g.InDegree("bar")
 	c.Assert(exists, Equals, true)
@@ -172,27 +203,25 @@ func (s *GraphSuite) TestInDegree(c *C) {
 func (s *GraphSuite) TestSize(c *C) {
 	c.Assert(s.Graph.Size(), Equals, 2)
 
-	g := s.F2.CreateEmptyGraph()
+	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
 }
 
 func (s *GraphSuite) TestOrder(c *C) {
 	c.Assert(s.Graph.Size(), Equals, 2)
 
-	g := s.F2.CreateEmptyGraph()
+	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
 }
 
 /* MutableGraphSuite - tests for mutable graph methods */
 type MutableGraphSuite struct {
 	Graph   MutableGraph
-	Factory *GraphFactory
-	F2      MutableGraphCreator
+	Factory MutableGraphCreator
 }
 
 func (s *MutableGraphSuite) SetUpTest(c *C) {
-	s.Graph = s.F2.CreateMutableGraph()
-	//s.Graph = s.Factory.CreateMutableGraph()
+	s.Graph = s.Factory.CreateMutableGraph()
 }
 
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
@@ -275,4 +304,117 @@ func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 	s.Graph.RemoveVertex(1)
 
 	c.Assert(s.Graph.Size(), Equals, 1)
+}
+
+/* WeightedGraphSuite - tests for weighted graphs */
+
+type WeightedGraphSuite struct {
+	Graph   WeightedGraph
+	Factory WeightedGraphCreator
+}
+
+func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
+	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+
+	edgeset := set.NewNonTS()
+	// Now with weighted edge iteration method
+	wf := func(e WeightedEdge) {
+		edgeset.Add(e)
+	}
+
+	g.EachWeightedEdge(wf)
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
+	c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
+	c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
+}
+
+/* MutableWeightedGraphSuite - tests for mutable weighted graphs */
+
+type MutableWeightedGraphSuite struct {
+	Graph           MutableWeightedGraph
+	WeightedFactory MutableWeightedGraphCreator
+	MutableGraphSuite
+}
+
+func (s *MutableWeightedGraphSuite) SetUpTest(c *C) {
+	s.Graph = s.WeightedFactory.CreateMutableWeightedGraph()
+}
+
+func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
+	s.Graph.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+
+	f := func(e Edge) {
+		// Undirected graphs provide no guarantee of vertex output ordering,
+		// and as such either {1,2} or {2,1} are valid outputs.
+		// TODO this can be removed once a HasEdge() is implemented.
+		if !c.Check(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{1, 2}) {
+			if c.Check(BaseEdge{e.Source(), e.Target()}, Equals, BaseEdge{2, 1}) {
+				c.Succeed()
+			} else {
+				c.Log("Neither acceptable ordered pair of vertices was provided.")
+				c.FailNow()
+			}
+		}
+	}
+
+	edgeset := set.NewNonTS()
+	s.Graph.EachEdge(f)
+
+	wf := func(e WeightedEdge) {
+		edgeset.Add(e)
+	}
+
+	s.Graph.EachWeightedEdge(wf)
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) || edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, false)
+
+	// Now test removal
+	f = func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	}
+
+	s.Graph.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+	s.Graph.EachEdge(f)
+}
+
+func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
+	s.Graph.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+	edgeset := set.NewNonTS()
+
+	f := func(e Edge) {
+		edgeset.Add(e)
+	}
+
+	// First test with generic edge iteration method
+	s.Graph.EachEdge(f)
+
+	// Check both directed and undirected edge permutations
+	c.Assert(edgeset.Has(BaseEdge{1, 2}) != edgeset.Has(BaseEdge{2, 1}), Equals, true)
+	c.Assert(edgeset.Has(BaseEdge{2, 3}) != edgeset.Has(BaseEdge{3, 2}), Equals, true)
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) || edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, false)
+	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) || edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, false)
+
+	edgeset2 := set.NewNonTS()
+	// Now with weighted edge iteration method
+	wf := func(e WeightedEdge) {
+		edgeset2.Add(e)
+	}
+
+	s.Graph.EachWeightedEdge(wf)
+	c.Assert(edgeset2.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset2.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
+	c.Assert(edgeset2.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset2.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
+	c.Assert(edgeset2.Has(BaseEdge{1, 2}) || edgeset2.Has(BaseEdge{2, 1}), Equals, false)
+	c.Assert(edgeset2.Has(BaseEdge{2, 3}) || edgeset2.Has(BaseEdge{3, 2}), Equals, false)
+
+	// Now test removal
+	f = func(e Edge) {
+		c.Error("Graph should not contain any edges after removal.")
+	}
+	wf = func(e WeightedEdge) {
+		c.Error("Graph should not contain any edges after removal.")
+	}
+
+	s.Graph.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+	s.Graph.EachEdge(f)
+	s.Graph.EachWeightedEdge(wf)
 }
