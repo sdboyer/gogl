@@ -14,23 +14,6 @@ import (
 // themselves. Your use case cares about the content of your vertices, but gogl
 // does not.  Consequently, anything can act as a vertex.
 type Vertex interface{}
-type VertexList []Vertex
-
-// VertexSet uses maps to express a value-less (empty struct), indexed
-// unordered list. See
-// https://groups.google.com/forum/#!searchin/golang-nuts/map/golang-nuts/H2cXpwisEUE/1X2FV-rODfIJ
-type VertexSet map[Vertex]struct{}
-
-// However, as a practical, internal matter, some approaches to representing
-// graphs may benefit significantly (in terms of memory use) from having a uint
-// that uniquely identifies each vertex. This is essentially an implementation
-// detail, but if your use case merits it (large graph processing is busting
-// memory), you can trade off a bit of speed for potentially nontrivial memory
-// savings.
-// TODO implement a datastructure that does this, and test these outlandish claims!
-type IdentifiableVertex interface {
-	id() uint64
-}
 
 /* Edge structures */
 
@@ -43,18 +26,6 @@ type IdentifiableVertex interface {
 // the varying constraints and implementation needs, but still achieve optimal
 // performance given those constraints.
 
-// TODO totally unclear whether or not defining capabilities in a bitfield like
-// this will actually help us achieve the goal
-const (
-	E_DIRECTED, EM_DIRECTED = 1 << iota, 1<<iota - 1
-	E_UNDIRECTED, EM_UNDIRECTED
-	E_WEIGHTED, EM_WEIGHTED
-	E_TYPED, EM_TYPED
-	E_SIGNED, EM_SIGNED
-	E_LOOPS, EM_LOOPS
-	E_MULTIGRAPH, EM_MULTIGRAPH
-)
-
 type Edge interface {
 	Source() Vertex
 	Target() Vertex
@@ -65,8 +36,6 @@ type WeightedEdge interface {
 	Edge
 	Weight() int
 }
-
-type Path []Edge
 
 // BaseEdge is a struct used internally to represent edges and meet the Edge
 // interface requirements. It uses the standard notation, (u,v), for vertex
