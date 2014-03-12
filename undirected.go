@@ -11,7 +11,7 @@ type Undirected struct {
 func NewUndirected() *Undirected {
 	list := &Undirected{}
 	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]VertexSet)
+	list.list = make(map[Vertex]map[Vertex]struct{})
 
 	// Type assertions to ensure interfaces are met
 	var _ Graph = list

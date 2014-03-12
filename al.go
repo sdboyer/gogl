@@ -18,7 +18,7 @@ import (
 	"sync"
 )
 
-type al map[Vertex]VertexSet
+type al map[Vertex]map[Vertex]struct{}
 
 // Helper to not have to write struct{} everywhere.
 var keyExists = struct{}{}
@@ -105,13 +105,13 @@ func (g *adjacencyList) EnsureVertex(vertices ...Vertex) {
 func (g *adjacencyList) ensureVertex(vertices ...Vertex) {
 	// TODO this is horrible, but the reflection approach in the testing harness requires it...for now
 	if g.list == nil {
-		g.list = make(map[Vertex]VertexSet)
+		g.list = make(map[Vertex]map[Vertex]struct{})
 	}
 
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?
-			g.list[vertex] = make(VertexSet, 10)
+			g.list[vertex] = make(map[Vertex]struct{}, 10)
 		}
 	}
 
