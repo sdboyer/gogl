@@ -52,15 +52,13 @@ func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
 
 	if exists = g.hasVertex(vertex); exists {
 
-		f := func(v Vertex) {
+		// This results in a double read-lock. Should be fine.
+		for e := range g.list {
+			g.EachAdjacent(e, func(v Vertex) {
 			if v == vertex {
 				degree++
 			}
-		}
-
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, f)
+		})
 		}
 	}
 

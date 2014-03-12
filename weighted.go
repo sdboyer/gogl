@@ -146,15 +146,13 @@ func (g *weightedDirected) InDegree(vertex Vertex) (degree int, exists bool) {
 
 	if exists = g.hasVertex(vertex); exists {
 
-		f := func(v Vertex) {
+		// This results in a double read-lock. Should be fine.
+		for e := range g.list {
+			g.EachAdjacent(e, func(v Vertex) {
 			if v == vertex {
 				degree++
 			}
-		}
-
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, f)
+		})
 		}
 	}
 
@@ -428,11 +426,9 @@ func (g *weightedUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			f := func(adjacent Vertex) {
+			g.eachAdjacent(vertex, func(adjacent Vertex) {
 				delete(g.list[adjacent], vertex)
-			}
-
-			g.eachAdjacent(vertex, f)
+			})
 			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)
 		}

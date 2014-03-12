@@ -19,8 +19,12 @@ var edgeSet = []Edge{
 	&BaseEdge{"bar", "baz"},
 }
 
-// This function automatically sets up suites of tests for graphs according to
-// they implement.
+// This function automatically sets up suites of black box unit tests for
+// graphs by determining which gogl interfaces they implement.
+//
+// Passing a graph to this method for testing is the most official way to
+// determine whether or not it complies with not just the interfaces, but also
+// the graph semantics defined by gogl.
 func SetUpSimpleGraphTests(g Graph) bool {
 	gf := &GraphFactory{g}
 
@@ -298,7 +302,6 @@ func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 }
 
 // Checks to ensure that removal works for both in-edges and out-edges.
-// TODO - make the edge membership check a little more robust.
 func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 	g := s.Factory.CreateMutableGraph()
 
