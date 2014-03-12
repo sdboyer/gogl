@@ -129,8 +129,14 @@ func (s *GraphSuite) SetUpTest(c *C) {
 	s.Graph = s.Factory.CreateGraphFromEdges(edgeSet...)
 }
 
-func (s *GraphSuite) TestVertexMembership(c *C) {
+func (s *GraphSuite) TestHasVertex(c *C) {
+	c.Assert(s.Graph.HasVertex("qux"), Equals, false)
 	c.Assert(s.Graph.HasVertex("foo"), Equals, true)
+}
+
+func (s *GraphSuite) TestHasEdge(c *C) {
+	c.Assert(s.Graph.HasEdge(edgeSet[0]), Equals, true)
+	c.Assert(s.Graph.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)
 }
 
 func (s *GraphSuite) TestEachVertex(c *C) {
@@ -321,6 +327,15 @@ func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
 	c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
 	c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
 	c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
+}
+
+func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
+	edges := []WeightedEdge{BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5}}
+	g := s.Factory.CreateWeightedGraphFromEdges(edges...)
+
+	// TODO figure out how to meaningfully test undirected graphs' logic here
+	c.Assert(g.HasWeightedEdge(edges[0]), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
 }
 
 /* MutableWeightedGraphSuite - tests for mutable weighted graphs */

@@ -69,6 +69,20 @@ func (g *Undirected) EachEdge(f func(edge Edge)) {
 	}
 }
 
+// Indicates whether or not the given edge is present in the graph.
+func (g *Undirected) HasEdge(edge Edge) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	// Spread it into two expressions to avoid evaluating the second if possible
+	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return true
+	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+		return true
+	}
+	return false
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *Undirected) Density() float64 {

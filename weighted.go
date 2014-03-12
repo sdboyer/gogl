@@ -187,6 +187,29 @@ func (g *weightedDirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 	}
 }
 
+// Indicates whether or not the given edge is present in the graph. It matches
+// based solely on the presence of an edge, disregarding edge weight.
+func (g *weightedDirected) HasEdge(edge Edge) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[edge.Source()][edge.Target()]
+	return exists
+}
+
+// Indicates whether or not the given weighted edge is present in the graph.
+// It will only match if the provided WeightedEdge has the same weight as
+// the edge contained in the graph.
+func (g *weightedDirected) HasWeightedEdge(edge WeightedEdge) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if weight, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return weight == edge.Weight()
+	}
+	return false
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *weightedDirected) Density() float64 {
@@ -350,6 +373,37 @@ func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 			}
 		}
 	}
+}
+
+// Indicates whether or not the given edge is present in the graph. It matches
+// based solely on the presence of an edge, disregarding edge weight.
+func (g *weightedUndirected) HasEdge(edge Edge) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	// Spread it into two expressions to avoid evaluating the second if possible
+	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return true
+	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+		return true
+	}
+	return false
+}
+
+// Indicates whether or not the given weighted edge is present in the graph.
+// It will only match if the provided WeightedEdge has the same weight as
+// the edge contained in the graph.
+func (g *weightedUndirected) HasWeightedEdge(edge WeightedEdge) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	// Spread it into two expressions to avoid evaluating the second if possible
+	if weight, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return edge.Weight() == weight
+	} else if weight, exists := g.list[edge.Target()][edge.Source()]; exists {
+		return edge.Weight() == weight
+	}
+	return false
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the

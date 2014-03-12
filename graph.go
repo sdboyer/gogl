@@ -73,6 +73,7 @@ type Graph interface {
 	EachEdge(f func(edge Edge))
 	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
 	HasVertex(vertex Vertex) bool
+	HasEdge(e Edge) bool
 	Order() int
 	Size() int
 	InDegree(vertex Vertex) (int, bool)
@@ -103,6 +104,7 @@ type DirectedGraph interface {
 
 type WeightedGraph interface {
 	Graph
+	HasWeightedEdge(e WeightedEdge) bool
 	EachWeightedEdge(f func(edge WeightedEdge))
 }
 
