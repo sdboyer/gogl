@@ -1,3 +1,3 @@
 package gogl
 
-var _ = SetUpSimpleGraphTests(NewUndirected())
+var _ = SetUpSimpleGraphTests(NewUndirected(), false)
