@@ -1,11 +1,11 @@
-package gogl
+// Contains algos and logic related to depth-first graph traversal.
+package dfs
 
 import (
 	"errors"
+
 	"github.com/sdboyer/gogl"
 )
-
-// Contains algos and logic related to depth-first traversal.
 
 type vnode struct {
 	v    gogl.Vertex
