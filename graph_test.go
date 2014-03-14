@@ -2,6 +2,7 @@ package gogl
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
 
@@ -29,21 +30,22 @@ func SetUpSimpleGraphTests(g Graph, directed bool) bool {
 	gf := &GraphFactory{g}
 
 	// Set up the basic Graph suite unconditionally
-	_ = Suite(&GraphSuite{Graph: g, Factory: gf, Directed: directed})
+	Suite(&GraphSuite{Graph: g, Factory: gf, Directed: directed})
 
-	mg, ok := g.(MutableGraph)
-	if ok {
-		_ = Suite(&MutableGraphSuite{Graph: mg, Factory: gf, Directed: directed})
+	if mg, ok := g.(MutableGraph); ok {
+		Suite(&MutableGraphSuite{Graph: mg, Factory: gf, Directed: directed})
 	}
 
-	wg, ok := g.(WeightedGraph)
-	if ok {
-		_ = Suite(&WeightedGraphSuite{Graph: wg, Factory: gf, Directed: directed})
+	if wg, ok := g.(WeightedGraph); ok {
+		Suite(&WeightedGraphSuite{Graph: wg, Factory: gf, Directed: directed})
 	}
 
-	mwg, ok := g.(MutableWeightedGraph)
-	if ok {
-		_ = Suite(&MutableWeightedGraphSuite{Graph: mwg, Factory: gf, Directed: directed})
+	if mwg, ok := g.(MutableWeightedGraph); ok {
+		Suite(&MutableWeightedGraphSuite{Graph: mwg, Factory: gf, Directed: directed})
+	}
+
+	if sg, ok := g.(SimpleGraph); ok {
+		Suite(&SimpleGraphSuite{Graph: sg, Factory: gf, Directed: directed})
 	}
 
 	return true
@@ -65,11 +67,7 @@ func (gf *GraphFactory) create() interface{} {
 	return reflect.New(reflect.Indirect(reflect.ValueOf(gf.sourceGraph)).Type()).Interface()
 }
 
-func (gf *GraphFactory) CreateEmptyGraph() Graph {
-	return gf.create().(Graph)
-}
-
-func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
+func (gf *GraphFactory) graphFromEdges(edges ...Edge) Graph {
 	// For now just cheat and work through a Mutable interface
 	base := gf.create()
 
@@ -86,6 +84,23 @@ func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
 	}
 
 	return base.(Graph)
+
+}
+
+func (gf *GraphFactory) CreateEmptyGraph() Graph {
+	return gf.create().(Graph)
+}
+
+func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
+	return gf.graphFromEdges(edges...)
+}
+
+func (gf *GraphFactory) CreateEmptySimpleGraph() SimpleGraph {
+	return gf.create().(SimpleGraph)
+}
+
+func (gf *GraphFactory) CreateSimpleGraphFromEdges(edges ...Edge) SimpleGraph {
+	return gf.graphFromEdges(edges...).(SimpleGraph)
 }
 
 func (gf *GraphFactory) CreateMutableGraph() MutableGraph {
@@ -115,6 +130,11 @@ func (gf *GraphFactory) CreateMutableWeightedGraph() MutableWeightedGraph {
 type GraphCreator interface {
 	CreateEmptyGraph() Graph
 	CreateGraphFromEdges(edges ...Edge) Graph
+}
+
+type SimpleGraphCreator interface {
+	CreateEmptySimpleGraph() SimpleGraph
+	CreateSimpleGraphFromEdges(edges ...Edge) SimpleGraph
 }
 
 type MutableGraphCreator interface {
@@ -231,6 +251,33 @@ func (s *GraphSuite) TestOrder(c *C) {
 
 	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
+}
+
+/* SimpleGraphSuite - tests for simple graph methods */
+
+type SimpleGraphSuite struct {
+	Graph    Graph
+	Factory  SimpleGraphCreator
+	Directed bool
+}
+
+func (s *SimpleGraphSuite) TestDensity(c *C) {
+	empty := s.Factory.CreateEmptySimpleGraph()
+	c.Assert(math.IsNaN(empty.Density()), Equals, true)
+
+	vev := s.Factory.CreateSimpleGraphFromEdges(BaseEdge{1, 2})
+	if s.Directed {
+		c.Assert(vev.Density(), Equals, float64(0.5))
+	} else {
+		c.Assert(vev.Density(), Equals, float64(1))
+	}
+
+	vevev := s.Factory.CreateSimpleGraphFromEdges(BaseEdge{1, 2}, BaseEdge{2, 3})
+	if s.Directed {
+		c.Assert(vevev.Density(), Equals, float64(2)/float64(6))
+	} else {
+		c.Assert(vevev.Density(), Equals, float64(2)/float64(3))
+	}
 }
 
 /* MutableGraphSuite - tests for mutable graph methods */

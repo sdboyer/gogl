@@ -51,14 +51,13 @@ func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
 	defer g.mu.RUnlock()
 
 	if exists = g.hasVertex(vertex); exists {
-
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {
 			g.EachAdjacent(e, func(v Vertex) {
-			if v == vertex {
-				degree++
-			}
-		})
+				if v == vertex {
+					degree++
+				}
+			})
 		}
 	}
 
@@ -94,7 +93,7 @@ func (g *Directed) Density() float64 {
 	defer g.mu.RUnlock()
 
 	order := g.Order()
-	return 2 * float64(g.Size()) / float64(order*(order-1))
+	return float64(g.Size()) / float64(order*(order-1))
 }
 
 // Removes a vertex from the graph. Also removes any edges of which that
