@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-var _ = SetUpSimpleGraphTests(NewDirected(), true)
-
 func TestDensity(t *testing.T) {
 	g := NewDirected()
 	var density float64

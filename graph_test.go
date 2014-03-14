@@ -49,6 +49,14 @@ func SetUpSimpleGraphTests(g Graph, directed bool) bool {
 	return true
 }
 
+// Set up suites for all of gogl's graphs.
+var _ = SetUpSimpleGraphTests(NewDirected(), true)
+var _ = SetUpSimpleGraphTests(NewUndirected(), false)
+var _ = SetUpSimpleGraphTests(NewWeightedDirected(), true)
+var _ = SetUpSimpleGraphTests(NewWeightedUndirected(), false)
+
+/* The GraphFactory - this generates graph instances for the tests. */
+
 type GraphFactory struct {
 	sourceGraph Graph
 }
