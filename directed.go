@@ -183,11 +183,11 @@ func (g *Directed) Transpose() DirectedGraph {
 		if !g2.hasVertex(source) {
 			g2.list[source] = make(map[Vertex]struct{}, startcap+1)
 		}
-			for target, _ := range adjacent {
-				if !g2.hasVertex(target) {
-					g2.list[target] = make(map[Vertex]struct{}, startcap+1)
-				}
-				g2.list[target][source] = keyExists
+		for target, _ := range adjacent {
+			if !g2.hasVertex(target) {
+				g2.list[target] = make(map[Vertex]struct{}, startcap+1)
+			}
+			g2.list[target][source] = keyExists
 		}
 	}
 
