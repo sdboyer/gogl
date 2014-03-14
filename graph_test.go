@@ -16,8 +16,13 @@ var _ = fmt.Println
 func Test(t *testing.T) { TestingT(t) }
 
 var edgeSet = []Edge{
-	&BaseEdge{"foo", "bar"},
-	&BaseEdge{"bar", "baz"},
+	BaseEdge{"foo", "bar"},
+	BaseEdge{"bar", "baz"},
+}
+
+// swap method is useful for some testing shorthand
+func (e BaseEdge) swap() Edge {
+	return BaseEdge{e.V, e.U}
 }
 
 // This function automatically sets up suites of black box unit tests for
@@ -26,8 +31,14 @@ var edgeSet = []Edge{
 // Passing a graph to this method for testing is the most official way to
 // determine whether or not it complies with not just the interfaces, but also
 // the graph semantics defined by gogl.
-func SetUpSimpleGraphTests(g Graph, directed bool) bool {
+func SetUpSimpleGraphTests(g Graph) bool {
 	gf := &GraphFactory{g}
+	var directed bool
+
+	if dg, ok := g.(DirectedGraph); ok {
+		directed = true
+		Suite(&DirectedGraphSuite{Graph: dg, Factory: gf})
+	}
 
 	// Set up the basic Graph suite unconditionally
 	Suite(&GraphSuite{Graph: g, Factory: gf, Directed: directed})
@@ -52,10 +63,10 @@ func SetUpSimpleGraphTests(g Graph, directed bool) bool {
 }
 
 // Set up suites for all of gogl's graphs.
-var _ = SetUpSimpleGraphTests(NewDirected(), true)
-var _ = SetUpSimpleGraphTests(NewUndirected(), false)
-var _ = SetUpSimpleGraphTests(NewWeightedDirected(), true)
-var _ = SetUpSimpleGraphTests(NewWeightedUndirected(), false)
+var _ = SetUpSimpleGraphTests(NewDirected())
+var _ = SetUpSimpleGraphTests(NewUndirected())
+var _ = SetUpSimpleGraphTests(NewWeightedDirected())
+var _ = SetUpSimpleGraphTests(NewWeightedUndirected())
 
 /* The GraphFactory - this generates graph instances for the tests. */
 
@@ -93,6 +104,10 @@ func (gf *GraphFactory) CreateEmptyGraph() Graph {
 
 func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
 	return gf.graphFromEdges(edges...)
+}
+
+func (gf *GraphFactory) CreateDirectedGraphFromEdges(edges ...Edge) DirectedGraph {
+	return gf.graphFromEdges(edges...).(DirectedGraph)
 }
 
 func (gf *GraphFactory) CreateEmptySimpleGraph() SimpleGraph {
@@ -135,6 +150,10 @@ type GraphCreator interface {
 type SimpleGraphCreator interface {
 	CreateEmptySimpleGraph() SimpleGraph
 	CreateSimpleGraphFromEdges(edges ...Edge) SimpleGraph
+}
+
+type DirectedGraphCreator interface {
+	CreateDirectedGraphFromEdges(edges ...Edge) DirectedGraph
 }
 
 type MutableGraphCreator interface {
@@ -251,6 +270,25 @@ func (s *GraphSuite) TestOrder(c *C) {
 
 	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
+}
+
+/* DirectedGraphSuite - tests for directed graph methods */
+
+type DirectedGraphSuite struct {
+	Graph   Graph
+	Factory DirectedGraphCreator
+}
+
+func (s *DirectedGraphSuite) TestTranspose(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(edgeSet...)
+
+	g2 := g.Transpose()
+
+	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge).swap()), Equals, true)
+
+	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge)), Equals, false)
 }
 
 /* SimpleGraphSuite - tests for simple graph methods */

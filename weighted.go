@@ -117,6 +117,7 @@ func NewWeightedDirected() MutableWeightedGraph {
 	// Type assertions to ensure interfaces are met
 	var _ Graph = list
 	var _ SimpleGraph = list
+	var _ DirectedGraph = list
 	var _ WeightedGraph = list
 	var _ MutableWeightedGraph = list
 
@@ -284,6 +285,32 @@ func (g *weightedDirected) RemoveEdges(edges ...WeightedEdge) {
 			g.size--
 		}
 	}
+}
+
+func (g *weightedDirected) Transpose() DirectedGraph {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g2 := &weightedDirected{}
+	g2.list = make(map[Vertex]map[Vertex]int)
+
+	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
+	startcap := int(g.Size() / g.Order())
+
+	for source, adjacent := range g.list {
+		if !g2.hasVertex(source) {
+			g2.list[source] = make(map[Vertex]int, startcap+1)
+		}
+
+		for target, weight := range adjacent {
+			if !g2.hasVertex(target) {
+				g2.list[target] = make(map[Vertex]int, startcap+1)
+			}
+			g2.list[target][source] = weight
+		}
+	}
+
+	return g2
 }
 
 /* UndirectedWeighted implementation */

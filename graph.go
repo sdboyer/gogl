@@ -98,8 +98,6 @@ type SimpleGraph interface {
 type DirectedGraph interface {
 	Graph
 	Transpose() DirectedGraph
-	IsAcyclic() bool
-	GetCycles() [][]Vertex
 }
 
 type WeightedGraph interface {

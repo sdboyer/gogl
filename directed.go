@@ -14,6 +14,7 @@ func NewDirected() *Directed {
 	var _ Graph = list
 	var _ SimpleGraph = list
 	var _ MutableGraph = list
+	var _ DirectedGraph = list
 
 	return list
 }
@@ -166,4 +167,29 @@ func (g *Directed) RemoveEdges(edges ...Edge) {
 			g.size--
 		}
 	}
+}
+
+func (g *Directed) Transpose() DirectedGraph {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g2 := &Directed{}
+	g2.list = make(map[Vertex]map[Vertex]struct{})
+
+	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
+	startcap := int(g.Size() / g.Order())
+
+	for source, adjacent := range g.list {
+		if !g2.hasVertex(source) {
+			g2.list[source] = make(map[Vertex]struct{}, startcap+1)
+		}
+			for target, _ := range adjacent {
+				if !g2.hasVertex(target) {
+					g2.list[target] = make(map[Vertex]struct{}, startcap+1)
+				}
+				g2.list[target][source] = keyExists
+		}
+	}
+
+	return g2
 }
