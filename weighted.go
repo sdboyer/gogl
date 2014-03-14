@@ -165,8 +165,8 @@ func (g *weightedDirected) EachEdge(f func(edge Edge)) {
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
-			f(BaseEdge{U: source, V: target})
+		for target, weight := range adjacent {
+			f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight})
 		}
 	}
 }
@@ -343,10 +343,11 @@ func (g *weightedUndirected) EachEdge(f func(edge Edge)) {
 	visited := set.NewNonTS()
 
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
-			e := BaseEdge{U: source, V: target}
+		for target, weight := range adjacent {
+			be := BaseEdge{U: source, V: target}
+			e := BaseWeightedEdge{be, weight}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(e)
+				visited.Add(be)
 				f(e)
 			}
 		}
@@ -363,9 +364,10 @@ func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 
 	for source, adjacent := range g.list {
 		for target, weight := range adjacent {
-			e := BaseWeightedEdge{BaseEdge{U: source, V: target}, weight}
+			be := BaseEdge{U: source, V: target}
+			e := BaseWeightedEdge{be, weight}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(BaseEdge{U: source, V: target})
+				visited.Add(be)
 				f(e)
 			}
 		}

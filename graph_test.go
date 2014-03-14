@@ -369,6 +369,17 @@ type WeightedGraphSuite struct {
 	Directed bool
 }
 
+func (s *WeightedGraphSuite) TestEachEdge(c *C) {
+	// This method is not redundant with the base Graph suite as it ensures that the edges
+	// provided by the EachEdge() iterator actually do implement WeightedEdge.
+	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+
+	var we WeightedEdge
+	g.EachEdge(func(e Edge) {
+		c.Assert(e, Implements, &we)
+	})
+}
+
 func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
 	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
 
