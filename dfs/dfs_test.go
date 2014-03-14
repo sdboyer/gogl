@@ -1,17 +1,18 @@
-package gogl
+package dfs
 
 import (
 	"testing"
-	. "github.com/sdboyer/gogl"
+
+	"github.com/sdboyer/gogl"
 )
 
-var dfEdgeSet = []Edge{
-	&BaseEdge{"foo", "bar"},
-	&BaseEdge{"bar", "baz"},
-	&BaseEdge{"baz", "qux"},
+var dfEdgeSet = []gogl.Edge{
+	&gogl.BaseEdge{"foo", "bar"},
+	&gogl.BaseEdge{"bar", "baz"},
+	&gogl.BaseEdge{"baz", "qux"},
 }
 
-func sliceEquals(a, b []Vertex) bool {
+func sliceEquals(a, b []gogl.Vertex) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -25,12 +26,12 @@ func sliceEquals(a, b []Vertex) bool {
 }
 
 func TestTslGeneration(t *testing.T) {
-	g := NewDirectedFromEdgeSet(dfEdgeSet)
+	g := gogl.NewDirectedFromEdgeSet(dfEdgeSet)
 
 	vis := &DFTslVisitor{}
 	DepthFirstFromVertices(g, vis, "foo")
 
-	if !sliceEquals(vis.GetTsl(), []Vertex{"qux", "baz", "bar", "foo"}) {
+	if !sliceEquals(vis.GetTsl(), []gogl.Vertex{"qux", "baz", "bar", "foo"}) {
 		t.Error("TSL is not correct.")
 	}
 }

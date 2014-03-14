@@ -2,13 +2,13 @@ package gogl
 
 import (
 	"errors"
-	. "github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl"
 )
 
 // Contains algos and logic related to depth-first traversal.
 
 type vnode struct {
-	v    Vertex
+	v    gogl.Vertex
 	next *vnode
 }
 
@@ -24,12 +24,12 @@ type vstack struct {
 }
 
 type linkedlist interface {
-	push(v Vertex)
-	pop() Vertex
+	push(v gogl.Vertex)
+	pop() gogl.Vertex
 	length() int
 }
 
-func (q *vqueue) push(v Vertex) {
+func (q *vqueue) push(v gogl.Vertex) {
 	n := &vnode{v: v}
 
 	if q.back == nil {
@@ -43,7 +43,7 @@ func (q *vqueue) push(v Vertex) {
 	q.count++
 }
 
-func (q *vqueue) pop() Vertex {
+func (q *vqueue) pop() gogl.Vertex {
 	ret := q.front
 	q.front = q.front.next
 
@@ -55,7 +55,7 @@ func (q *vqueue) length() int {
 	return q.count
 }
 
-func (s *vstack) push(v Vertex) {
+func (s *vstack) push(v gogl.Vertex) {
 	n := &vnode{v: v}
 
 	if s.top == nil {
@@ -68,7 +68,7 @@ func (s *vstack) push(v Vertex) {
 	s.count++
 }
 
-func (s *vstack) pop() Vertex {
+func (s *vstack) pop() gogl.Vertex {
 	ret := s.top
 	s.top = s.top.next
 
@@ -80,49 +80,49 @@ func (s *vstack) length() int {
 	return s.count
 }
 
-type DFVisitor interface {
-	onInitializeVertex(vertex Vertex)
-	onBackEdge(vertex Vertex)
-	onStartVertex(vertex Vertex)
-	onExamineEdge(edge Edge)
-	onFinishVertex(vertex Vertex)
+type Visitor interface {
+	onInitializeVertex(vertex gogl.Vertex)
+	onBackEdge(vertex gogl.Vertex)
+	onStartVertex(vertex gogl.Vertex)
+	onExamineEdge(edge gogl.Edge)
+	onFinishVertex(vertex gogl.Vertex)
 }
 
 type DFTslVisitor struct {
-	g   Graph
-	tsl []Vertex
+	g   gogl.Graph
+	tsl []gogl.Vertex
 }
 
-func (vis *DFTslVisitor) onInitializeVertex(vertex Vertex) {}
+func (vis *DFTslVisitor) onInitializeVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onBackEdge(vertex Vertex) {}
+func (vis *DFTslVisitor) onBackEdge(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onStartVertex(vertex Vertex) {}
+func (vis *DFTslVisitor) onStartVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onExamineEdge(edge Edge) {}
+func (vis *DFTslVisitor) onExamineEdge(edge gogl.Edge) {}
 
-func (vis *DFTslVisitor) onFinishVertex(vertex Vertex) {
+func (vis *DFTslVisitor) onFinishVertex(vertex gogl.Vertex) {
 	vis.tsl = append(vis.tsl, vertex)
 }
 
-func (vis *DFTslVisitor) GetTsl() []Vertex {
+func (vis *DFTslVisitor) GetTsl() []gogl.Vertex {
 	return vis.tsl
 }
 
 type EdgeFilterer interface {
-	FilterEdge(edge Edge) bool
-	FilterEdges(edges []Edge) []Edge
+	FilterEdge(edge gogl.Edge) bool
+	FilterEdges(edges []gogl.Edge) []gogl.Edge
 }
 
 type walker struct {
-	vis      DFVisitor
-	g        Graph
-	visited  map[Vertex]struct{}
-	visiting map[Vertex]struct{}
+	vis      Visitor
+	g        gogl.Graph
+	visited  map[gogl.Vertex]struct{}
+	visiting map[gogl.Vertex]struct{}
 	ll       linkedlist
 }
 
-func DepthFirstFromVertices(g Graph, vis DFVisitor, vertices ...Vertex) error {
+func DepthFirstFromVertices(g gogl.Graph, vis Visitor, vertices ...gogl.Vertex) error {
 	stack := vstack{}
 	for _, v := range vertices {
 		stack.push(v)
@@ -135,8 +135,8 @@ func DepthFirstFromVertices(g Graph, vis DFVisitor, vertices ...Vertex) error {
 	w := walker{
 		vis:      vis,
 		g:        g,
-		visited:  make(map[Vertex]struct{}),
-		visiting: make(map[Vertex]struct{}),
+		visited:  make(map[gogl.Vertex]struct{}),
+		visiting: make(map[gogl.Vertex]struct{}),
 	}
 
 	for v := stack.pop(); ; {
@@ -150,15 +150,15 @@ func DepthFirstFromVertices(g Graph, vis DFVisitor, vertices ...Vertex) error {
 	return nil
 }
 
-func (w *walker) dfrecursive(v Vertex) {
+func (w *walker) dfrecursive(v gogl.Vertex) {
 	if _, visiting := w.visiting[v]; visiting {
 		w.vis.onBackEdge(v)
 	} else if _, visited := w.visited[v]; !visited {
 		w.visiting[v] = struct{}{}
 		w.vis.onStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to Vertex) {
-			w.vis.onExamineEdge(&BaseEdge{v, to})
+		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+			w.vis.onExamineEdge(gogl.BaseEdge{v, to})
 			w.dfrecursive(to)
 		})
 
@@ -169,7 +169,7 @@ func (w *walker) dfrecursive(v Vertex) {
 }
 
 func (w *walker) dflist() {
-	var v Vertex
+	var v gogl.Vertex
 	for v = w.ll.pop(); v != nil; v = w.ll.pop() {
 		if _, visiting := w.visiting[v]; visiting {
 			w.vis.onBackEdge(v)
