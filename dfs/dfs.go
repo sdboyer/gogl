@@ -4,8 +4,123 @@ package dfs
 import (
 	"errors"
 
+	"github.com/fatih/set"
 	"github.com/sdboyer/gogl"
 )
+
+const (
+	white = iota
+	grey
+	black
+)
+
+// Performs a depth-first search on the provided graph for the given target vertex, beginning
+// from the given start vertex.
+//
+// A slice of vertices is returned, identifying the path from the start to the target vertex.
+// If no path can be found, the returned slice is nil and an error is returned instead.
+func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Vertex, err error) {
+	if !g.HasVertex(target) {
+		return nil, errors.New("Target vertex is not present in graph.")
+	}
+	if !g.HasVertex(start) {
+		return nil, errors.New("Start vertex is not present in graph.")
+	}
+
+	visitor := &searchVisitor{}
+
+	w := walker{
+		vis: visitor,
+		g:   g,
+		// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this is horribly slow
+		colors: make(map[gogl.Vertex]uint),
+	}
+
+	w.dfsearch(v)
+
+	return path, nil
+}
+
+// Performs a depth-first search on the provided graph for the given vertex, using the vertices
+// provided to the third variadic parameter as starting points. For each given start vertex,
+// the search proceeds in a parallel goroutine until a path to the target vertex is found.
+// The resulting path is then sent back through the channel.
+//
+// If no starting vertices are provided, then a list of source vertices is built via FindSources(),
+// and that set is used as the starting point. Because FindSources() requires a DirectedGraph,
+// an error will be returned if a non-directed graph is provided without any start vertices.
+//
+// TODO unexported until this is actually implemented. keeping it here as a note for now :)
+func multiSearch(g gogl.Graph, target gogl.Vertex, start ...gogl.Vertex) (pathchan chan<- *searchPath, err error) {
+	start, err = buildStartQueue(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+type searchPath struct {
+	Start     gogl.Vertex
+	Target    gogl.Vertex
+	Reachable bool
+	Path      []gogl.Vertex
+}
+
+// Performs a topological sort using the provided graph. The third variadic parameter defines a
+// set of vertices to start from; vertices unreachable from this starting set will not be included
+// in the final sorted output.
+//
+// If no starting vertices are provided, then a list of source vertices is built via FindSources(),
+// and that set is used as the starting point. Because FindSources() requires a DirectedGraph,
+// an error will be returned if a non-directed graph is provided without any start vertices.
+func Toposort(g gogl.Graph, start ...gogl.Vertex) (tsl []gogl.Vertex, err error) {
+	start, err = buildStartQueue(g)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Traverses the given graph in a depth-first manner, using the provided visitor.
+func Traverse(g gogl.Graph, visitor Visitor) (Visitor, error) {
+
+	return visitor, nil
+}
+
+// Finds all source vertices (vertices with no incoming edges) in the given directed graph.
+func FindSources(g gogl.DirectedGraph) (sources []gogl.Vertex, err error) {
+	// TODO hardly the most efficient way to keep track, i'm sure
+	incomings := set.NewNonTS()
+
+	g.EachEdge(func(e gogl.Edge) {
+		incomings.Add(e.Target())
+	})
+
+	g.EachVertex(func(v gogl.Vertex) {
+		if !incomings.Has(v) {
+			sources = append(sources, v)
+		}
+	})
+
+	return
+}
+
+// Simple helper for shared traversal entry-point logic.
+func buildStartQueue(g gogl.Graph, v ...gogl.Vertex) (start []gogl.Vertex, err error) {
+	if len(v) == 0 {
+		if dg, ok := g.(gogl.DirectedGraph); ok {
+			start, err = FindSources(dg)
+		} else {
+			return nil, errors.New("Undirected graphs have no sources to find, a start point for search must be provided.")
+		}
+	} else {
+		start = v
+	}
+
+	return
+}
 
 type vnode struct {
 	v    gogl.Vertex
@@ -81,11 +196,32 @@ func (s *vstack) length() int {
 }
 
 type Visitor interface {
-	onInitializeVertex(vertex gogl.Vertex)
-	onBackEdge(vertex gogl.Vertex)
-	onStartVertex(vertex gogl.Vertex)
-	onExamineEdge(edge gogl.Edge)
-	onFinishVertex(vertex gogl.Vertex)
+	OnBackEdge(vertex gogl.Vertex)
+	OnStartVertex(vertex gogl.Vertex)
+	OnExamineEdge(edge gogl.Edge)
+	OnFinishVertex(vertex gogl.Vertex)
+}
+
+type TerminatingVisitor interface {
+	Visitor
+	Terminate() (bool, error)
+}
+
+type searchVisitor struct {
+	g     gogl.Graph
+	stack vstack
+}
+
+func (sv *searchVisitor) OnBackEdge(vertex gogl.Vertex) {}
+
+func (sv *searchVisitor) OnStartVertex(vertex gogl.Vertex) {
+	sv.stack.push(vertex)
+}
+
+func (sv *searchVisitor) OnExamineEdge(edge gogl.Edge) {}
+
+func (sv *searchVisitor) OnFinishVertex(vertex gogl.Vertex) {
+	sv.stack.pop()
 }
 
 type DFTslVisitor struct {
@@ -93,15 +229,15 @@ type DFTslVisitor struct {
 	tsl []gogl.Vertex
 }
 
-func (vis *DFTslVisitor) onInitializeVertex(vertex gogl.Vertex) {}
+func (vis *DFTslVisitor) OnInitializeVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onBackEdge(vertex gogl.Vertex) {}
+func (vis *DFTslVisitor) OnBackEdge(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onStartVertex(vertex gogl.Vertex) {}
+func (vis *DFTslVisitor) OnStartVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) onExamineEdge(edge gogl.Edge) {}
+func (vis *DFTslVisitor) OnExamineEdge(edge gogl.Edge) {}
 
-func (vis *DFTslVisitor) onFinishVertex(vertex gogl.Vertex) {
+func (vis *DFTslVisitor) OnFinishVertex(vertex gogl.Vertex) {
 	vis.tsl = append(vis.tsl, vertex)
 }
 
@@ -117,6 +253,8 @@ type EdgeFilterer interface {
 type walker struct {
 	vis      Visitor
 	g        gogl.Graph
+	complete bool
+	colors   map[gogl.Vertex]uint
 	visited  map[gogl.Vertex]struct{}
 	visiting map[gogl.Vertex]struct{}
 	ll       linkedlist
@@ -152,19 +290,41 @@ func DepthFirstFromVertices(g gogl.Graph, vis Visitor, vertices ...gogl.Vertex) 
 
 func (w *walker) dfrecursive(v gogl.Vertex) {
 	if _, visiting := w.visiting[v]; visiting {
-		w.vis.onBackEdge(v)
+		w.vis.OnBackEdge(v)
 	} else if _, visited := w.visited[v]; !visited {
 		w.visiting[v] = struct{}{}
-		w.vis.onStartVertex(v)
+		w.vis.OnStartVertex(v)
 
 		w.g.EachAdjacent(v, func(to gogl.Vertex) {
-			w.vis.onExamineEdge(gogl.BaseEdge{v, to})
+			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
 			w.dfrecursive(to)
 		})
 
-		w.vis.onFinishVertex(v)
+		w.vis.OnFinishVertex(v)
 		w.visited[v] = struct{}{}
 		delete(w.visiting, v)
+	}
+}
+
+func (w *walker) dfsearch(v gogl.Vertex) {
+	color, exists := w.colors[v]
+	if !exists {
+		color = white
+	}
+
+	if color == grey {
+		w.vis.OnBackEdge(v)
+	} else if color == white {
+		w.visiting[v] = struct{}{}
+		w.vis.OnStartVertex(v)
+
+		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
+			w.dfsearch(v)
+		})
+
+		w.vis.OnFinishVertex(v)
+		w.visited[v] = struct{}{}
 	}
 }
 
@@ -172,7 +332,7 @@ func (w *walker) dflist() {
 	var v gogl.Vertex
 	for v = w.ll.pop(); v != nil; v = w.ll.pop() {
 		if _, visiting := w.visiting[v]; visiting {
-			w.vis.onBackEdge(v)
+			w.vis.OnBackEdge(v)
 		} else {
 
 		}
