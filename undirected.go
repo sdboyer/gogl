@@ -21,17 +21,6 @@ func NewUndirected() *Undirected {
 	return list
 }
 
-// Creates a new Undirected graph from an edge set.
-func NewUndirectedFromEdgeSet(set []Edge) *Undirected {
-	g := NewUndirected()
-
-	for _, edge := range set {
-		g.addEdges(edge)
-	}
-
-	return g
-}
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *Undirected) OutDegree(vertex Vertex) (degree int, exists bool) {

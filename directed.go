@@ -19,15 +19,6 @@ func NewDirected() *Directed {
 	return list
 }
 
-// Creates a new Directed graph from an edge set.
-func NewDirectedFromEdgeSet(set []Edge) *Directed {
-	g := NewDirected()
-
-	g.addEdges(set...)
-
-	return g
-}
-
 /* Directed additions */
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the

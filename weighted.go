@@ -333,16 +333,6 @@ func NewWeightedUndirected() MutableWeightedGraph {
 	return g
 }
 
-// Creates a new Undirected graph from an edge set.
-func NewWeightedUndirectedFromEdges(edges ...WeightedEdge) MutableWeightedGraph {
-	g := &weightedUndirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	g.list = make(map[Vertex]map[Vertex]int)
-	g.addEdges(edges...)
-
-	return g
-}
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *weightedUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
