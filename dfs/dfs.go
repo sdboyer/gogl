@@ -32,14 +32,14 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 	w := walker{
 		vis: visitor,
 		g:   g,
-		// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this is horribly slow
+		// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups
 		colors: make(map[gogl.Vertex]uint),
 		target: target,
 	}
 
 	w.dfsearch(start)
 
-	return path, nil
+	return visitor.getPath(), nil
 }
 
 // Performs a depth-first search on the provided graph for the given vertex, using the vertices
@@ -220,9 +220,12 @@ func (sv *searchVisitor) OnFinishVertex(vertex gogl.Vertex) {
 	sv.stack.pop()
 }
 
-func (sv *searchVisitor) getPath()[] gogl.Vertex {
+func (sv *searchVisitor) getPath() []gogl.Vertex {
 	path := make([]gogl.Vertex, 0, sv.stack.length())
-	for vertex := sv.stack.pop; vertex != nil; vertex = sv.stack.pop {
+
+	stacklen := sv.stack.length()
+	for i := 0; i < stacklen; i++ {
+		vertex := sv.stack.pop()
 		path = append(path, vertex)
 	}
 
@@ -327,14 +330,14 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 	if color == grey {
 		w.vis.OnBackEdge(v)
 	} else if color == white {
-		w.visiting[v] = struct{}{}
+		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
 		w.g.EachAdjacent(v, func(to gogl.Vertex) {
 			// no more new visits if complete
 			if !w.complete {
 				w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
-				w.dfsearch(v)
+				w.dfsearch(to)
 			}
 		})
 		// escape hatch
@@ -343,7 +346,7 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		}
 
 		w.vis.OnFinishVertex(v)
-		w.visited[v] = struct{}{}
+		w.colors[v] = black
 	}
 }
 
