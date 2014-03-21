@@ -34,9 +34,10 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 		g:   g,
 		// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this is horribly slow
 		colors: make(map[gogl.Vertex]uint),
+		target: target,
 	}
 
-	w.dfsearch(v)
+	w.dfsearch(start)
 
 	return path, nil
 }
@@ -202,11 +203,6 @@ type Visitor interface {
 	OnFinishVertex(vertex gogl.Vertex)
 }
 
-type TerminatingVisitor interface {
-	Visitor
-	Terminate() (bool, error)
-}
-
 type searchVisitor struct {
 	g     gogl.Graph
 	stack vstack
@@ -222,6 +218,15 @@ func (sv *searchVisitor) OnExamineEdge(edge gogl.Edge) {}
 
 func (sv *searchVisitor) OnFinishVertex(vertex gogl.Vertex) {
 	sv.stack.pop()
+}
+
+func (sv *searchVisitor) getPath()[] gogl.Vertex {
+	path := make([]gogl.Vertex, 0, sv.stack.length())
+	for vertex := sv.stack.pop; vertex != nil; vertex = sv.stack.pop {
+		path = append(path, vertex)
+	}
+
+	return path
 }
 
 type DFTslVisitor struct {
@@ -254,6 +259,7 @@ type walker struct {
 	vis      Visitor
 	g        gogl.Graph
 	complete bool
+	target   gogl.Vertex
 	colors   map[gogl.Vertex]uint
 	visited  map[gogl.Vertex]struct{}
 	visiting map[gogl.Vertex]struct{}
@@ -307,6 +313,12 @@ func (w *walker) dfrecursive(v gogl.Vertex) {
 }
 
 func (w *walker) dfsearch(v gogl.Vertex) {
+	if v == w.target {
+		w.complete = true
+		w.vis.OnStartVertex(v)
+		return
+	}
+
 	color, exists := w.colors[v]
 	if !exists {
 		color = white
@@ -319,9 +331,16 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		w.vis.OnStartVertex(v)
 
 		w.g.EachAdjacent(v, func(to gogl.Vertex) {
-			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
-			w.dfsearch(v)
+			// no more new visits if complete
+			if !w.complete {
+				w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
+				w.dfsearch(v)
+			}
 		})
+		// escape hatch
+		if w.complete {
+			return
+		}
 
 		w.vis.OnFinishVertex(v)
 		w.visited[v] = struct{}{}
