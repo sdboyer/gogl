@@ -2,6 +2,7 @@ package dfs
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/sdboyer/gogl"
@@ -17,8 +18,33 @@ var dfEdgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"baz", "qux"},
 }
 
-type DepthFirstSearchSuite struct {
+type containsChecker struct {
+	*CheckerInfo
 }
+
+var contains Checker = &containsChecker{
+	&CheckerInfo{Name: "Contains", Params: []string{"haystack", "needle"}},
+}
+
+func (cc *containsChecker) Check(params []interface{}, names []string) (result bool, error string) {
+	needle := reflect.ValueOf(params[1])
+	haystack := reflect.ValueOf(params[0])
+
+	if reflect.SliceOf(needle.Type()) != haystack.Type() {
+		return false, "Haystack must be a slice with the same element type as needle."
+	}
+
+	length := haystack.Len()
+	for i := 0; i < length; i++ {
+		if reflect.DeepEqual(haystack.Index(i).Interface(), needle.Interface()) {
+			return true, ""
+		}
+	}
+
+	return false, ""
+}
+
+type DepthFirstSearchSuite struct{}
 
 var _ = Suite(&DepthFirstSearchSuite{})
 
