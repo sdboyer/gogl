@@ -50,12 +50,67 @@ var _ = Suite(&DepthFirstSearchSuite{})
 
 // Basic test of outermost search functionality.
 func (s *DepthFirstSearchSuite) TestSearch(c *C) {
+	// directed
 	g := gogl.NewDirected()
 	g.AddEdges(dfEdgeSet...)
 
 	path, err := Search(g, "qux", "bar")
-	c.Assert(fmt.Sprint(path), Equals, fmt.Sprint([]gogl.Vertex{"qux", "baz", "bar"}))
+	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
 	c.Assert(err, IsNil)
+
+	// undirected
+	ug := gogl.NewUndirected()
+	ug.AddEdges(dfEdgeSet...)
+
+	path, err = Search(g, "qux", "bar")
+	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
+	c.Assert(err, IsNil)
+}
+
+func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
+	g := gogl.NewDirected()
+	g.AddEdges(dfEdgeSet...)
+
+	sources, err := FindSources(g)
+	c.Assert(fmt.Sprint(sources), Equals, fmt.Sprint([]gogl.Vertex{"foo"}))
+	c.Assert(err, IsNil)
+
+	// Ensure it finds multiple, as well
+	g.AddEdges(&gogl.BaseEdge{"quark", "baz"})
+	sources, err = FindSources(g)
+
+	possibles := [][]gogl.Vertex{
+		[]gogl.Vertex{"foo", "quark"},
+		[]gogl.Vertex{"quark", "foo"},
+	}
+	c.Assert(possibles, contains, sources)
+	c.Assert(err, IsNil)
+
+}
+
+func (s *DepthFirstSearchSuite) TestToposort(c *C) {
+	// directed
+	g := gogl.NewDirected()
+	g.AddEdges(dfEdgeSet...)
+
+	tsl, err := Toposort(g, "foo")
+	c.Assert(err, IsNil)
+	c.Assert(tsl, DeepEquals, []gogl.Vertex{"foo", "bar", "baz", "qux"})
+
+	//possibles := [][]gogl.Vertex{
+	//[]gogl.Vertex{},
+	//}
+	// undirected
+	ug := gogl.NewUndirected()
+	ug.AddEdges(dfEdgeSet...)
+
+	_, err = Toposort(g)
+	c.Assert(err, ErrorMatches, ".*do not have sources.*")
+
+	tsl, err = Toposort(g, "foo")
+	c.Assert(err, IsNil)
+	c.Assert(tsl, DeepEquals, []gogl.Vertex{"foo", "bar", "baz", "qux"})
+
 }
 
 func sliceEquals(a, b []gogl.Vertex) bool {

@@ -114,7 +114,7 @@ func buildStartQueue(g gogl.Graph, v ...gogl.Vertex) (start []gogl.Vertex, err e
 		if dg, ok := g.(gogl.DirectedGraph); ok {
 			start, err = FindSources(dg)
 		} else {
-			return nil, errors.New("Undirected graphs have no sources to find, a start point for search must be provided.")
+			return nil, errors.New("Undirected graphs do not have sources, a start point for traversal must be provided.")
 		}
 	} else {
 		start = v
