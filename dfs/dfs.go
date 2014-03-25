@@ -232,24 +232,24 @@ func (sv *searchVisitor) getPath() []gogl.Vertex {
 	return path
 }
 
-type DFTslVisitor struct {
+type TslVisitor struct {
 	g   gogl.Graph
 	tsl []gogl.Vertex
 }
 
-func (vis *DFTslVisitor) OnInitializeVertex(vertex gogl.Vertex) {}
+func (vis *TslVisitor) OnInitializeVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) OnBackEdge(vertex gogl.Vertex) {}
+func (vis *TslVisitor) OnBackEdge(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) OnStartVertex(vertex gogl.Vertex) {}
+func (vis *TslVisitor) OnStartVertex(vertex gogl.Vertex) {}
 
-func (vis *DFTslVisitor) OnExamineEdge(edge gogl.Edge) {}
+func (vis *TslVisitor) OnExamineEdge(edge gogl.Edge) {}
 
-func (vis *DFTslVisitor) OnFinishVertex(vertex gogl.Vertex) {
+func (vis *TslVisitor) OnFinishVertex(vertex gogl.Vertex) {
 	vis.tsl = append(vis.tsl, vertex)
 }
 
-func (vis *DFTslVisitor) GetTsl() []gogl.Vertex {
+func (vis *TslVisitor) GetTsl() []gogl.Vertex {
 	return vis.tsl
 }
 
@@ -287,7 +287,7 @@ func DepthFirstFromVertices(g gogl.Graph, vis Visitor, vertices ...gogl.Vertex) 
 	}
 
 	for v := stack.pop(); ; {
-		w.dfrecursive(v)
+		w.dftraverse(v)
 
 		if stack.length() == 0 {
 			break
@@ -297,21 +297,25 @@ func DepthFirstFromVertices(g gogl.Graph, vis Visitor, vertices ...gogl.Vertex) 
 	return nil
 }
 
-func (w *walker) dfrecursive(v gogl.Vertex) {
-	if _, visiting := w.visiting[v]; visiting {
+func (w *walker) dftraverse(v gogl.Vertex) {
+	color, exists := w.colors[v]
+	if !exists {
+		color = white
+	}
+
+	if color == grey {
 		w.vis.OnBackEdge(v)
-	} else if _, visited := w.visited[v]; !visited {
-		w.visiting[v] = struct{}{}
+	} else if color == white {
+		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
 		w.g.EachAdjacent(v, func(to gogl.Vertex) {
 			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
-			w.dfrecursive(to)
+			w.dftraverse(to)
 		})
 
 		w.vis.OnFinishVertex(v)
-		w.visited[v] = struct{}{}
-		delete(w.visiting, v)
+		w.colors[v] = black
 	}
 }
 
@@ -347,16 +351,5 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 
 		w.vis.OnFinishVertex(v)
 		w.colors[v] = black
-	}
-}
-
-func (w *walker) dflist() {
-	var v gogl.Vertex
-	for v = w.ll.pop(); v != nil; v = w.ll.pop() {
-		if _, visiting := w.visiting[v]; visiting {
-			w.vis.OnBackEdge(v)
-		} else {
-
-		}
 	}
 }

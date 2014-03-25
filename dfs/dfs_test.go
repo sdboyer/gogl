@@ -130,7 +130,7 @@ func TestTslGeneration(t *testing.T) {
 	g := gogl.NewDirected()
 	g.AddEdges(dfEdgeSet...)
 
-	vis := &DFTslVisitor{}
+	vis := &TslVisitor{}
 	DepthFirstFromVertices(g, vis, "foo")
 
 	if !sliceEquals(vis.GetTsl(), []gogl.Vertex{"qux", "baz", "bar", "foo"}) {
