@@ -263,38 +263,9 @@ type walker struct {
 	g        gogl.Graph
 	complete bool
 	target   gogl.Vertex
+	// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups
 	colors   map[gogl.Vertex]uint
-	visited  map[gogl.Vertex]struct{}
-	visiting map[gogl.Vertex]struct{}
 	ll       linkedlist
-}
-
-func DepthFirstFromVertices(g gogl.Graph, vis Visitor, vertices ...gogl.Vertex) error {
-	stack := vstack{}
-	for _, v := range vertices {
-		stack.push(v)
-	}
-
-	if stack.length() == 0 {
-		return errors.New("No vertices provided as start points, cannot traverse.")
-	}
-
-	w := walker{
-		vis:      vis,
-		g:        g,
-		visited:  make(map[gogl.Vertex]struct{}),
-		visiting: make(map[gogl.Vertex]struct{}),
-	}
-
-	for v := stack.pop(); ; {
-		w.dftraverse(v)
-
-		if stack.length() == 0 {
-			break
-		}
-	}
-
-	return nil
 }
 
 func (w *walker) dftraverse(v gogl.Vertex) {
