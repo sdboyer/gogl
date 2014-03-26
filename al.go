@@ -1,3 +1,9 @@
+package gogl
+
+import (
+	"sync"
+)
+
 /*
 Adjacency lists are a relatively simple graph representation. They maintain
 a list of vertices, storing information about edge membership relative to
@@ -10,14 +16,7 @@ properties.
 gogl's adjacency lists are space-efficient; in a directed graph, the memory
 cost for the entire graph G is proportional to V + E; in an undirected graph,
 it is V + 2E.
-
 */
-package gogl
-
-import (
-	"sync"
-)
-
 type al map[Vertex]map[Vertex]struct{}
 
 // Helper to not have to write struct{} everywhere.

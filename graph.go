@@ -63,6 +63,19 @@ func (e BaseWeightedEdge) Weight() int {
 
 /* Graph structures */
 
+// Graph is gogl's most basic interface: it contains only the methods that
+// *every* type of graph implements.
+//
+// Graph is intentionally underspecified: both directed and undirected graphs
+// implement it; simple graphs, multigraphs, weighted, labeled, or any
+// combination thereof.
+//
+// The semantics of some of these methods vary slightly from one graph type
+// to another, but in general, the baisc Graph methods are supplemented, not
+// superceded, by the methods in more specific interfaces.
+//
+// Graph is a purely read oriented interface; the various Mutable*Graph
+// interfaces contain the methods for writing.
 type Graph interface {
 	EachVertex(f func(vertex Vertex))
 	EachEdge(f func(edge Edge))
@@ -75,6 +88,17 @@ type Graph interface {
 	OutDegree(vertex Vertex) (int, bool)
 }
 
+// DirectedGraph describes a Graph all of whose edges are directed.
+//
+// Implementing DirectedGraph is the only unambiguous signal gogl provides
+// that a graph's edges are directed.
+type DirectedGraph interface {
+	Graph
+	Transpose() DirectedGraph
+}
+
+// MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
+// that can be modified freely by adding or removing vertices or edges.
 type MutableGraph interface {
 	Graph
 	EnsureVertex(vertices ...Vertex)
@@ -90,17 +114,29 @@ type SimpleGraph interface {
 	Density() float64
 }
 
-type DirectedGraph interface {
-	Graph
-	Transpose() DirectedGraph
-}
-
+// A weighted graph is a graph subtype where the edges have a numeric weight;
+// as described by the WeightedEdge interface, this weight is a signed int.
+//
+// WeightedGraphs have both the HasEdge() and HasWeightedEdge() methods.
+// Correct implementations should treat the difference as a matter of
+// strictness:
+//
+// HasEdge() should return true as long as an edge exists
+// connecting the two given vertices (respecting directed or undirected as
+// appropriate), regardless of its weight.
+//
+// HasWeightedEdge() should return true iff an edge exists connecting the
+// two given vertices (respecting directed or undirected as appropriate),
+// AND if the edge weights are the same.
 type WeightedGraph interface {
 	Graph
 	HasWeightedEdge(e WeightedEdge) bool
 	EachWeightedEdge(f func(edge WeightedEdge))
 }
 
+// MutableWeightedGraph is the mutable version of a weighted graph. Its
+// AddEdges() method is incompatible with MutableGraph, guaranteeing
+// only weighted edges can be present in the graph.
 type MutableWeightedGraph interface {
 	WeightedGraph
 	EnsureVertex(vertices ...Vertex)
