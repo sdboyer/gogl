@@ -85,7 +85,6 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	}
 	c.Assert(possibles, contains, sources)
 	c.Assert(err, IsNil)
-
 }
 
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
@@ -95,20 +94,16 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 
 	tsl, err := Toposort(g, "foo")
 	c.Assert(err, IsNil)
-	c.Assert(tsl, DeepEquals, []gogl.Vertex{"foo", "bar", "baz", "qux"})
+	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 
-	//possibles := [][]gogl.Vertex{
-	//[]gogl.Vertex{},
-	//}
 	// undirected
 	ug := gogl.NewUndirected()
 	ug.AddEdges(dfEdgeSet...)
 
-	_, err = Toposort(g)
+	_, err = Toposort(ug)
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
 
-	tsl, err = Toposort(g, "foo")
+	tsl, err = Toposort(ug, "foo")
 	c.Assert(err, IsNil)
-	c.Assert(tsl, DeepEquals, []gogl.Vertex{"foo", "bar", "baz", "qux"})
-
+	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 }

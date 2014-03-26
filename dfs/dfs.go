@@ -14,7 +14,7 @@ const (
 	black
 )
 
-// Performs a depth-first search on the provided graph for the given target vertex, beginning
+// Performs a depth-first search for the given target vertex in the provided graph, beginning
 // from the given start vertex.
 //
 // A slice of vertices is returned, identifying the path from the start to the target vertex.
@@ -30,9 +30,8 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 	visitor := &searchVisitor{}
 
 	w := walker{
-		vis: visitor,
-		g:   g,
-		// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups
+		vis:    visitor,
+		g:      g,
 		colors: make(map[gogl.Vertex]uint),
 		target: target,
 	}
@@ -42,7 +41,7 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 	return visitor.getPath(), nil
 }
 
-// Performs a depth-first search on the provided graph for the given vertex, using the vertices
+// Performs a depth-first search for the given target vertex in the provided graph, using the vertices
 // provided to the third variadic parameter as starting points. For each given start vertex,
 // the search proceeds in a parallel goroutine until a path to the target vertex is found.
 // The resulting path is then sent back through the channel.
@@ -75,13 +74,39 @@ type searchPath struct {
 // If no starting vertices are provided, then a list of source vertices is built via FindSources(),
 // and that set is used as the starting point. Because FindSources() requires a DirectedGraph,
 // an error will be returned if a non-directed graph is provided without any start vertices.
-func Toposort(g gogl.Graph, start ...gogl.Vertex) (tsl []gogl.Vertex, err error) {
-	start, err = buildStartQueue(g)
+func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
+	start, err := buildStartQueue(g, start...)
 	if err != nil {
 		return nil, err
 	}
 
-	return
+	stack := vstack{}
+	for _, v := range start {
+		stack.push(v)
+	}
+
+	if stack.length() == 0 {
+		return nil, errors.New("No vertices provided as start points, cannot traverse.")
+	}
+
+	// Set the tsl capacity to the order of the graph. May be bigger than we need, but def not smaller
+	visitor := &TslVisitor{tsl: make([]gogl.Vertex, 0, g.Order())}
+
+	w := walker{
+		vis:    visitor,
+		g:      g,
+		colors: make(map[gogl.Vertex]uint),
+	}
+
+	for v := stack.pop(); ; {
+		w.dftraverse(v)
+
+		if stack.length() == 0 {
+			break
+		}
+	}
+
+	return visitor.tsl, nil
 }
 
 // Traverses the given graph in a depth-first manner, using the provided visitor.
@@ -235,11 +260,14 @@ func (sv *searchVisitor) getPath() []gogl.Vertex {
 type TslVisitor struct {
 	g   gogl.Graph
 	tsl []gogl.Vertex
+	err error
 }
 
 func (vis *TslVisitor) OnInitializeVertex(vertex gogl.Vertex) {}
 
-func (vis *TslVisitor) OnBackEdge(vertex gogl.Vertex) {}
+func (vis *TslVisitor) OnBackEdge(vertex gogl.Vertex) {
+	vis.err = errors.New("Cycle detected in graph")
+}
 
 func (vis *TslVisitor) OnStartVertex(vertex gogl.Vertex) {}
 
@@ -249,8 +277,8 @@ func (vis *TslVisitor) OnFinishVertex(vertex gogl.Vertex) {
 	vis.tsl = append(vis.tsl, vertex)
 }
 
-func (vis *TslVisitor) GetTsl() []gogl.Vertex {
-	return vis.tsl
+func (vis *TslVisitor) GetTsl() ([]gogl.Vertex, error) {
+	return vis.tsl, vis.err
 }
 
 type EdgeFilterer interface {
@@ -264,8 +292,8 @@ type walker struct {
 	complete bool
 	target   gogl.Vertex
 	// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups
-	colors   map[gogl.Vertex]uint
-	ll       linkedlist
+	colors map[gogl.Vertex]uint
+	ll     linkedlist
 }
 
 func (w *walker) dftraverse(v gogl.Vertex) {
