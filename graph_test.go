@@ -326,6 +326,24 @@ type MutableGraphSuite struct {
 	Directed bool
 }
 
+func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Factory.CreateMutableGraph()
+
+	g.EnsureVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.RemoveVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.AddEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+
+	g.RemoveEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+}
+
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
 	g := s.Factory.CreateMutableGraph()
 
@@ -454,6 +472,24 @@ type MutableWeightedGraphSuite struct {
 	Graph    MutableWeightedGraph
 	Factory  MutableWeightedGraphCreator
 	Directed bool
+}
+
+func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Factory.CreateMutableWeightedGraph()
+
+	g.EnsureVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.RemoveVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.AddEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+
+	g.RemoveEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
 }
 
 func (s *MutableWeightedGraphSuite) TestEnsureVertex(c *C) {
