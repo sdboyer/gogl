@@ -185,6 +185,10 @@ func (q *vqueue) push(v gogl.Vertex) {
 }
 
 func (q *vqueue) pop() gogl.Vertex {
+	if q.front == nil {
+		return nil
+	}
+
 	ret := q.front
 	q.front = q.front.next
 
@@ -210,6 +214,10 @@ func (s *vstack) push(v gogl.Vertex) {
 }
 
 func (s *vstack) pop() gogl.Vertex {
+	if s.top == nil {
+		return nil
+	}
+
 	ret := s.top
 	s.top = s.top.next
 
@@ -262,8 +270,6 @@ type TslVisitor struct {
 	tsl []gogl.Vertex
 	err error
 }
-
-func (vis *TslVisitor) OnInitializeVertex(vertex gogl.Vertex) {}
 
 func (vis *TslVisitor) OnBackEdge(vertex gogl.Vertex) {
 	vis.err = errors.New("Cycle detected in graph")

@@ -107,3 +107,39 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 }
+
+type LinkedListSuite struct{}
+
+var _ = Suite(&LinkedListSuite{})
+
+func (s *LinkedListSuite) TestStack(c *C) {
+	stack := vstack{}
+
+	c.Assert(stack.length(), Equals, 0)
+
+	stack.push("foo")
+	c.Assert(stack.length(), Equals, 1)
+
+	stack.push("bar")
+	c.Assert(stack.length(), Equals, 2)
+	c.Assert(stack.pop(), Equals, "bar")
+	c.Assert(stack.pop(), Equals, "foo")
+	c.Assert(stack.pop(), IsNil)
+	c.Assert(stack.length(), Equals, 0)
+}
+
+func (s *LinkedListSuite) TestQueue(c *C) {
+	queue := vqueue{}
+
+	c.Assert(queue.length(), Equals, 0)
+
+	queue.push("foo")
+	c.Assert(queue.length(), Equals, 1)
+
+	queue.push("bar")
+	c.Assert(queue.length(), Equals, 2)
+	c.Assert(queue.pop(), Equals, "foo")
+	c.Assert(queue.pop(), Equals, "bar")
+	c.Assert(queue.pop(), IsNil)
+	c.Assert(queue.length(), Equals, 0)
+}
