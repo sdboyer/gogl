@@ -92,25 +92,33 @@ func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 	// Set the tsl capacity to the order of the graph. May be bigger than we need, but def not smaller
 	visitor := &TslVisitor{tsl: make([]gogl.Vertex, 0, g.Order())}
 
-	w := walker{
+	w := &walker{
 		vis:    visitor,
 		g:      g,
 		colors: make(map[gogl.Vertex]uint),
 	}
 
+	var traverser func(*walker, gogl.Vertex)
+	if _, ok := g.(gogl.DirectedGraph); ok {
+		traverser = (*walker).dftraverse
+	} else {
+		traverser = (*walker).dfutraverse
+	}
+
 	for v := stack.pop(); ; {
-		w.dftraverse(v)
+		traverser(w, v)
 
 		if stack.length() == 0 {
 			break
 		}
 	}
 
-	return visitor.tsl, nil
+	return visitor.GetTsl()
 }
 
-// Traverses the given graph in a depth-first manner, using the provided visitor.
-func Traverse(g gogl.Graph, visitor Visitor) (Visitor, error) {
+// Traverses the given graph in a depth-first manner, using the given visitor
+// and starting from the given vertices.
+func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, error) {
 
 	return visitor, nil
 }
@@ -353,6 +361,21 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		if w.complete {
 			return
 		}
+
+		w.vis.OnFinishVertex(v)
+		w.colors[v] = black
+	}
+}
+
+func (w *walker) dfutraverse(v gogl.Vertex) {
+	if _, exists := w.colors[v]; !exists {
+		w.colors[v] = grey
+		w.vis.OnStartVertex(v)
+
+		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
+			w.dfutraverse(to)
+		})
 
 		w.vis.OnFinishVertex(v)
 		w.colors[v] = black
