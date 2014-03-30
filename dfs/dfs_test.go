@@ -52,7 +52,16 @@ var _ = Suite(&DepthFirstSearchSuite{})
 func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	// directed
 	g := gogl.NewDirected()
-	g.AddEdges(dfEdgeSet...)
+
+	// must demonstrate that non-productive search paths are not included
+	edgeset := []gogl.Edge{
+		&gogl.BaseEdge{"foo", "bar"},
+		&gogl.BaseEdge{"bar", "baz"},
+		&gogl.BaseEdge{"bar", "quark"},
+		&gogl.BaseEdge{"baz", "qux"},
+	}
+
+	g.AddEdges(edgeset...)
 
 	path, err := Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
@@ -60,7 +69,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 
 	// undirected
 	ug := gogl.NewUndirected()
-	ug.AddEdges(dfEdgeSet...)
+	ug.AddEdges(edgeset...)
 
 	path, err = Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
