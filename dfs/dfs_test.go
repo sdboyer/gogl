@@ -76,6 +76,16 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	c.Assert(err, IsNil)
 }
 
+func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
+	g := gogl.NewDirected()
+	g.EnsureVertex("foo")
+
+	_, err := Search(g, "foo", "bar")
+	c.Assert(err, ErrorMatches, "Start vertex.*")
+	_, err = Search(g, "bar", "foo")
+	c.Assert(err, ErrorMatches, "Target vertex.*")
+}
+
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	g := gogl.NewDirected()
 	g.AddEdges(dfEdgeSet...)
