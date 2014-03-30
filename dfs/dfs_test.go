@@ -115,6 +115,11 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 
+	// add a cycle, ensure error comes back
+	g.AddEdges(gogl.BaseEdge{"bar", "foo"})
+	tsl, err = Toposort(g, "foo")
+	c.Assert(err, ErrorMatches, "Cycle detected in graph")
+
 	// undirected
 	ug := gogl.NewUndirected()
 	ug.AddEdges(dfEdgeSet...)
@@ -123,6 +128,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
 
 	tsl, err = Toposort(ug, "foo")
+	// no such thing as a 'cycle' (of that kind) in undirected graphs
 	c.Assert(err, IsNil)
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 }
