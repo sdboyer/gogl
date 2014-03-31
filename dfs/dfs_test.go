@@ -55,7 +55,27 @@ func (cc *containsChecker) Check(params []interface{}, names []string) (result b
 	needle := reflect.ValueOf(params[1])
 	haystack := reflect.ValueOf(params[0])
 
+	switch haystack.Kind() {
+	default:
+		return false, "Haystack must be a slice or array."
+	case reflect.Slice, reflect.Array:
+	}
+
+	if haystack.Len() == 0 {
+		return false, "Haystack is empty."
+	}
+
+	typealign := true
 	if reflect.SliceOf(needle.Type()) != haystack.Type() {
+		if haystack.Index(0).Kind() == reflect.Interface &&
+			haystack.Index(0).Elem().Type() == needle.Type() {
+			typealign = true
+		} else {
+			typealign = false
+		}
+	}
+
+	if !typealign {
 		return false, "Haystack must be a slice with the same element type as needle."
 	}
 
@@ -66,7 +86,7 @@ func (cc *containsChecker) Check(params []interface{}, names []string) (result b
 		}
 	}
 
-	return false, ""
+	return false, "Item not found in collection."
 }
 
 type DepthFirstSearchSuite struct{}
