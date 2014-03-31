@@ -178,6 +178,78 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 }
 
+func (s *DepthFirstSearchSuite) TestTraverse(c *C) {
+	g := gogl.NewDirected()
+	g.AddEdges(dfEdgeSet...)
+}
+
+// This is a bit wackyhacky, but works well enough
+var _ = Suite(&TestVisitor{})
+
+type TestVisitor struct {
+	c           *C
+	vertices    []string
+	colors      map[string]int
+	found_edges []gogl.Edge
+}
+
+func (v *TestVisitor) OnBackEdge(vertex gogl.Vertex) {
+	vtx := vertex.(string)
+	v.c.Assert(v.colors[vtx], Equals, grey)
+}
+
+func (v *TestVisitor) OnStartVertex(vertex gogl.Vertex) {
+	vtx := vertex.(string)
+	v.c.Assert(v.colors[vtx], Equals, white)
+	v.colors[vtx] = grey
+}
+
+func (v *TestVisitor) OnExamineEdge(edge gogl.Edge) {
+	v.c.Assert(v.found_edges, not(contains), edge)
+	v.found_edges = append(v.found_edges, edge)
+}
+
+func (v *TestVisitor) OnFinishVertex(vertex gogl.Vertex) {
+	vtx := vertex.(string)
+	v.c.Assert(v.colors[vtx], Equals, grey)
+	v.colors[vtx] = black
+}
+
+func (v *TestVisitor) TestTraverse(c *C) {
+	v.c = c
+	g := gogl.NewDirected()
+
+	edgeset := []gogl.Edge{
+		gogl.BaseEdge{"foo", "bar"},
+		gogl.BaseEdge{"bar", "baz"},
+		gogl.BaseEdge{"bar", "foo"},
+		gogl.BaseEdge{"bar", "quark"},
+		gogl.BaseEdge{"baz", "qux"},
+	}
+	g.AddEdges(edgeset...)
+
+	v.vertices = []string{"foo", "bar", "baz", "qux", "quark"}
+
+	v.colors = make(map[string]int)
+	for _, vtx := range v.vertices {
+		v.colors[vtx] = white
+	}
+
+	v.found_edges = make([]gogl.Edge, 0)
+
+	Traverse(g, v, "foo")
+
+	for vertex, color := range v.colors {
+		c.Log("Checking that vertex '", vertex, "' has been finished")
+		c.Assert(color, Equals, black)
+	}
+
+	for _, e := range edgeset {
+		c.Assert(v.found_edges, contains, e)
+	}
+	c.Assert(len(v.found_edges), Equals, len(edgeset))
+}
+
 type LinkedListSuite struct{}
 
 var _ = Suite(&LinkedListSuite{})

@@ -119,6 +119,29 @@ func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 // Traverses the given graph in a depth-first manner, using the given visitor
 // and starting from the given vertices.
 func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, error) {
+	start, err := buildStartQueue(g, start...)
+	if err != nil {
+		return nil, err
+	}
+
+	stack := vstack{}
+	for _, v := range start {
+		stack.push(v)
+	}
+
+	w := &walker{
+		vis:    visitor,
+		g:      g,
+		colors: make(map[gogl.Vertex]uint),
+	}
+
+	for v := stack.pop(); ; {
+		w.dftraverse(v)
+
+		if stack.length() == 0 {
+			break
+		}
+	}
 
 	return visitor, nil
 }
