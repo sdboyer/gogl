@@ -18,6 +18,31 @@ var dfEdgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"baz", "qux"},
 }
 
+func not(checker Checker) Checker {
+	return &notChecker{checker}
+}
+
+type notChecker struct {
+	sub Checker
+}
+
+func (checker *notChecker) Info() *CheckerInfo {
+	info := *checker.sub.Info()
+	info.Name = "Not(" + info.Name + ")"
+	return &info
+}
+
+func (checker *notChecker) Check(params []interface{}, names []string) (result bool, error string) {
+	result, error = checker.sub.Check(params, names)
+	result = !result
+	if result {
+		return result, ""
+	} else {
+		info := *checker.sub.Info()
+		return result, info.Name + " succeeded."
+	}
+}
+
 type containsChecker struct {
 	*CheckerInfo
 }
