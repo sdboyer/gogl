@@ -18,31 +18,6 @@ var dfEdgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"baz", "qux"},
 }
 
-func not(checker Checker) Checker {
-	return &notChecker{checker}
-}
-
-type notChecker struct {
-	sub Checker
-}
-
-func (checker *notChecker) Info() *CheckerInfo {
-	info := *checker.sub.Info()
-	info.Name = "Not(" + info.Name + ")"
-	return &info
-}
-
-func (checker *notChecker) Check(params []interface{}, names []string) (result bool, error string) {
-	result, error = checker.sub.Check(params, names)
-	result = !result
-	if result {
-		return result, ""
-	} else {
-		info := *checker.sub.Info()
-		return result, info.Name + " succeeded."
-	}
-}
-
 type containsChecker struct {
 	*CheckerInfo
 }
@@ -61,32 +36,29 @@ func (cc *containsChecker) Check(params []interface{}, names []string) (result b
 	case reflect.Slice, reflect.Array:
 	}
 
-	if haystack.Len() == 0 {
-		return false, "Haystack is empty."
+	haylen := haystack.Len()
+	if haylen == 0 {
+		// have to check this before type because can't check type reliably without a value
+		return false, ""
 	}
 
 	typealign := true
 	if reflect.SliceOf(needle.Type()) != haystack.Type() {
-		if haystack.Index(0).Kind() == reflect.Interface &&
-			haystack.Index(0).Elem().Type() == needle.Type() {
-			typealign = true
-		} else {
-			typealign = false
-		}
+		typealign = haystack.Index(0).Kind() == reflect.Interface &&
+			haystack.Index(0).Elem().Type() == needle.Type()
 	}
 
 	if !typealign {
 		return false, "Haystack must be a slice with the same element type as needle."
 	}
 
-	length := haystack.Len()
-	for i := 0; i < length; i++ {
+	for i := 0; i < haylen; i++ {
 		if reflect.DeepEqual(haystack.Index(i).Interface(), needle.Interface()) {
 			return true, ""
 		}
 	}
 
-	return false, "Item not found in collection."
+	return false, ""
 }
 
 type DepthFirstSearchSuite struct{}
@@ -205,7 +177,7 @@ func (v *TestVisitor) OnStartVertex(vertex gogl.Vertex) {
 }
 
 func (v *TestVisitor) OnExamineEdge(edge gogl.Edge) {
-	v.c.Assert(v.found_edges, not(contains), edge)
+	v.c.Assert(v.found_edges, Not(contains), edge)
 	v.found_edges = append(v.found_edges, edge)
 }
 
