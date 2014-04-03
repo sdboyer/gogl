@@ -32,7 +32,7 @@ func (e BaseEdge) swap() Edge {
 // determine whether or not it complies with not just the interfaces, but also
 // the graph semantics defined by gogl.
 func SetUpSimpleGraphTests(g Graph) bool {
-	gf := &GraphFactory{g}
+	gf := &GraphTestFactory{g}
 	var directed bool
 
 	if dg, ok := g.(DirectedGraph); ok {
@@ -68,17 +68,17 @@ var _ = SetUpSimpleGraphTests(NewUndirected())
 var _ = SetUpSimpleGraphTests(NewWeightedDirected())
 var _ = SetUpSimpleGraphTests(NewWeightedUndirected())
 
-/* The GraphFactory - this generates graph instances for the tests. */
+/* The GraphTestFactory - this generates graph instances for the tests. */
 
-type GraphFactory struct {
+type GraphTestFactory struct {
 	sourceGraph Graph
 }
 
-func (gf *GraphFactory) create() interface{} {
+func (gf *GraphTestFactory) create() interface{} {
 	return reflect.New(reflect.Indirect(reflect.ValueOf(gf.sourceGraph)).Type()).Interface()
 }
 
-func (gf *GraphFactory) graphFromEdges(edges ...Edge) Graph {
+func (gf *GraphTestFactory) graphFromEdges(edges ...Edge) Graph {
 	// For now just cheat and work through a Mutable interface
 	base := gf.create()
 
@@ -98,31 +98,31 @@ func (gf *GraphFactory) graphFromEdges(edges ...Edge) Graph {
 
 }
 
-func (gf *GraphFactory) CreateEmptyGraph() Graph {
+func (gf *GraphTestFactory) CreateEmptyGraph() Graph {
 	return gf.create().(Graph)
 }
 
-func (gf *GraphFactory) CreateGraphFromEdges(edges ...Edge) Graph {
+func (gf *GraphTestFactory) CreateGraphFromEdges(edges ...Edge) Graph {
 	return gf.graphFromEdges(edges...)
 }
 
-func (gf *GraphFactory) CreateDirectedGraphFromEdges(edges ...Edge) DirectedGraph {
+func (gf *GraphTestFactory) CreateDirectedGraphFromEdges(edges ...Edge) DirectedGraph {
 	return gf.graphFromEdges(edges...).(DirectedGraph)
 }
 
-func (gf *GraphFactory) CreateEmptySimpleGraph() SimpleGraph {
+func (gf *GraphTestFactory) CreateEmptySimpleGraph() SimpleGraph {
 	return gf.create().(SimpleGraph)
 }
 
-func (gf *GraphFactory) CreateSimpleGraphFromEdges(edges ...Edge) SimpleGraph {
+func (gf *GraphTestFactory) CreateSimpleGraphFromEdges(edges ...Edge) SimpleGraph {
 	return gf.graphFromEdges(edges...).(SimpleGraph)
 }
 
-func (gf *GraphFactory) CreateMutableGraph() MutableGraph {
+func (gf *GraphTestFactory) CreateMutableGraph() MutableGraph {
 	return gf.create().(MutableGraph)
 }
 
-func (gf *GraphFactory) CreateWeightedGraphFromEdges(edges ...WeightedEdge) WeightedGraph {
+func (gf *GraphTestFactory) CreateWeightedGraphFromEdges(edges ...WeightedEdge) WeightedGraph {
 	base := gf.create()
 	if mwg, ok := base.(MutableWeightedGraph); ok {
 		mwg.AddEdges(edges...)
@@ -132,11 +132,11 @@ func (gf *GraphFactory) CreateWeightedGraphFromEdges(edges ...WeightedEdge) Weig
 	panic("Until GraphInitializers are made to work properly, all graphs have to be mutable for this testing harness to work.")
 }
 
-func (gf *GraphFactory) CreateEmptyWeightedGraph() WeightedGraph {
+func (gf *GraphTestFactory) CreateEmptyWeightedGraph() WeightedGraph {
 	return gf.create().(WeightedGraph)
 }
 
-func (gf *GraphFactory) CreateMutableWeightedGraph() MutableWeightedGraph {
+func (gf *GraphTestFactory) CreateMutableWeightedGraph() MutableWeightedGraph {
 	return gf.create().(MutableWeightedGraph)
 }
 

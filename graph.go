@@ -1,5 +1,9 @@
 package gogl
 
+import (
+	"fmt"
+)
+
 /* Vertex structures */
 
 // As a rule, gogl tries to place as low a requirement on its vertices as
@@ -71,7 +75,7 @@ func (e BaseWeightedEdge) Weight() int {
 // combination thereof.
 //
 // The semantics of some of these methods vary slightly from one graph type
-// to another, but in general, the baisc Graph methods are supplemented, not
+// to another, but in general, the basic Graph methods are supplemented, not
 // superceded, by the methods in more specific interfaces.
 //
 // Graph is a purely read oriented interface; the various Mutable*Graph
@@ -143,4 +147,53 @@ type MutableWeightedGraph interface {
 	RemoveVertex(vertices ...Vertex)
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
+}
+
+/* Graph creation */
+
+type GraphFactory func() interface{}
+
+var Graphs = make(map[string]GraphFactory, 0)
+
+// Creates a new graph instance.
+//
+// You will need to type assert the returned graph to the interface appropriate
+// for your use case: Graph, DirectedGraph, MutableGraph, WeightedGraph, etc.
+func New(name string) (graph interface{}, err error) {
+	if _, exists := Graphs[name]; !exists {
+		return nil, fmt.Errorf("No graph is registered with the name %q", name)
+	}
+
+	return Graphs[name](), nil
+}
+
+func RegisterGraph(name string, factory GraphFactory) error {
+	if _, exists := Graphs[name]; exists {
+		return fmt.Errorf("A graph is already registered with the name %q", name)
+	}
+
+	g := factory()
+
+	if _, ok := g.(Graph); ok {
+		return nil
+	} else if _, ok := g.(WeightedGraph); ok {
+		return nil
+	}
+
+	return fmt.Errorf("Value returned from factory does not implement a known Graph interface")
+}
+
+func init() {
+	RegisterGraph("basic.directed", func() interface{} {
+		return NewDirected()
+	})
+	RegisterGraph("basic.undirected", func() interface{} {
+		return NewUndirected()
+	})
+	RegisterGraph("weighted.directed", func() interface{} {
+		return NewWeightedDirected()
+	})
+	RegisterGraph("weighted.undirected", func() interface{} {
+		return NewWeightedUndirected()
+	})
 }
