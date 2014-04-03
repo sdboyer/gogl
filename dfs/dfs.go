@@ -318,11 +318,6 @@ func (vis *TslVisitor) GetTsl() ([]gogl.Vertex, error) {
 	return vis.tsl, vis.err
 }
 
-type EdgeFilterer interface {
-	FilterEdge(edge gogl.Edge) bool
-	FilterEdges(edges []gogl.Edge) []gogl.Edge
-}
-
 type walker struct {
 	vis      Visitor
 	g        gogl.Graph
