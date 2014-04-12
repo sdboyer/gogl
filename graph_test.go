@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/fatih/set"
+	"gopkg.in/fatih/set.v0"
 	. "launchpad.net/gocheck"
 )
 

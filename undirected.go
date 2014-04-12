@@ -1,7 +1,7 @@
 package gogl
 
 import (
-	"github.com/fatih/set"
+	"gopkg.in/fatih/set.v0"
 )
 
 type Undirected struct {

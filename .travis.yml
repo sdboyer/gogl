@@ -4,5 +4,5 @@ go:
   - tip
 install:
   - go get -t launchpad.net/gocheck
-  - go get github.com/fatih/set
+  - go get gopkg.in/fatih/set.v0
 script: go test -v ./... -gocheck.v

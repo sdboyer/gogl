@@ -4,8 +4,8 @@ package dfs
 import (
 	"errors"
 
-	"github.com/fatih/set"
 	"github.com/sdboyer/gogl"
+	"gopkg.in/fatih/set.v0"
 )
 
 const (

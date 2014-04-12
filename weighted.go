@@ -3,7 +3,7 @@ package gogl
 import (
 	"sync"
 
-	"github.com/fatih/set"
+	"gopkg.in/fatih/set.v0"
 )
 
 // This is implemented as an adjacency list, because those are simple.
