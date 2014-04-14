@@ -472,9 +472,9 @@ func (g *labeledUndirected) addEdges(edges ...LabeledEdge) {
 		g.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			w := edge.Label()
-			g.list[edge.Source()][edge.Target()] = w
-			g.list[edge.Target()][edge.Source()] = w
+			l := edge.Label()
+			g.list[edge.Source()][edge.Target()] = l
+			g.list[edge.Target()][edge.Source()] = l
 			g.size++
 		}
 	}
