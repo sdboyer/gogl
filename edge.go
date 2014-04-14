@@ -32,6 +32,12 @@ type LabeledEdge interface {
 	Label() string
 }
 
+// A DataEdge is an Edge that also carries some arbitrary data.
+type DataEdge interface {
+	Edge
+	Data() interface{}
+}
+
 // BaseEdge is a struct used to represent edges and meet the Edge interface
 // requirements. It uses the standard graph notation, (U,V), for its
 // contained vertex pair.
@@ -70,4 +76,14 @@ type BaseLabeledEdge struct {
 
 func (e BaseLabeledEdge) Label() string {
 	return e.L
+}
+
+// BaseDataEdge extends BaseEdge with arbitrary data.
+type BaseDataEdge struct {
+	BaseEdge
+	D interface{}
+}
+
+func (e BaseDataEdge) Data() interface{} {
+	return e.D
 }
