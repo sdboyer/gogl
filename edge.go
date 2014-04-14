@@ -20,6 +20,11 @@ type WeightedEdge interface {
 	Weight() int
 }
 
+type LabeledEdge interface {
+	Edge
+	Label() string
+}
+
 // BaseEdge is a struct used internally to represent edges and meet the Edge
 // interface requirements. It uses the standard notation, (u,v), for vertex
 // pairs in an edge.
@@ -47,4 +52,13 @@ type BaseWeightedEdge struct {
 
 func (e BaseWeightedEdge) Weight() int {
 	return e.W
+}
+
+type BaseLabeledEdge struct {
+	BaseEdge
+	L string
+}
+
+func (e BaseLabeledEdge) Label() string {
+	return e.L
 }

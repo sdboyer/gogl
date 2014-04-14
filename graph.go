@@ -71,8 +71,7 @@ type SimpleGraph interface {
 // as described by the WeightedEdge interface, this weight is a signed int.
 //
 // WeightedGraphs have both the HasEdge() and HasWeightedEdge() methods.
-// Correct implementations should treat the difference as a matter of
-// strictness:
+// Correct implementations should treat the difference as a matter of strictness:
 //
 // HasEdge() should return true as long as an edge exists
 // connecting the two given vertices (respecting directed or undirected as
@@ -96,6 +95,36 @@ type MutableWeightedGraph interface {
 	RemoveVertex(vertices ...Vertex)
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A labeled graph is a graph subtype where the edges have an identifier;
+// as described by the LabeledEdge interface, this identifier is a string.
+//
+// LabeledGraphs have both the HasEdge() and HasLabeledEdge() methods.
+// Correct implementations should treat the difference as a matter of strictness:
+//
+// HasEdge() should return true as long as an edge exists
+// connecting the two given vertices (respecting directed or undirected as
+// appropriate), regardless of its label.
+//
+// HasLabeledEdge() should return true iff an edge exists connecting the
+// two given vertices (respecting directed or undirected as appropriate),
+// AND if the edge labels are the same.
+type LabeledGraph interface {
+	Graph
+	HasLabeledEdge(e LabeledEdge) bool
+	EachLabeledEdge(f func(edge LabeledEdge))
+}
+
+// LabeledWeightedGraph is the mutable version of a labeled graph. Its
+// AddEdges() method is incompatible with MutableGraph, guaranteeing
+// only weighted edges can be present in the graph.
+type MutableLabeledGraph interface {
+	LabeledGraph
+	EnsureVertex(vertices ...Vertex)
+	RemoveVertex(vertices ...Vertex)
+	AddEdges(edges ...LabeledEdge)
+	RemoveEdges(edges ...LabeledEdge)
 }
 
 /* Graph creation */
