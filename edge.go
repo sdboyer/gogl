@@ -9,25 +9,32 @@ package gogl
 // the varying constraints and implementation needs, but still achieve optimal
 // performance given those constraints.
 
+// The Edge interface describes a connection between two vertices.
+//
+// Edge does not have an intrinsic opinion about directionality; gogl treats
+// that as a property of the overall Graph object in which the Edge appears
+// rather than a property of any individual Edge.
 type Edge interface {
 	Source() Vertex
 	Target() Vertex
 	Both() (Vertex, Vertex)
 }
 
+// A WeightedEdge is an Edge that also has a numerical weight.
 type WeightedEdge interface {
 	Edge
 	Weight() int
 }
 
+// A LabeledEdge is an Edge that also has a string label.
 type LabeledEdge interface {
 	Edge
 	Label() string
 }
 
-// BaseEdge is a struct used internally to represent edges and meet the Edge
-// interface requirements. It uses the standard notation, (u,v), for vertex
-// pairs in an edge.
+// BaseEdge is a struct used to represent edges and meet the Edge interface
+// requirements. It uses the standard graph notation, (U,V), for its
+// contained vertex pair.
 type BaseEdge struct {
 	U Vertex
 	V Vertex
@@ -45,6 +52,7 @@ func (e BaseEdge) Both() (Vertex, Vertex) {
 	return e.U, e.V
 }
 
+// BaseWeightedEdge extends BaseEdge with weight data.
 type BaseWeightedEdge struct {
 	BaseEdge
 	W int
@@ -54,6 +62,7 @@ func (e BaseWeightedEdge) Weight() int {
 	return e.W
 }
 
+// BaseLabeledEdge extends BaseEdge with label data.
 type BaseLabeledEdge struct {
 	BaseEdge
 	L string
