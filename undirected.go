@@ -5,7 +5,7 @@ import (
 )
 
 type Undirected struct {
-	adjacencyList
+	al_basic_mut
 }
 
 func NewUndirected() *Undirected {

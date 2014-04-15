@@ -1,10 +1,10 @@
 package gogl
 
 type Directed struct {
-	adjacencyList
+	al_basic_mut
 }
 
-// Composite literal to create a new Directed.
+// Creates a new mutable, directed graph.
 func NewDirected() *Directed {
 	list := &Directed{}
 	// Cannot assign to promoted fields in a composite literals.
@@ -160,10 +160,129 @@ func (g *Directed) RemoveEdges(edges ...Edge) {
 	}
 }
 
+// Returns a graph with the same vertex and edge set, but with the
+// directionality of all its edges reversed.
+//
+// This implementation returns a new graph object (doubling memory use),
+// but not all implementations do so.
 func (g *Directed) Transpose() DirectedGraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
+	g2 := &Directed{}
+	g2.list = make(map[Vertex]map[Vertex]struct{})
+
+	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
+	startcap := int(g.Size() / g.Order())
+
+	for source, adjacent := range g.list {
+		if !g2.hasVertex(source) {
+			g2.list[source] = make(map[Vertex]struct{}, startcap+1)
+		}
+		for target, _ := range adjacent {
+			if !g2.hasVertex(target) {
+				g2.list[target] = make(map[Vertex]struct{}, startcap+1)
+			}
+			g2.list[target][source] = keyExists
+		}
+	}
+
+	return g2
+}
+
+/* ImmutableDirected implementation */
+
+type immutableDirected struct {
+	al_basic_immut
+}
+
+// Creates a new mutable, directed graph.
+func NewImmutableDirected(g DirectedGraph) DirectedGraph {
+	list := &immutableDirected{}
+	// Cannot assign to promoted fields in a composite literals.
+	list.list = make(map[Vertex]map[Vertex]struct{})
+
+	g.EachEdge(func(edge Edge) {
+		list.ensureVertex(edge.Source(), edge.Target())
+
+		if _, exists := list.list[edge.Source()][edge.Target()]; !exists {
+			list.list[edge.Source()][edge.Target()] = keyExists
+			list.size++
+		}
+	})
+
+	if list.Order() != g.Order() {
+		g.EachVertex(func(vertex Vertex) {
+			list.ensureVertex(vertex)
+		})
+	}
+
+	// Type assertions to ensure interfaces are met
+	var _ Graph = list
+	var _ SimpleGraph = list
+	var _ DirectedGraph = list
+
+	return list
+}
+
+// Traverses the set of edges in the graph, passing each edge to the
+// provided closure.
+func (g *immutableDirected) EachEdge(f func(edge Edge)) {
+	for source, adjacent := range g.list {
+		for target, _ := range adjacent {
+			f(BaseEdge{U: source, V: target})
+		}
+	}
+}
+
+// Returns the density of the graph. Density is the ratio of edge count to the
+// number of edges there would be in complete graph (maximum edge count).
+func (g *immutableDirected) Density() float64 {
+	order := g.Order()
+	return float64(g.Size()) / float64(order*(order-1))
+}
+
+// Indicates whether or not the given edge is present in the graph.
+func (g *immutableDirected) HasEdge(edge Edge) bool {
+	_, exists := g.list[edge.Source()][edge.Target()]
+	return exists
+}
+
+// Returns the outdegree of the provided vertex. If the vertex is not present in the
+// graph, the second return value will be false.
+func (g *immutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+	if exists = g.hasVertex(vertex); exists {
+		degree = len(g.list[vertex])
+	}
+	return
+}
+
+// Returns the indegree of the provided vertex. If the vertex is not present in the
+// graph, the second return value will be false.
+//
+// Note that getting indegree is inefficient for directed adjacency lists; it requires
+// a full scan of the graph's edge set.
+func (g *immutableDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+	if exists = g.hasVertex(vertex); exists {
+		// This results in a double read-lock. Should be fine.
+		for e := range g.list {
+			g.EachAdjacent(e, func(v Vertex) {
+				if v == vertex {
+					degree++
+				}
+			})
+		}
+	}
+
+	return
+}
+
+// Returns a graph with the same vertex and edge set, but with the
+// directionality of all its edges reversed.
+//
+// This implementation returns a new graph object (doubling memory use),
+// but not all implementations do so.
+func (g *immutableDirected) Transpose() DirectedGraph {
 	g2 := &Directed{}
 	g2.list = make(map[Vertex]map[Vertex]struct{})
 
