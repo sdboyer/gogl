@@ -16,6 +16,30 @@ type Vertex interface{}
 
 /* Graph structures */
 
+// Something that allows graph-like traversals.
+type GraphTraverser interface {
+	EachVertex(f func(vertex Vertex))
+	EachEdge(f func(edge Edge))
+	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
+}
+
+type VertexInspector interface {
+	InDegree(vertex Vertex) (int, bool)
+	OutDegree(vertex Vertex) (int, bool)
+	HasVertex(vertex Vertex) bool
+	Order() int
+}
+
+type EdgeInspector interface {
+	HasEdge(e Edge) bool
+	Size() int
+}
+
+type VertexMutator interface {
+	EnsureVertex(vertices ...Vertex)
+	RemoveVertex(vertices ...Vertex)
+}
+
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
 //
@@ -30,15 +54,9 @@ type Vertex interface{}
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	EachVertex(f func(vertex Vertex))
-	EachEdge(f func(edge Edge))
-	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
-	HasVertex(vertex Vertex) bool
-	HasEdge(e Edge) bool
-	Order() int
-	Size() int
-	InDegree(vertex Vertex) (int, bool)
-	OutDegree(vertex Vertex) (int, bool)
+	GraphTraverser
+	VertexInspector
+	EdgeInspector
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
@@ -54,8 +72,7 @@ type DirectedGraph interface {
 // that can be modified freely by adding or removing vertices or edges.
 type MutableGraph interface {
 	Graph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
+	VertexMutator
 	AddEdges(edges ...Edge)
 	RemoveEdges(edges ...Edge)
 }
@@ -91,8 +108,7 @@ type WeightedGraph interface {
 // only weighted edges can be present in the graph.
 type MutableWeightedGraph interface {
 	WeightedGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
+	VertexMutator
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
 }
@@ -121,8 +137,7 @@ type LabeledGraph interface {
 // only weighted edges can be present in the graph.
 type MutableLabeledGraph interface {
 	LabeledGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
+	VertexMutator
 	AddEdges(edges ...LabeledEdge)
 	RemoveEdges(edges ...LabeledEdge)
 }
@@ -154,8 +169,7 @@ type DataGraph interface {
 // only weighted edges can be present in the graph.
 type MutableDataGraph interface {
 	DataGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
+	VertexMutator
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
 }
