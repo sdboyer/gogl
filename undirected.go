@@ -4,12 +4,12 @@ import (
 	"gopkg.in/fatih/set.v0"
 )
 
-type Undirected struct {
+type mutableUndirected struct {
 	al_basic_mut
 }
 
-func NewUndirected() *Undirected {
-	list := &Undirected{}
+func NewUndirected() MutableGraph {
+	list := &mutableUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]struct{})
 
@@ -23,7 +23,7 @@ func NewUndirected() *Undirected {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *Undirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -35,13 +35,13 @@ func (g *Undirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *Undirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
 	return g.OutDegree(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *Undirected) EachEdge(f func(edge Edge)) {
+func (g *mutableUndirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -59,7 +59,7 @@ func (g *Undirected) EachEdge(f func(edge Edge)) {
 }
 
 // Indicates whether or not the given edge is present in the graph.
-func (g *Undirected) HasEdge(edge Edge) bool {
+func (g *mutableUndirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -74,7 +74,7 @@ func (g *Undirected) HasEdge(edge Edge) bool {
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *Undirected) Density() float64 {
+func (g *mutableUndirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -84,7 +84,7 @@ func (g *Undirected) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *Undirected) RemoveVertex(vertices ...Vertex) {
+func (g *mutableUndirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -105,7 +105,7 @@ func (g *Undirected) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *Undirected) AddEdges(edges ...Edge) {
+func (g *mutableUndirected) AddEdges(edges ...Edge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -117,7 +117,7 @@ func (g *Undirected) AddEdges(edges ...Edge) {
 }
 
 // Adds a new edge to the graph.
-func (g *Undirected) addEdges(edges ...Edge) {
+func (g *mutableUndirected) addEdges(edges ...Edge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
@@ -131,7 +131,7 @@ func (g *Undirected) addEdges(edges ...Edge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *Undirected) RemoveEdges(edges ...Edge) {
+func (g *mutableUndirected) RemoveEdges(edges ...Edge) {
 	if len(edges) == 0 {
 		return
 	}
