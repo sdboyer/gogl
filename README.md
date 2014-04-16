@@ -44,8 +44,11 @@ func main() {
     g := gogl.NewDirected()
     // Adds two edges (and implicitly, their vertices)
     g.AddEdge(gogl.BaseEdge{"foo", "bar"}, gogl.BaseEdge{"bar", "baz"}))
+    
     // Topologically sort your graph from a given start point, producing a slice of vertices
-    fmt.Println(dfs.Toposort(g, "foo")) // prints "[baz bar foo]"
+    var tsl []gogl.Vertex
+    tsl, _ = dfs.Toposort(g, "foo") // second return is an error
+    fmt.Println(tsl) // prints "[baz bar foo]"
 }
 ```
 
