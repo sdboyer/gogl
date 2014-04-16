@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# run on CI service w/something like:
+#
+# go get github.com/axw/gocov/gocov
+# go get github.com/mattn/goveralls
+# COVERALLS="-service drone.io -repotoken $COVERALLS_TOKEN" ./test-coverage.sh
+#
+
 echo "mode: set" > acc.out
 fail=0
 
