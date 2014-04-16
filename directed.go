@@ -1,12 +1,12 @@
 package gogl
 
-type Directed struct {
+type mutableDirected struct {
 	al_basic_mut
 }
 
 // Creates a new mutable, directed graph.
-func NewDirected() *Directed {
-	list := &Directed{}
+func NewDirected() MutableGraph {
+	list := &mutableDirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]struct{})
 
@@ -19,11 +19,11 @@ func NewDirected() *Directed {
 	return list
 }
 
-/* Directed additions */
+/* mutableDirected additions */
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *Directed) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -38,7 +38,7 @@ func (g *Directed) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableDirected) InDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -58,7 +58,7 @@ func (g *Directed) InDegree(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *Directed) EachEdge(f func(edge Edge)) {
+func (g *mutableDirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -70,7 +70,7 @@ func (g *Directed) EachEdge(f func(edge Edge)) {
 }
 
 // Indicates whether or not the given edge is present in the graph.
-func (g *Directed) HasEdge(edge Edge) bool {
+func (g *mutableDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -80,7 +80,7 @@ func (g *Directed) HasEdge(edge Edge) bool {
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *Directed) Density() float64 {
+func (g *mutableDirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -90,7 +90,7 @@ func (g *Directed) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *Directed) RemoveVertex(vertices ...Vertex) {
+func (g *mutableDirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -118,7 +118,7 @@ func (g *Directed) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *Directed) AddEdges(edges ...Edge) {
+func (g *mutableDirected) AddEdges(edges ...Edge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -130,7 +130,7 @@ func (g *Directed) AddEdges(edges ...Edge) {
 }
 
 // Adds a new edge to the graph.
-func (g *Directed) addEdges(edges ...Edge) {
+func (g *mutableDirected) addEdges(edges ...Edge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
@@ -143,7 +143,7 @@ func (g *Directed) addEdges(edges ...Edge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *Directed) RemoveEdges(edges ...Edge) {
+func (g *mutableDirected) RemoveEdges(edges ...Edge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -165,11 +165,11 @@ func (g *Directed) RemoveEdges(edges ...Edge) {
 //
 // This implementation returns a new graph object (doubling memory use),
 // but not all implementations do so.
-func (g *Directed) Transpose() DirectedGraph {
+func (g *mutableDirected) Transpose() DirectedGraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g2 := &Directed{}
+	g2 := &mutableDirected{}
 	g2.list = make(map[Vertex]map[Vertex]struct{})
 
 	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
@@ -190,7 +190,7 @@ func (g *Directed) Transpose() DirectedGraph {
 	return g2
 }
 
-/* ImmutableDirected implementation */
+/* immutableDirected implementation */
 
 type immutableDirected struct {
 	al_basic_immut
@@ -283,7 +283,7 @@ func (g *immutableDirected) InDegree(vertex Vertex) (degree int, exists bool) {
 // This implementation returns a new graph object (doubling memory use),
 // but not all implementations do so.
 func (g *immutableDirected) Transpose() DirectedGraph {
-	g2 := &Directed{}
+	g2 := &immutableDirected{}
 	g2.list = make(map[Vertex]map[Vertex]struct{})
 
 	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps

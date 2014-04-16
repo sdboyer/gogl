@@ -107,13 +107,14 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	g := gogl.NewDirected()
 	g.AddEdges(dfEdgeSet...)
 
-	sources, err := FindSources(g)
+	dg, _ := g.(gogl.DirectedGraph)
+	sources, err := FindSources(dg)
 	c.Assert(fmt.Sprint(sources), Equals, fmt.Sprint([]gogl.Vertex{"foo"}))
 	c.Assert(err, IsNil)
 
 	// Ensure it finds multiple, as well
 	g.AddEdges(&gogl.BaseEdge{"quark", "baz"})
-	sources, err = FindSources(g)
+	sources, err = FindSources(dg)
 
 	possibles := [][]gogl.Vertex{
 		[]gogl.Vertex{"foo", "quark"},
