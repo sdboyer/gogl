@@ -14,7 +14,81 @@ import (
 // does not.  Consequently, anything can act as a vertex.
 type Vertex interface{}
 
-/* Graph structures */
+/* Atomic graph interfaces */
+
+// A VertexEnumerator iteratively enumerates vertices.
+type VertexEnumerator interface {
+	EachVertex(f func(Vertex))
+}
+
+// An EdgeEnumerator iteratively enumerates edges.
+type EdgeEnumerator interface {
+	EachEdge(f func(Edge))
+}
+
+// An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
+type AdjacencyEnumerator interface {
+	EachAdjacent(start Vertex, f func(adjacent Vertex))
+}
+
+// A VertexMembershipChecker can indicate the presence of a vertex.
+type VertexMembershipChecker interface {
+	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
+}
+
+// An InOutDegreeChecker reports the number of edges incident to a given vertex.
+// TODO use this
+type DegreeChecker interface {
+	Degree(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
+}
+
+// An InOutDegreeChecker reports the number of in or out-edges a given vertex has.
+type InOutDegreeChecker interface {
+	InDegree(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
+	OutDegree(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
+}
+
+// An EdgeMembershipChecker can indicate the presence of an edge.
+type EdgeMembershipChecker interface {
+	HasEdge(Edge) bool
+}
+
+// A VertexSetMutator allows the addition and removal of vertices from a set.
+type VertexSetMutator interface {
+	EnsureVertex(...Vertex)
+	RemoveVertex(...Vertex)
+}
+
+// An EdgeSetMutator allows the addition and removal of edges from a set.
+type EdgeSetMutator interface {
+	AddEdges(edges ...Edge)
+	RemoveEdges(edges ...Edge)
+}
+
+// A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
+type WeightedEdgeSetMutator interface {
+	AddEdges(edges ...WeightedEdge)
+	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
+type LabeledEdgeSetMutator interface {
+	AddEdges(edges ...LabeledEdge)
+	RemoveEdges(edges ...LabeledEdge)
+}
+
+// A PropertyEdgeSetMutator allows the addition and removal of data edges from a set.
+type PropertyEdgeSetMutator interface {
+	AddEdges(edges ...PropertyEdge)
+	RemoveEdges(edges ...PropertyEdge)
+}
+
+// A Transposer produces a transposed version of a DirectedGraph.
+type Transposer interface {
+	Transpose() DirectedGraph
+}
+
+/* Aggregate graph interfaces */
 
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
@@ -30,15 +104,14 @@ type Vertex interface{}
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	EachVertex(f func(vertex Vertex))
-	EachEdge(f func(edge Edge))
-	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
-	HasVertex(vertex Vertex) bool
-	HasEdge(e Edge) bool
-	Order() int
-	Size() int
-	InDegree(vertex Vertex) (int, bool)
-	OutDegree(vertex Vertex) (int, bool)
+	VertexEnumerator        // Allows enumerated traversal of vertices
+	EdgeEnumerator          // Allows enumerated traversal of edges
+	AdjacencyEnumerator     // Allows enumerated traversal of a vertex's adjacent vertices
+	VertexMembershipChecker // Allows inspection of contained vertices
+	EdgeMembershipChecker   // Allows inspection of contained edges
+	InOutDegreeChecker      // Reports in- and out-degree of vertices
+	Order() int             // Total number of vertices in the graph
+	Size() int              // Total number of edges in the graph
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
@@ -47,17 +120,15 @@ type Graph interface {
 // that a graph's edges are directed.
 type DirectedGraph interface {
 	Graph
-	Transpose() DirectedGraph
+	Transposer // DirectedGraphs can produce a transpose of themselves
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
 // that can be modified freely by adding or removing vertices or edges.
 type MutableGraph interface {
 	Graph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
-	AddEdges(edges ...Edge)
-	RemoveEdges(edges ...Edge)
+	VertexSetMutator
+	EdgeSetMutator
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops and
@@ -91,10 +162,8 @@ type WeightedGraph interface {
 // only weighted edges can be present in the graph.
 type MutableWeightedGraph interface {
 	WeightedGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
-	AddEdges(edges ...WeightedEdge)
-	RemoveEdges(edges ...WeightedEdge)
+	VertexSetMutator
+	WeightedEdgeSetMutator
 }
 
 // A labeled graph is a graph subtype where the edges have an identifier;
@@ -118,13 +187,11 @@ type LabeledGraph interface {
 
 // LabeledWeightedGraph is the mutable version of a labeled graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
-// only weighted edges can be present in the graph.
+// only labeled edges can be present in the graph.
 type MutableLabeledGraph interface {
 	LabeledGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
-	AddEdges(edges ...LabeledEdge)
-	RemoveEdges(edges ...LabeledEdge)
+	VertexSetMutator
+	LabeledEdgeSetMutator
 }
 
 // A data graph is a graph subtype where the edges carry arbitrary Go data;
@@ -149,15 +216,13 @@ type PropertyGraph interface {
 	EachPropertyEdge(f func(edge PropertyEdge))
 }
 
-// PropertyWeightedGraph is the mutable version of a labeled graph. Its
+// MutablePropertyGraph is the mutable version of a propety graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
-// only weighted edges can be present in the graph.
+// only property edges can be present in the graph.
 type MutablePropertyGraph interface {
 	PropertyGraph
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
-	AddEdges(edges ...PropertyEdge)
-	RemoveEdges(edges ...PropertyEdge)
+	VertexSetMutator
+	PropertyEdgeSetMutator
 }
 
 /* Graph creation */
