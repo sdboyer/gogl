@@ -31,13 +31,6 @@ type AdjacencyEnumerator interface {
 	EachAdjacent(from Vertex, f func(to Vertex))
 }
 
-// A GraphEnumerator can iteratively enumerate several graph properties.
-type GraphEnumerator interface {
-	VertexEnumerator
-	EdgeEnumerator
-	AdjacencyEnumerator
-}
-
 // A VertexSetInspector indicates the presence and degree of vertices within a set, and the size of the set as a whole.
 type VertexSetInspector interface {
 	HasVertex(Vertex) bool                      // Whether or not the vertex is present in the set
@@ -64,7 +57,7 @@ type EdgeSetMutator interface {
 	RemoveEdges(edges ...Edge)
 }
 
-/* Aggregate Graph interfaces */
+/* Aggregate graph interfaces */
 
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
@@ -80,9 +73,11 @@ type EdgeSetMutator interface {
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	GraphEnumerator
-	VertexSetInspector
-	EdgeSetInspector
+	VertexEnumerator    // Allows enumerated traversal of vertices
+	EdgeEnumerator      // Allows enumerated traversal of edges
+	AdjacencyEnumerator // Allows enumerated traversal of a vertex's adjacent vertices
+	VertexSetInspector  // Allows inspection of contained vertices
+	EdgeSetInspector    // Allows inspection of contained edges
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
