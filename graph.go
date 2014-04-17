@@ -16,11 +16,26 @@ type Vertex interface{}
 
 /* Graph structures */
 
-// Something that allows graph-like traversals.
-type GraphTraverser interface {
+// A VertexEnumerator iteratively enumerates vertices.
+type VertexEnumerator interface {
 	EachVertex(f func(vertex Vertex))
+}
+
+// An EdgeEnumerator iteratively enumerates edges.
+type EdgeEnumerator interface {
 	EachEdge(f func(edge Edge))
-	EachAdjacent(vertex Vertex, f func(adjacent Vertex))
+}
+
+// An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
+type AdjacencyEnumerator interface {
+	EachAdjacent(from Vertex, f func(to Vertex))
+}
+
+// A GraphEnumerator can iteratively enumerate several graph properties.
+type GraphEnumerator interface {
+	VertexEnumerator
+	EdgeEnumerator
+	AdjacencyEnumerator
 }
 
 type VertexInspector interface {
@@ -54,7 +69,7 @@ type VertexMutator interface {
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	GraphTraverser
+	GraphEnumerator
 	VertexInspector
 	EdgeInspector
 }
