@@ -26,6 +26,18 @@ type EdgeEnumerator interface {
 	EachEdge(f func(Edge))
 }
 
+// An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
+type IncidentEdgeEnumerator interface {
+	EachEdgeIncidentTo(Vertex, f func(Edge)) bool
+}
+
+// An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
+// One enumerator provides inbound edges, the other outbound edges.
+type IncidentArcEnumerator interface {
+	EachArcFrom(Vertex, f func(Edge)) bool
+	EachArcTo(Vertex, f func(Edge)) bool
+}
+
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
 	EachAdjacent(start Vertex, f func(adjacent Vertex))
@@ -39,7 +51,7 @@ type VertexMembershipChecker interface {
 // An InOutDegreeChecker reports the number of edges incident to a given vertex.
 // TODO use this
 type DegreeChecker interface {
-	Degree(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
+	DegreeOf(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
 }
 
 // An InOutDegreeChecker reports the number of in or out-edges a given vertex has.
