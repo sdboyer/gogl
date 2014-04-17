@@ -14,16 +14,16 @@ import (
 // does not.  Consequently, anything can act as a vertex.
 type Vertex interface{}
 
-/* Graph structures */
+/* Atomic graph interfaces */
 
 // A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {
-	EachVertex(f func(vertex Vertex))
+	EachVertex(f func(Vertex))
 }
 
 // An EdgeEnumerator iteratively enumerates edges.
 type EdgeEnumerator interface {
-	EachEdge(f func(edge Edge))
+	EachEdge(f func(Edge))
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
@@ -38,22 +38,33 @@ type GraphEnumerator interface {
 	AdjacencyEnumerator
 }
 
-type VertexInspector interface {
-	InDegree(vertex Vertex) (int, bool)
-	OutDegree(vertex Vertex) (int, bool)
-	HasVertex(vertex Vertex) bool
-	Order() int
+// A VertexSetInspector indicates the presence and degree of vertices within a set, and the size of the set as a whole.
+type VertexSetInspector interface {
+	HasVertex(Vertex) bool                      // Whether or not the vertex is present in the set
+	InDegree(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
+	OutDegree(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
+	Order() int                                 // Total number of vertices in the set
 }
 
-type EdgeInspector interface {
-	HasEdge(e Edge) bool
+// An EdgeSetInspector indicates the presence of an edge in a set, and the size of the set as a whole.
+type EdgeSetInspector interface {
+	HasEdge(Edge) bool
 	Size() int
 }
 
-type VertexMutator interface {
-	EnsureVertex(vertices ...Vertex)
-	RemoveVertex(vertices ...Vertex)
+// A VertexSetMutator allows the addition and removal of vertices from a set.
+type VertexSetMutator interface {
+	EnsureVertex(...Vertex)
+	RemoveVertex(...Vertex)
 }
+
+// An EdgeSetMutator allows the addition and removal of edges from a set.
+type EdgeSetMutator interface {
+	AddEdges(edges ...Edge)
+	RemoveEdges(edges ...Edge)
+}
+
+/* Aggregate Graph interfaces */
 
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
@@ -70,8 +81,8 @@ type VertexMutator interface {
 // interfaces contain the methods for writing.
 type Graph interface {
 	GraphEnumerator
-	VertexInspector
-	EdgeInspector
+	VertexSetInspector
+	EdgeSetInspector
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
@@ -87,9 +98,8 @@ type DirectedGraph interface {
 // that can be modified freely by adding or removing vertices or edges.
 type MutableGraph interface {
 	Graph
-	VertexMutator
-	AddEdges(edges ...Edge)
-	RemoveEdges(edges ...Edge)
+	VertexSetMutator
+	EdgeSetMutator
 }
 
 // A simple graph is in opposition to a multigraph: it disallows loops and
@@ -123,7 +133,7 @@ type WeightedGraph interface {
 // only weighted edges can be present in the graph.
 type MutableWeightedGraph interface {
 	WeightedGraph
-	VertexMutator
+	VertexSetMutator
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
 }
@@ -152,7 +162,7 @@ type LabeledGraph interface {
 // only weighted edges can be present in the graph.
 type MutableLabeledGraph interface {
 	LabeledGraph
-	VertexMutator
+	VertexSetMutator
 	AddEdges(edges ...LabeledEdge)
 	RemoveEdges(edges ...LabeledEdge)
 }
@@ -184,7 +194,7 @@ type DataGraph interface {
 // only weighted edges can be present in the graph.
 type MutableDataGraph interface {
 	DataGraph
-	VertexMutator
+	VertexSetMutator
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
 }
