@@ -33,7 +33,17 @@ type AdjacencyEnumerator interface {
 
 // A VertexMembershipChecker can indicate the presence of a vertex.
 type VertexMembershipChecker interface {
-	HasVertex(Vertex) bool                      // Whether or not the vertex is present in the set
+	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
+}
+
+// An InOutDegreeChecker reports the number of edges incident to a given vertex.
+// TODO use this
+type DegreeChecker interface {
+	Degree(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
+}
+
+// An InOutDegreeChecker reports the number of in or out-edges a given vertex has.
+type InOutDegreeChecker interface {
 	InDegree(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
 	OutDegree(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
 }
@@ -99,6 +109,7 @@ type Graph interface {
 	AdjacencyEnumerator     // Allows enumerated traversal of a vertex's adjacent vertices
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
+	InOutDegreeChecker      // Reports in- and out-degree of vertices
 	Order() int             // Total number of vertices in the graph
 	Size() int              // Total number of edges in the graph
 }
