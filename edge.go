@@ -32,10 +32,10 @@ type LabeledEdge interface {
 	Label() string
 }
 
-// A DataEdge is an Edge that also carries some arbitrary data.
-type DataEdge interface {
+// A PropertyEdge is an Edge that also has arbitrary property data.
+type PropertyEdge interface {
 	Edge
-	Data() interface{}
+	Property() interface{}
 }
 
 // BaseEdge is a struct used to represent edges and meet the Edge interface
@@ -78,12 +78,12 @@ func (e BaseLabeledEdge) Label() string {
 	return e.L
 }
 
-// BaseDataEdge extends BaseEdge with arbitrary data.
-type BaseDataEdge struct {
+// BasePropertyEdge extends BaseEdge with arbitrary data.
+type BasePropertyEdge struct {
 	BaseEdge
-	D interface{}
+	P interface{}
 }
 
-func (e BaseDataEdge) Data() interface{} {
-	return e.D
+func (e BasePropertyEdge) Property() interface{} {
+	return e.P
 }

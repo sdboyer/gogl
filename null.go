@@ -12,13 +12,13 @@ var _ DirectedGraph = nullGraph(false)
 var _ SimpleGraph = nullGraph(false)
 var _ WeightedGraph = nullGraph(false)
 var _ LabeledGraph = nullGraph(false)
-var _ DataGraph = nullGraph(false)
+var _ PropertyGraph = nullGraph(false)
 
 func (g nullGraph) EachVertex(f func(v Vertex))                        {}
 func (g nullGraph) EachEdge(f func(e Edge))                            {}
 func (g nullGraph) EachWeightedEdge(f func(e WeightedEdge))            {}
 func (g nullGraph) EachLabeledEdge(f func(e LabeledEdge))              {}
-func (g nullGraph) EachDataEdge(f func(e DataEdge))                    {}
+func (g nullGraph) EachPropertyEdge(f func(e PropertyEdge))            {}
 func (g nullGraph) EachAdjacent(start Vertex, f func(adjacent Vertex)) {}
 
 func (g nullGraph) HasVertex(v Vertex) bool {
@@ -45,7 +45,7 @@ func (g nullGraph) HasLabeledEdge(e LabeledEdge) bool {
 	return false
 }
 
-func (g nullGraph) HasDataEdge(e DataEdge) bool {
+func (g nullGraph) HasPropertyEdge(e PropertyEdge) bool {
 	return false
 }
 

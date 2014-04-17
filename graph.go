@@ -128,36 +128,36 @@ type MutableLabeledGraph interface {
 }
 
 // A data graph is a graph subtype where the edges carry arbitrary Go data;
-// as described by the DataEdge interface, this identifier is an interface{}.
+// as described by the PropertyEdge interface, this identifier is an interface{}.
 //
-// DataGraphs have both the HasEdge() and HasDataEdge() methods.
+// PropertyGraphs have both the HasEdge() and HasPropertyEdge() methods.
 // Correct implementations should treat the difference as a matter of strictness:
 //
 // HasEdge() should return true as long as an edge exists
 // connecting the two given vertices (respecting directed or undirected as
 // appropriate), regardless of its label.
 //
-// HasDataEdge() should return true iff an edge exists connecting the
+// HasPropertyEdge() should return true iff an edge exists connecting the
 // two given vertices (respecting directed or undirected as appropriate),
 // AND if the edge data is the same. Simple comparison will typically be used
 // to establish data equality, which means that using noncomparables (a slice,
 // map, or non-pointer struct containing a slice or a map) for the data will
 // cause a panic.
-type DataGraph interface {
+type PropertyGraph interface {
 	Graph
-	HasDataEdge(e DataEdge) bool
-	EachDataEdge(f func(edge DataEdge))
+	HasPropertyEdge(e PropertyEdge) bool
+	EachPropertyEdge(f func(edge PropertyEdge))
 }
 
-// DataWeightedGraph is the mutable version of a labeled graph. Its
+// PropertyWeightedGraph is the mutable version of a labeled graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only weighted edges can be present in the graph.
-type MutableDataGraph interface {
-	DataGraph
+type MutablePropertyGraph interface {
+	PropertyGraph
 	EnsureVertex(vertices ...Vertex)
 	RemoveVertex(vertices ...Vertex)
-	AddEdges(edges ...DataEdge)
-	RemoveEdges(edges ...DataEdge)
+	AddEdges(edges ...PropertyEdge)
+	RemoveEdges(edges ...PropertyEdge)
 }
 
 /* Graph creation */

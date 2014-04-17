@@ -7,17 +7,17 @@ import (
 )
 
 // This is implemented as an adjacency list, because those are simple.
-type baseData struct {
+type baseProperty struct {
 	list map[Vertex]map[Vertex]interface{}
 	size int
 	mu   sync.RWMutex
 }
 
-/* baseData shared methods */
+/* baseProperty shared methods */
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseData) EachVertex(f func(vertex Vertex)) {
+func (g *baseProperty) EachVertex(f func(vertex Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -28,7 +28,7 @@ func (g *baseData) EachVertex(f func(vertex Vertex)) {
 
 // Given a vertex present in the graph, passes each vertex adjacent to the
 // provided vertex to the provided closure.
-func (g *baseData) EachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *baseProperty) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -36,7 +36,7 @@ func (g *baseData) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 }
 
 // Internal adjacency traverser that bypasses locking.
-func (g *baseData) eachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *baseProperty) eachAdjacent(vertex Vertex, f func(target Vertex)) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			f(adjacent)
@@ -45,7 +45,7 @@ func (g *baseData) eachAdjacent(vertex Vertex, f func(target Vertex)) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseData) HasVertex(vertex Vertex) (exists bool) {
+func (g *baseProperty) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -54,13 +54,13 @@ func (g *baseData) HasVertex(vertex Vertex) (exists bool) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseData) hasVertex(vertex Vertex) (exists bool) {
+func (g *baseProperty) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.list[vertex]
 	return
 }
 
 // Returns the order (number of vertices) in the graph.
-func (g *baseData) Order() int {
+func (g *baseProperty) Order() int {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -68,13 +68,13 @@ func (g *baseData) Order() int {
 }
 
 // Returns the size (number of edges) in the graph.
-func (g *baseData) Size() int {
+func (g *baseProperty) Size() int {
 	return g.size
 }
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseData) EnsureVertex(vertices ...Vertex) {
+func (g *baseProperty) EnsureVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -87,7 +87,7 @@ func (g *baseData) EnsureVertex(vertices ...Vertex) {
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseData) ensureVertex(vertices ...Vertex) {
+func (g *baseProperty) ensureVertex(vertices ...Vertex) {
 	// TODO this is horrible, but the reflection approach in the testing harness requires it...for now
 	if g.list == nil {
 		g.list = make(map[Vertex]map[Vertex]interface{})
@@ -103,14 +103,14 @@ func (g *baseData) ensureVertex(vertices ...Vertex) {
 	return
 }
 
-/* DirectedData implementation */
+/* DirectedProperty implementation */
 
-type dataDirected struct {
-	baseData
+type propertyDirected struct {
+	baseProperty
 }
 
-func NewDataDirected() MutableDataGraph {
-	list := &dataDirected{}
+func NewPropertyDirected() MutablePropertyGraph {
+	list := &propertyDirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]interface{})
 
@@ -118,15 +118,15 @@ func NewDataDirected() MutableDataGraph {
 	var _ Graph = list
 	var _ SimpleGraph = list
 	var _ DirectedGraph = list
-	var _ DataGraph = list
-	var _ MutableDataGraph = list
+	var _ PropertyGraph = list
+	var _ MutablePropertyGraph = list
 
 	return list
 }
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *dataDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -141,7 +141,7 @@ func (g *dataDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *dataDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyDirected) InDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -161,33 +161,33 @@ func (g *dataDirected) InDegree(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *dataDirected) EachEdge(f func(edge Edge)) {
+func (g *propertyDirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target, data := range adjacent {
-			f(BaseDataEdge{BaseEdge{U: source, V: target}, data})
+		for target, property := range adjacent {
+			f(BasePropertyEdge{BaseEdge{U: source, V: target}, property})
 		}
 	}
 }
 
-// Traverses the set of edges in the graph, passing each edge and its data
+// Traverses the set of edges in the graph, passing each edge and its property
 // to the provided closure.
-func (g *dataDirected) EachDataEdge(f func(edge DataEdge)) {
+func (g *propertyDirected) EachPropertyEdge(f func(edge PropertyEdge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target, data := range adjacent {
-			f(BaseDataEdge{BaseEdge{U: source, V: target}, data})
+		for target, property := range adjacent {
+			f(BasePropertyEdge{BaseEdge{U: source, V: target}, property})
 		}
 	}
 }
 
 // Indicates whether or not the given edge is present in the graph. It matches
-// based solely on the presence of an edge, disregarding edge data.
-func (g *dataDirected) HasEdge(edge Edge) bool {
+// based solely on the presence of an edge, disregarding edge property.
+func (g *propertyDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -195,22 +195,22 @@ func (g *dataDirected) HasEdge(edge Edge) bool {
 	return exists
 }
 
-// Indicates whether or not the given data edge is present in the graph.
-// It will only match if the provided DataEdge has the same data as
+// Indicates whether or not the given property edge is present in the graph.
+// It will only match if the provided PropertyEdge has the same property as
 // the edge contained in the graph.
-func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
+func (g *propertyDirected) HasPropertyEdge(edge PropertyEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
-		return data == edge.Data()
+	if property, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return property == edge.Property()
 	}
 	return false
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *dataDirected) Density() float64 {
+func (g *propertyDirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -220,7 +220,7 @@ func (g *dataDirected) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *dataDirected) RemoveVertex(vertices ...Vertex) {
+func (g *propertyDirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -245,7 +245,7 @@ func (g *dataDirected) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *dataDirected) AddEdges(edges ...DataEdge) {
+func (g *propertyDirected) AddEdges(edges ...PropertyEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -257,12 +257,12 @@ func (g *dataDirected) AddEdges(edges ...DataEdge) {
 }
 
 // Adds a new edge to the graph.
-func (g *dataDirected) addEdges(edges ...DataEdge) {
+func (g *propertyDirected) addEdges(edges ...PropertyEdge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Data()
+			g.list[edge.Source()][edge.Target()] = edge.Property()
 			g.size++
 		}
 	}
@@ -270,7 +270,7 @@ func (g *dataDirected) addEdges(edges ...DataEdge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *dataDirected) RemoveEdges(edges ...DataEdge) {
+func (g *propertyDirected) RemoveEdges(edges ...PropertyEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -287,11 +287,11 @@ func (g *dataDirected) RemoveEdges(edges ...DataEdge) {
 	}
 }
 
-func (g *dataDirected) Transpose() DirectedGraph {
+func (g *propertyDirected) Transpose() DirectedGraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g2 := &dataDirected{}
+	g2 := &propertyDirected{}
 	g2.list = make(map[Vertex]map[Vertex]interface{})
 
 	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
@@ -302,40 +302,40 @@ func (g *dataDirected) Transpose() DirectedGraph {
 			g2.list[source] = make(map[Vertex]interface{}, startcap+1)
 		}
 
-		for target, data := range adjacent {
+		for target, property := range adjacent {
 			if !g2.hasVertex(target) {
 				g2.list[target] = make(map[Vertex]interface{}, startcap+1)
 			}
-			g2.list[target][source] = data
+			g2.list[target][source] = property
 		}
 	}
 
 	return g2
 }
 
-/* UndirectedData implementation */
+/* UndirectedProperty implementation */
 
-type dataUndirected struct {
-	baseData
+type propertyUndirected struct {
+	baseProperty
 }
 
-func NewDataUndirected() MutableDataGraph {
-	g := &dataUndirected{}
+func NewPropertyUndirected() MutablePropertyGraph {
+	g := &propertyUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	g.list = make(map[Vertex]map[Vertex]interface{})
 
 	// Type assertions to ensure interfaces are met
 	var _ Graph = g
 	var _ SimpleGraph = g
-	var _ DataGraph = g
-	var _ MutableDataGraph = g
+	var _ PropertyGraph = g
+	var _ MutablePropertyGraph = g
 
 	return g
 }
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *dataUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -347,22 +347,22 @@ func (g *dataUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *dataUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
 	return g.OutDegree(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *dataUndirected) EachEdge(f func(edge Edge)) {
+func (g *propertyUndirected) EachEdge(f func(edge Edge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	visited := set.NewNonTS()
 
 	for source, adjacent := range g.list {
-		for target, data := range adjacent {
+		for target, property := range adjacent {
 			be := BaseEdge{U: source, V: target}
-			e := BaseDataEdge{be, data}
+			e := BasePropertyEdge{be, property}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
 				f(e)
@@ -371,18 +371,18 @@ func (g *dataUndirected) EachEdge(f func(edge Edge)) {
 	}
 }
 
-// Traverses the set of edges in the graph, passing each edge and its data
+// Traverses the set of edges in the graph, passing each edge and its property
 // to the provided closure.
-func (g *dataUndirected) EachDataEdge(f func(edge DataEdge)) {
+func (g *propertyUndirected) EachPropertyEdge(f func(edge PropertyEdge)) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	visited := set.NewNonTS()
 
 	for source, adjacent := range g.list {
-		for target, data := range adjacent {
+		for target, property := range adjacent {
 			be := BaseEdge{U: source, V: target}
-			e := BaseDataEdge{be, data}
+			e := BasePropertyEdge{be, property}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
 				f(e)
@@ -392,8 +392,8 @@ func (g *dataUndirected) EachDataEdge(f func(edge DataEdge)) {
 }
 
 // Indicates whether or not the given edge is present in the graph. It matches
-// based solely on the presence of an edge, disregarding edge data.
-func (g *dataUndirected) HasEdge(edge Edge) bool {
+// based solely on the presence of an edge, disregarding edge property.
+func (g *propertyUndirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -406,25 +406,25 @@ func (g *dataUndirected) HasEdge(edge Edge) bool {
 	return false
 }
 
-// Indicates whether or not the given data edge is present in the graph.
-// It will only match if the provided DataEdge has the same data as
+// Indicates whether or not the given property edge is present in the graph.
+// It will only match if the provided PropertyEdge has the same property as
 // the edge contained in the graph.
-func (g *dataUndirected) HasDataEdge(edge DataEdge) bool {
+func (g *propertyUndirected) HasPropertyEdge(edge PropertyEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
-		return edge.Data() == data
-	} else if data, exists := g.list[edge.Target()][edge.Source()]; exists {
-		return edge.Data() == data
+	if property, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return edge.Property() == property
+	} else if property, exists := g.list[edge.Target()][edge.Source()]; exists {
+		return edge.Property() == property
 	}
 	return false
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *dataUndirected) Density() float64 {
+func (g *propertyUndirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -434,7 +434,7 @@ func (g *dataUndirected) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *dataUndirected) RemoveVertex(vertices ...Vertex) {
+func (g *propertyUndirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -455,7 +455,7 @@ func (g *dataUndirected) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *dataUndirected) AddEdges(edges ...DataEdge) {
+func (g *propertyUndirected) AddEdges(edges ...PropertyEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -467,12 +467,12 @@ func (g *dataUndirected) AddEdges(edges ...DataEdge) {
 }
 
 // Adds a new edge to the graph.
-func (g *dataUndirected) addEdges(edges ...DataEdge) {
+func (g *propertyUndirected) addEdges(edges ...PropertyEdge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			d := edge.Data()
+			d := edge.Property()
 			g.list[edge.Source()][edge.Target()] = d
 			g.list[edge.Target()][edge.Source()] = d
 			g.size++
@@ -482,7 +482,7 @@ func (g *dataUndirected) addEdges(edges ...DataEdge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *dataUndirected) RemoveEdges(edges ...DataEdge) {
+func (g *propertyUndirected) RemoveEdges(edges ...PropertyEdge) {
 	if len(edges) == 0 {
 		return
 	}
