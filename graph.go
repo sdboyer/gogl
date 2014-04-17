@@ -28,21 +28,19 @@ type EdgeEnumerator interface {
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
-	EachAdjacent(from Vertex, f func(to Vertex))
+	EachAdjacent(start Vertex, f func(adjacent Vertex))
 }
 
-// A VertexSetInspector indicates the presence and degree of vertices within a set, and the size of the set as a whole.
-type VertexSetInspector interface {
+// A VertexMembershipChecker can indicate the presence of a vertex.
+type VertexMembershipChecker interface {
 	HasVertex(Vertex) bool                      // Whether or not the vertex is present in the set
 	InDegree(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
 	OutDegree(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
-	Order() int                                 // Total number of vertices in the set
 }
 
-// An EdgeSetInspector indicates the presence of an edge in a set, and the size of the set as a whole.
-type EdgeSetInspector interface {
+// An EdgeMembershipChecker can indicate the presence of an edge.
+type EdgeMembershipChecker interface {
 	HasEdge(Edge) bool
-	Size() int
 }
 
 // A VertexSetMutator allows the addition and removal of vertices from a set.
@@ -55,6 +53,29 @@ type VertexSetMutator interface {
 type EdgeSetMutator interface {
 	AddEdges(edges ...Edge)
 	RemoveEdges(edges ...Edge)
+}
+
+// A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
+type WeightedEdgeSetMutator interface {
+	AddEdges(edges ...WeightedEdge)
+	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
+type LabeledEdgeSetMutator interface {
+	AddEdges(edges ...LabeledEdge)
+	RemoveEdges(edges ...LabeledEdge)
+}
+
+// A DataEdgeSetMutator allows the addition and removal of data edges from a set.
+type DataEdgeSetMutator interface {
+	AddEdges(edges ...DataEdge)
+	RemoveEdges(edges ...DataEdge)
+}
+
+// A Transposer produces a transposed version of a DirectedGraph.
+type Transposer interface {
+	Transpose() DirectedGraph
 }
 
 /* Aggregate graph interfaces */
@@ -73,11 +94,13 @@ type EdgeSetMutator interface {
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	VertexEnumerator    // Allows enumerated traversal of vertices
-	EdgeEnumerator      // Allows enumerated traversal of edges
-	AdjacencyEnumerator // Allows enumerated traversal of a vertex's adjacent vertices
-	VertexSetInspector  // Allows inspection of contained vertices
-	EdgeSetInspector    // Allows inspection of contained edges
+	VertexEnumerator        // Allows enumerated traversal of vertices
+	EdgeEnumerator          // Allows enumerated traversal of edges
+	AdjacencyEnumerator     // Allows enumerated traversal of a vertex's adjacent vertices
+	VertexMembershipChecker // Allows inspection of contained vertices
+	EdgeMembershipChecker   // Allows inspection of contained edges
+	Order() int             // Total number of vertices in the graph
+	Size() int              // Total number of edges in the graph
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
@@ -86,7 +109,7 @@ type Graph interface {
 // that a graph's edges are directed.
 type DirectedGraph interface {
 	Graph
-	Transpose() DirectedGraph
+	Transposer // DirectedGraphs can produce a transpose of themselves
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
@@ -129,8 +152,7 @@ type WeightedGraph interface {
 type MutableWeightedGraph interface {
 	WeightedGraph
 	VertexSetMutator
-	AddEdges(edges ...WeightedEdge)
-	RemoveEdges(edges ...WeightedEdge)
+	WeightedEdgeSetMutator
 }
 
 // A labeled graph is a graph subtype where the edges have an identifier;
@@ -158,8 +180,7 @@ type LabeledGraph interface {
 type MutableLabeledGraph interface {
 	LabeledGraph
 	VertexSetMutator
-	AddEdges(edges ...LabeledEdge)
-	RemoveEdges(edges ...LabeledEdge)
+	LabeledEdgeSetMutator
 }
 
 // A data graph is a graph subtype where the edges carry arbitrary Go data;
@@ -190,8 +211,7 @@ type DataGraph interface {
 type MutableDataGraph interface {
 	DataGraph
 	VertexSetMutator
-	AddEdges(edges ...DataEdge)
-	RemoveEdges(edges ...DataEdge)
+	DataEdgeSetMutator
 }
 
 /* Graph creation */
