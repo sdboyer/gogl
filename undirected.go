@@ -41,7 +41,7 @@ func (g *mutableUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool) 
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableUndirected) EachEdge(f func(edge Edge)) {
+func (g *mutableUndirected) EachEdge(f EdgeLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

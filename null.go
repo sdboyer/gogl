@@ -14,12 +14,12 @@ var _ WeightedGraph = nullGraph(false)
 var _ LabeledGraph = nullGraph(false)
 var _ PropertyGraph = nullGraph(false)
 
-func (g nullGraph) EachVertex(f func(v Vertex))                        {}
-func (g nullGraph) EachEdge(f func(e Edge))                            {}
-func (g nullGraph) EachWeightedEdge(f func(e WeightedEdge))            {}
-func (g nullGraph) EachLabeledEdge(f func(e LabeledEdge))              {}
-func (g nullGraph) EachPropertyEdge(f func(e PropertyEdge))            {}
-func (g nullGraph) EachAdjacent(start Vertex, f func(adjacent Vertex)) {}
+func (g nullGraph) EachVertex(f VertexLambda)                 {}
+func (g nullGraph) EachEdge(f EdgeLambda)                     {}
+func (g nullGraph) EachWeightedEdge(f func(e WeightedEdge))   {}
+func (g nullGraph) EachLabeledEdge(f func(e LabeledEdge))     {}
+func (g nullGraph) EachPropertyEdge(f func(e PropertyEdge))   {}
+func (g nullGraph) EachAdjacent(start Vertex, f VertexLambda) {}
 
 func (g nullGraph) HasVertex(v Vertex) bool {
 	return false

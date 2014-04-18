@@ -25,7 +25,7 @@ type al_basic struct {
 var keyExists = struct{}{}
 
 // Internal adjacency traverser that bypasses locking.
-func (g *al_basic) eachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *al_basic) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			f(adjacent)
@@ -68,7 +68,7 @@ type al_basic_immut struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *al_basic_immut) EachVertex(f func(vertex Vertex)) {
+func (g *al_basic_immut) EachVertex(f VertexLambda) {
 	for v := range g.list {
 		f(v)
 	}
@@ -76,7 +76,7 @@ func (g *al_basic_immut) EachVertex(f func(vertex Vertex)) {
 
 // Given a vertex present in the graph, passes each vertex adjacent to the
 // provided vertex to the provided closure.
-func (g *al_basic_immut) EachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *al_basic_immut) EachAdjacent(vertex Vertex, f VertexLambda) {
 	g.eachAdjacent(vertex, f)
 }
 
@@ -99,7 +99,7 @@ type al_basic_mut struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *al_basic_mut) EachVertex(f func(vertex Vertex)) {
+func (g *al_basic_mut) EachVertex(f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -110,7 +110,7 @@ func (g *al_basic_mut) EachVertex(f func(vertex Vertex)) {
 
 // Given a vertex present in the graph, passes each vertex adjacent to the
 // provided vertex to the provided closure.
-func (g *al_basic_mut) EachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *al_basic_mut) EachAdjacent(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

@@ -58,7 +58,7 @@ func (g *mutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableDirected) EachEdge(f func(edge Edge)) {
+func (g *mutableDirected) EachEdge(f EdgeLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -227,7 +227,7 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *immutableDirected) EachEdge(f func(edge Edge)) {
+func (g *immutableDirected) EachEdge(f EdgeLambda) {
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
 			f(BaseEdge{U: source, V: target})

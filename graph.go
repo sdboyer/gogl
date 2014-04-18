@@ -16,31 +16,39 @@ type Vertex interface{}
 
 /* Atomic graph interfaces */
 
+// EdgeLambdas are used as arguments to various enumerators. They are called once for
+// each edge produced by the enumerator.
+type EdgeLambda func(Edge)
+
+// VertexLambdas are used as arguments to various enumerators. They are called once for
+// each vertex produced by the enumerator.
+type VertexLambda func(Vertex)
+
 // A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {
-	EachVertex(f func(Vertex))
+	EachVertex(VertexLambda)
 }
 
 // An EdgeEnumerator iteratively enumerates edges.
 type EdgeEnumerator interface {
-	EachEdge(f func(Edge))
+	EachEdge(EdgeLambda)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
-	EachEdgeIncidentTo(Vertex, f func(Edge)) bool
+	EachEdgeIncidentTo(Vertex, incidentEdgeLambda EdgeLambda)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
 // One enumerator provides inbound edges, the other outbound edges.
 type IncidentArcEnumerator interface {
-	EachArcFrom(Vertex, f func(Edge)) bool
-	EachArcTo(Vertex, f func(Edge)) bool
+	EachArcFrom(Vertex, outEdgeLambda EdgeLambda)
+	EachArcTo(Vertex, inEdgeLambda EdgeLambda)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
-	EachAdjacent(start Vertex, f func(adjacent Vertex))
+	EachAdjacent(start Vertex, adjacentVertexLambda VertexLambda)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.

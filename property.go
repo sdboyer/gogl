@@ -17,7 +17,7 @@ type baseProperty struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseProperty) EachVertex(f func(vertex Vertex)) {
+func (g *baseProperty) EachVertex(f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -28,7 +28,7 @@ func (g *baseProperty) EachVertex(f func(vertex Vertex)) {
 
 // Given a vertex present in the graph, passes each vertex adjacent to the
 // provided vertex to the provided closure.
-func (g *baseProperty) EachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *baseProperty) EachAdjacent(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -36,7 +36,7 @@ func (g *baseProperty) EachAdjacent(vertex Vertex, f func(target Vertex)) {
 }
 
 // Internal adjacency traverser that bypasses locking.
-func (g *baseProperty) eachAdjacent(vertex Vertex, f func(target Vertex)) {
+func (g *baseProperty) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			f(adjacent)
@@ -161,7 +161,7 @@ func (g *propertyDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *propertyDirected) EachEdge(f func(edge Edge)) {
+func (g *propertyDirected) EachEdge(f EdgeLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -353,7 +353,7 @@ func (g *propertyUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool)
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *propertyUndirected) EachEdge(f func(edge Edge)) {
+func (g *propertyUndirected) EachEdge(f EdgeLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
