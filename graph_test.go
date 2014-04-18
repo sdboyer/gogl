@@ -291,6 +291,18 @@ func (s *GraphSuite) TestEachVertex(c *C) {
 	}
 }
 
+func (s *GraphSuite) TestEachVertexTermination(c *C) {
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+
+	var hit int
+	g.EachVertex(func(v Vertex) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
 func (s *GraphSuite) TestEachEdge(c *C) {
 	var hit int
 	f := func(e Edge) (terminate bool) {
@@ -305,6 +317,18 @@ func (s *GraphSuite) TestEachEdge(c *C) {
 	}
 }
 
+func (s *GraphSuite) TestEachEdgeTermination(c *C) {
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+
+	var hit int
+	g.EachEdge(func(e Edge) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
 func (s *GraphSuite) TestEachAdjacent(c *C) {
 	var hit int
 	f := func(adj Vertex) (terminate bool) {
@@ -317,6 +341,18 @@ func (s *GraphSuite) TestEachAdjacent(c *C) {
 	if !c.Check(hit, Equals, 1) {
 		c.Error("EachEdge should have called injected closure iterator 2 times, actual count was ", hit)
 	}
+}
+
+func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
+	g := s.Factory.CreateGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
+
+	var hit int
+	g.EachAdjacent("foo", func(adjacent Vertex) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
 }
 
 // This test is carefully constructed to be fully correct for directed graphs,
