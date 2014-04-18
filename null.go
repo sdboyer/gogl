@@ -1,5 +1,9 @@
 package gogl
 
+import (
+	"math"
+)
+
 // The null graph is a graph without any edges or vertices. It implements all possible (non-mutable) graph interfaces.
 //
 // In effect, it is the zero-value of all possible graph types.
@@ -58,7 +62,7 @@ func (g nullGraph) Order() int {
 }
 
 func (g nullGraph) Density() float64 {
-	return 0
+	return math.NaN()
 }
 
 func (g nullGraph) Transpose() DirectedGraph {
