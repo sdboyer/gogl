@@ -22,7 +22,9 @@ func (g *baseWeighted) EachVertex(f VertexLambda) {
 	defer g.mu.RUnlock()
 
 	for v := range g.list {
-		f(v)
+		if f(v) {
+			return
+		}
 	}
 }
 
@@ -40,7 +42,7 @@ func (g *baseWeighted) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			if f(adjacent) {
-				break
+				return
 			}
 		}
 	}
@@ -170,7 +172,9 @@ func (g *weightedDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, weight := range adjacent {
-			f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight})
+			if f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight}) {
+				return
+			}
 		}
 	}
 }
@@ -368,7 +372,9 @@ func (g *weightedUndirected) EachEdge(f EdgeLambda) {
 			e := BaseWeightedEdge{be, weight}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
-				f(e)
+				if f(e) {
+					return
+				}
 			}
 		}
 	}

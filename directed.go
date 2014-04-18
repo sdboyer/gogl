@@ -65,7 +65,9 @@ func (g *mutableDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(BaseEdge{U: source, V: target})
+			if f(BaseEdge{U: source, V: target}) {
+				return
+			}
 		}
 	}
 }
@@ -233,7 +235,9 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 func (g *immutableDirected) EachEdge(f EdgeLambda) {
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(BaseEdge{U: source, V: target})
+			if f(BaseEdge{U: source, V: target}) {
+				return
+			}
 		}
 	}
 }

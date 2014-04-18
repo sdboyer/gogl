@@ -52,7 +52,9 @@ func (g *mutableUndirected) EachEdge(f EdgeLambda) {
 			e := BaseEdge{U: source, V: target}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(e)
-				f(e)
+				if f(e) {
+					return
+				}
 			}
 		}
 	}

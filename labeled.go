@@ -22,7 +22,9 @@ func (g *baseLabeled) EachVertex(f VertexLambda) {
 	defer g.mu.RUnlock()
 
 	for v := range g.list {
-		f(v)
+		if f(v) {
+			return
+		}
 	}
 }
 
@@ -39,7 +41,9 @@ func (g *baseLabeled) EachAdjacent(vertex Vertex, f VertexLambda) {
 func (g *baseLabeled) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
-			f(adjacent)
+			if f(adjacent) {
+				return
+			}
 		}
 	}
 }
@@ -168,7 +172,9 @@ func (g *labeledDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, label := range adjacent {
-			f(BaseLabeledEdge{BaseEdge{U: source, V: target}, label})
+			if f(BaseLabeledEdge{BaseEdge{U: source, V: target}, label}) {
+				return
+			}
 		}
 	}
 }
@@ -366,7 +372,9 @@ func (g *labeledUndirected) EachEdge(f EdgeLambda) {
 			e := BaseLabeledEdge{be, label}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
-				f(e)
+				if f(e) {
+					return
+				}
 			}
 		}
 	}

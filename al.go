@@ -28,7 +28,9 @@ var keyExists = struct{}{}
 func (g *al_basic) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
-			f(adjacent)
+			if f(adjacent) {
+				return
+			}
 		}
 	}
 }
@@ -70,7 +72,9 @@ type al_basic_immut struct {
 // provided closure.
 func (g *al_basic_immut) EachVertex(f VertexLambda) {
 	for v := range g.list {
-		f(v)
+		if f(v) {
+			return
+		}
 	}
 }
 
@@ -104,7 +108,9 @@ func (g *al_basic_mut) EachVertex(f VertexLambda) {
 	defer g.mu.RUnlock()
 
 	for v := range g.list {
-		f(v)
+		if f(v) {
+			return
+		}
 	}
 }
 
