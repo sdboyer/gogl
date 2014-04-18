@@ -94,8 +94,9 @@ func (g *mutableUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacent(vertex, func(adjacent Vertex) {
+			g.eachAdjacent(vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
+				return
 			})
 			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)

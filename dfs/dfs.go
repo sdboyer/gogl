@@ -151,14 +151,16 @@ func FindSources(g gogl.DirectedGraph) (sources []gogl.Vertex, err error) {
 	// TODO hardly the most efficient way to keep track, i'm sure
 	incomings := set.NewNonTS()
 
-	g.EachEdge(func(e gogl.Edge) {
+	g.EachEdge(func(e gogl.Edge) (terminate bool) {
 		incomings.Add(e.Target())
+		return
 	})
 
-	g.EachVertex(func(v gogl.Vertex) {
+	g.EachVertex(func(v gogl.Vertex) (terminate bool) {
 		if !incomings.Has(v) {
 			sources = append(sources, v)
 		}
+		return
 	})
 
 	return
@@ -340,9 +342,10 @@ func (w *walker) dftraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+		w.g.EachAdjacent(v, func(to gogl.Vertex) (terminate bool) {
 			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
 			w.dftraverse(to)
+			return
 		})
 
 		w.vis.OnFinishVertex(v)
@@ -368,12 +371,13 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+		w.g.EachAdjacent(v, func(to gogl.Vertex) bool {
 			// no more new visits if complete
 			if !w.complete {
 				w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
 				w.dfsearch(to)
 			}
+			return w.complete
 		})
 		// escape hatch
 		if w.complete {
@@ -390,9 +394,10 @@ func (w *walker) dfutraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) {
+		w.g.EachAdjacent(v, func(to gogl.Vertex) (terminate bool) {
 			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
 			w.dfutraverse(to)
+			return
 		})
 
 		w.vis.OnFinishVertex(v)

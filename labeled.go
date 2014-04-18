@@ -148,10 +148,11 @@ func (g *labeledDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) {
+			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
 				if v == vertex {
 					degree++
 				}
+				return
 			})
 		}
 	}
@@ -444,8 +445,9 @@ func (g *labeledUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacent(vertex, func(adjacent Vertex) {
+			g.eachAdjacent(vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
+				return
 			})
 			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)

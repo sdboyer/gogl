@@ -279,9 +279,10 @@ func (s *GraphSuite) TestHasEdge(c *C) {
 
 func (s *GraphSuite) TestEachVertex(c *C) {
 	var hit int
-	f := func(v Vertex) {
+	f := func(v Vertex) (terminate bool) {
 		hit++
 		c.Log("EachVertex hit closure, hit count", hit)
+		return
 	}
 
 	s.Graph.EachVertex(f)
@@ -292,9 +293,10 @@ func (s *GraphSuite) TestEachVertex(c *C) {
 
 func (s *GraphSuite) TestEachEdge(c *C) {
 	var hit int
-	f := func(e Edge) {
+	f := func(e Edge) (terminate bool) {
 		hit++
 		c.Log("EachAdjacent hit closure with edge pair ", e.Source(), " ", e.Target(), " at hit count ", hit)
+		return
 	}
 
 	s.Graph.EachEdge(f)
@@ -305,9 +307,10 @@ func (s *GraphSuite) TestEachEdge(c *C) {
 
 func (s *GraphSuite) TestEachAdjacent(c *C) {
 	var hit int
-	f := func(adj Vertex) {
+	f := func(adj Vertex) (terminate bool) {
 		hit++
 		c.Log("EachAdjacent hit closure with vertex ", adj, " at hit count ", hit)
+		return
 	}
 
 	s.Graph.EachAdjacent("foo", f)
@@ -517,8 +520,9 @@ func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
 
 	var we WeightedEdge
-	g.EachEdge(func(e Edge) {
+	g.EachEdge(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
+		return
 	})
 }
 
@@ -672,8 +676,9 @@ func (s *LabeledGraphSuite) TestEachEdge(c *C) {
 	g := s.Factory.CreateLabeledGraphFromEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
 
 	var we LabeledEdge
-	g.EachEdge(func(e Edge) {
+	g.EachEdge(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
+		return
 	})
 }
 
@@ -827,8 +832,9 @@ func (s *PropertyGraphSuite) TestEachEdge(c *C) {
 	g := s.Factory.CreatePropertyGraphFromEdges(BasePropertyEdge{BaseEdge{1, 2}, "foo"}, BasePropertyEdge{BaseEdge{2, 3}, "bar"})
 
 	var we PropertyEdge
-	g.EachEdge(func(e Edge) {
+	g.EachEdge(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
+		return
 	})
 }
 
