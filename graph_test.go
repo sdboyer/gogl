@@ -318,28 +318,28 @@ func (s *GraphSuite) TestEachAdjacent(c *C) {
 
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
-func (s *GraphSuite) TestOutDegree(c *C) {
+func (s *GraphSuite) TestOutDegreeOf(c *C) {
 	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
-	count, exists := g.OutDegree("foo")
+	count, exists := g.OutDegreeOf("foo")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 1)
 
-	count, exists = g.OutDegree("missing")
+	count, exists = g.OutDegreeOf("missing")
 	c.Assert(exists, Equals, false)
 	c.Assert(count, Equals, 0)
 }
 
 // This test is carefully constructed to be fully correct for directed graphs,
 // and incidentally correct for undirected graphs.
-func (s *GraphSuite) TestInDegree(c *C) {
+func (s *GraphSuite) TestInDegreeOf(c *C) {
 	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
 
-	count, exists := g.InDegree("bar")
+	count, exists := g.InDegreeOf("bar")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 1)
 
-	count, exists = g.InDegree("missing")
+	count, exists = g.InDegreeOf("missing")
 	c.Assert(exists, Equals, false)
 	c.Assert(count, Equals, 0)
 }

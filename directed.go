@@ -23,7 +23,7 @@ func NewDirected() MutableGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *mutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -38,7 +38,7 @@ func (g *mutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *mutableDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -250,7 +250,7 @@ func (g *immutableDirected) HasEdge(edge Edge) bool {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *immutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *immutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
 		degree = len(g.list[vertex])
 	}
@@ -262,7 +262,7 @@ func (g *immutableDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *immutableDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {

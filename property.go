@@ -126,7 +126,7 @@ func NewPropertyDirected() MutablePropertyGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *propertyDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -141,7 +141,7 @@ func (g *propertyDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *propertyDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -335,7 +335,7 @@ func NewPropertyUndirected() MutablePropertyGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *propertyUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *propertyUndirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -347,8 +347,8 @@ func (g *propertyUndirected) OutDegree(vertex Vertex) (degree int, exists bool) 
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *propertyUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
-	return g.OutDegree(vertex)
+func (g *propertyUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
+	return g.OutDegreeOf(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the

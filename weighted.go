@@ -126,7 +126,7 @@ func NewWeightedDirected() MutableWeightedGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *weightedDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *weightedDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -141,7 +141,7 @@ func (g *weightedDirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *weightedDirected) InDegree(vertex Vertex) (degree int, exists bool) {
+func (g *weightedDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -335,7 +335,7 @@ func NewWeightedUndirected() MutableWeightedGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *weightedUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *weightedUndirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -347,8 +347,8 @@ func (g *weightedUndirected) OutDegree(vertex Vertex) (degree int, exists bool) 
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *weightedUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
-	return g.OutDegree(vertex)
+func (g *weightedUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
+	return g.OutDegreeOf(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the

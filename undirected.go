@@ -23,7 +23,7 @@ func NewUndirected() MutableGraph {
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *mutableUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
+func (g *mutableUndirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -35,8 +35,8 @@ func (g *mutableUndirected) OutDegree(vertex Vertex) (degree int, exists bool) {
 
 // Returns the indegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *mutableUndirected) InDegree(vertex Vertex) (degree int, exists bool) {
-	return g.OutDegree(vertex)
+func (g *mutableUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
+	return g.OutDegreeOf(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the

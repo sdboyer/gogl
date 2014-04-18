@@ -25,11 +25,11 @@ func (g nullGraph) HasVertex(v Vertex) bool {
 	return false
 }
 
-func (g nullGraph) InDegree(Vertex) (degree int, exists bool) {
+func (g nullGraph) InDegreeOf(Vertex) (degree int, exists bool) {
 	return 0, false
 }
 
-func (g nullGraph) OutDegree(Vertex) (degree int, exists bool) {
+func (g nullGraph) OutDegreeOf(Vertex) (degree int, exists bool) {
 	return 0, false
 }
 

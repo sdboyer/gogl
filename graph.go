@@ -48,16 +48,16 @@ type VertexMembershipChecker interface {
 	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
 }
 
-// An InOutDegreeChecker reports the number of edges incident to a given vertex.
+// An DegreeChecker reports the number of edges incident to a given vertex.
 // TODO use this
 type DegreeChecker interface {
 	DegreeOf(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
 }
 
-// An InOutDegreeChecker reports the number of in or out-edges a given vertex has.
+// An InOutDegreeChecker reports the number of in or out-edges incident to given vertex.
 type InOutDegreeChecker interface {
-	InDegree(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
-	OutDegree(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
+	InDegreeOf(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
+	OutDegreeOf(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
 }
 
 // An EdgeMembershipChecker can indicate the presence of an edge.
