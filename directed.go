@@ -43,15 +43,12 @@ func (g *mutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	defer g.mu.RUnlock()
 
 	if exists = g.hasVertex(vertex); exists {
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
-				if v == vertex {
-					degree++
-				}
-				return
-			})
-		}
+		g.EachEdge(func(e Edge) (terminate bool) {
+			if vertex == e.Target() {
+				degree++
+			}
+			return
+		})
 	}
 
 	return
@@ -77,6 +74,72 @@ func (g *mutableDirected) EachEdge(f EdgeLambda) {
 		for target, _ := range adjacent {
 			if f(BaseEdge{U: source, V: target}) {
 				return
+			}
+		}
+	}
+}
+
+// Enumerates the set of all edges incident to the provided vertex.
+func (g *mutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	var terminate bool
+	interloper := func(e Edge) bool {
+		terminate = terminate || f(e)
+		return terminate
+	}
+
+	g.EachArcFrom(v, interloper)
+	g.EachArcTo(v, interloper)
+}
+
+// Enumerates the vertices adjacent to the provided vertex.
+func (g *mutableDirected) EachAdjacent(start Vertex, f VertexLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+		u, v := e.Both()
+		if u == start {
+			return f(v)
+		} else {
+			return f(u)
+		}
+	})
+}
+
+// Enumerates the set of out-edges for the provided vertex.
+func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for adjacent, _ := range g.list[v] {
+		if f(BaseEdge{U: v, V: adjacent}) {
+			return
+		}
+	}
+}
+
+// Enumerates the set of in-edges for the provided vertex.
+func (g *mutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for candidate, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if target == v {
+				if f(BaseEdge{U: candidate, V: target}) {
+					return
+				}
 			}
 		}
 	}
@@ -252,6 +315,60 @@ func (g *immutableDirected) EachEdge(f EdgeLambda) {
 	}
 }
 
+// Enumerates the set of all edges incident to the provided vertex.
+func (g *immutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+	var terminate bool
+	interloper := func(e Edge) bool {
+		terminate = terminate || f(e)
+		return terminate
+	}
+
+	g.EachArcFrom(v, interloper)
+	g.EachArcTo(v, interloper)
+}
+
+// Enumerates the vertices adjacent to the provided vertex.
+func (g *immutableDirected) EachAdjacent(start Vertex, f VertexLambda) {
+	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+		u, v := e.Both()
+		if u == start {
+			return f(u)
+		} else {
+			return f(v)
+		}
+	})
+}
+
+// Enumerates the set of out-edges for the provided vertex.
+func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for adjacent, _ := range g.list[v] {
+		if f(BaseEdge{U: v, V: adjacent}) {
+			return
+		}
+	}
+}
+
+// Enumerates the set of in-edges for the provided vertex.
+func (g *immutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for candidate, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if target == v {
+				if f(BaseEdge{U: candidate, V: target}) {
+					return
+				}
+			}
+		}
+	}
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *immutableDirected) Density() float64 {
@@ -281,15 +398,12 @@ func (g *immutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool)
 // a full scan of the graph's edge set.
 func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
-				if v == vertex {
-					degree++
-				}
-				return
-			})
-		}
+		g.EachEdge(func(e Edge) (terminate bool) {
+			if vertex == e.Target() {
+				degree++
+			}
+			return
+		})
 	}
 
 	return

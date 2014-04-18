@@ -25,7 +25,7 @@ type al_basic struct {
 var keyExists = struct{}{}
 
 // Internal adjacency traverser that bypasses locking.
-func (g *al_basic) eachAdjacent(vertex Vertex, f VertexLambda) {
+func (g *al_basic) eachAdjacentUnd(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
 			if f(adjacent) {
@@ -78,12 +78,6 @@ func (g *al_basic_immut) EachVertex(f VertexLambda) {
 	}
 }
 
-// Given a vertex present in the graph, passes each vertex adjacent to the
-// provided vertex to the provided closure.
-func (g *al_basic_immut) EachAdjacent(vertex Vertex, f VertexLambda) {
-	g.eachAdjacent(vertex, f)
-}
-
 // Indicates whether or not the given vertex is present in the graph.
 func (g *al_basic_immut) HasVertex(vertex Vertex) bool {
 	return g.hasVertex(vertex)
@@ -112,15 +106,6 @@ func (g *al_basic_mut) EachVertex(f VertexLambda) {
 			return
 		}
 	}
-}
-
-// Given a vertex present in the graph, passes each vertex adjacent to the
-// provided vertex to the provided closure.
-func (g *al_basic_mut) EachAdjacent(vertex Vertex, f VertexLambda) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	g.eachAdjacent(vertex, f)
 }
 
 // Indicates whether or not the given vertex is present in the graph.

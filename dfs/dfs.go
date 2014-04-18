@@ -36,6 +36,10 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 		target: target,
 	}
 
+	if dg, ok := g.(gogl.DirectedGraph); ok {
+		w.dg = dg
+	}
+
 	w.dfsearch(start)
 
 	return visitor.getPath(), nil
@@ -99,7 +103,8 @@ func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 	}
 
 	var traverser func(*walker, gogl.Vertex)
-	if _, ok := g.(gogl.DirectedGraph); ok {
+	if dg, ok := g.(gogl.DirectedGraph); ok {
+		w.dg = dg
 		traverser = (*walker).dftraverse
 	} else {
 		traverser = (*walker).dfutraverse
@@ -133,6 +138,10 @@ func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, err
 		vis:    visitor,
 		g:      g,
 		colors: make(map[gogl.Vertex]uint),
+	}
+
+	if dg, ok := g.(gogl.DirectedGraph); ok {
+		w.dg = dg
 	}
 
 	for v := stack.pop(); ; {
@@ -323,6 +332,7 @@ func (vis *TslVisitor) GetTsl() ([]gogl.Vertex, error) {
 type walker struct {
 	vis      Visitor
 	g        gogl.Graph
+	dg       gogl.DirectedGraph
 	complete bool
 	target   gogl.Vertex
 	// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups
@@ -342,9 +352,9 @@ func (w *walker) dftraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) (terminate bool) {
-			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
-			w.dftraverse(to)
+		w.dg.EachArcFrom(v, func(e gogl.Edge) (terminate bool) {
+			w.vis.OnExamineEdge(e)
+			w.dftraverse(e.Target())
 			return
 		})
 
@@ -371,11 +381,11 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) bool {
+		w.dg.EachArcFrom(v, func(e gogl.Edge) bool {
 			// no more new visits if complete
 			if !w.complete {
-				w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
-				w.dfsearch(to)
+				w.vis.OnExamineEdge(e)
+				w.dfsearch(e.Target())
 			}
 			return w.complete
 		})

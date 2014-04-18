@@ -54,6 +54,30 @@ func (g *mutableUndirected) EachEdge(f EdgeLambda) {
 	}
 }
 
+// Enumerates the set of all edges incident to the provided vertex.
+func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for adjacent, _ := range g.list[v] {
+		if f(BaseEdge{U: v, V: adjacent}) {
+			return
+		}
+	}
+}
+
+// Enumerates the vertices adjacent to the provided vertex.
+func (g *mutableUndirected) EachAdjacent(vertex Vertex, f VertexLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.eachAdjacentUnd(vertex, f)
+}
+
 // Indicates whether or not the given edge is present in the graph.
 func (g *mutableUndirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
@@ -90,7 +114,7 @@ func (g *mutableUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacent(vertex, func(adjacent Vertex) (terminate bool) {
+			g.eachAdjacentUnd(vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
 				return
 			})

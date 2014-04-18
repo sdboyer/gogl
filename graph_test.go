@@ -25,6 +25,11 @@ func (e BaseEdge) swap() Edge {
 	return BaseEdge{e.V, e.U}
 }
 
+func gdebug(g Graph, args ...interface{}) {
+	fmt.Println("DEBUG: graph type", reflect.New(reflect.Indirect(reflect.ValueOf(g)).Type()))
+	fmt.Println(args...)
+}
+
 // This function automatically sets up suites of black box unit tests for
 // graphs by determining which gogl interfaces they implement.
 //
@@ -310,7 +315,7 @@ func (s *GraphSuite) TestEachEdge(c *C) {
 	g := s.Factory.CreateGraphFromEdges(edgeSet...)
 
 	var hit int
-	g.EachEdge(func(e Edge) bool {
+	g.EachEdge(func(e Edge) (terminate bool) {
 		hit++
 		return
 	})
@@ -361,16 +366,17 @@ func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
 
 func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Factory.CreateGraphFromEdges(edgeSet...)
-	flipset = []Edge{
-		BaseEdge{edgeSet[0].Swap()},
-		BaseEdge{edgeSet[1].Swap()},
+	flipset := []Edge{
+		edgeSet[0].(BaseEdge).swap(),
+		edgeSet[1].(BaseEdge).swap(),
 	}
 
 	eset := set.NewNonTS()
 	var hit int
 	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
-		eset.Add(e)
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
 		return
 	})
 
@@ -387,7 +393,8 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	eset = set.NewNonTS()
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
-		eset.Add(e)
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
 		return
 	})
 
@@ -533,7 +540,8 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 	})
 
 	g.EachArcTo("bar", func(e Edge) (terminate bool) {
-		set.Add(e)
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
 		hit++
 		return
 	})
@@ -568,7 +576,8 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 	})
 
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
-		set.Add(e)
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
 		hit++
 		return
 	})
@@ -592,7 +601,7 @@ func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestEachEdgeIncidentToTermination(c *C) {
-	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+	g := s.Factory.CreateDirectedGraphFromEdges(edgeSet...)
 
 	var hit int
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {

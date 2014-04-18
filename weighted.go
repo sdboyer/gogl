@@ -28,26 +28,6 @@ func (g *baseWeighted) EachVertex(f VertexLambda) {
 	}
 }
 
-// Given a vertex present in the graph, passes each vertex adjacent to the
-// provided vertex to the provided closure.
-func (g *baseWeighted) EachAdjacent(vertex Vertex, f VertexLambda) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	g.eachAdjacent(vertex, f)
-}
-
-// Internal adjacency traverser that bypasses locking.
-func (g *baseWeighted) eachAdjacent(vertex Vertex, f VertexLambda) {
-	if _, exists := g.list[vertex]; exists {
-		for adjacent, _ := range g.list[vertex] {
-			if f(adjacent) {
-				return
-			}
-		}
-	}
-}
-
 // Indicates whether or not the given vertex is present in the graph.
 func (g *baseWeighted) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
@@ -150,15 +130,12 @@ func (g *weightedDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	defer g.mu.RUnlock()
 
 	if exists = g.hasVertex(vertex); exists {
-		// This results in a double read-lock. Should be fine.
-		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
-				if v == vertex {
-					degree++
-				}
-				return
-			})
-		}
+		g.EachEdge(func(e Edge) (terminate bool) {
+			if vertex == e.Target() {
+				degree++
+			}
+			return
+		})
 	}
 
 	return
@@ -172,6 +149,72 @@ func (g *weightedDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	indegree, exists := g.InDegreeOf(vertex)
 	outdegree, exists := g.OutDegreeOf(vertex)
 	return indegree + outdegree, exists
+}
+
+// Enumerates the set of all edges incident to the provided vertex.
+func (g *weightedDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	var terminate bool
+	interloper := func(e Edge) bool {
+		terminate = terminate || f(e)
+		return terminate
+	}
+
+	g.EachArcFrom(v, interloper)
+	g.EachArcTo(v, interloper)
+}
+
+// Enumerates the vertices adjacent to the provided vertex.
+func (g *weightedDirected) EachAdjacent(start Vertex, f VertexLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+		u, v := e.Both()
+		if u == start {
+			return f(v)
+		} else {
+			return f(u)
+		}
+	})
+}
+
+// Enumerates the set of out-edges for the provided vertex.
+func (g *weightedDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for adjacent, weight := range g.list[v] {
+		if f(BaseWeightedEdge{BaseEdge{U: v, V: adjacent}, weight}) {
+			return
+		}
+	}
+}
+
+// Enumerates the set of in-edges for the provided vertex.
+func (g *weightedDirected) EachArcTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for candidate, adjacent := range g.list {
+		for target, weight := range adjacent {
+			if target == v {
+				if f(BaseWeightedEdge{BaseEdge{U: candidate, V: target}, weight}) {
+					return
+				}
+			}
+		}
+	}
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
@@ -399,6 +442,40 @@ func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
 				f(e)
+			}
+		}
+	}
+}
+
+// Enumerates the set of all edges incident to the provided vertex.
+func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for adjacent, weight := range g.list[v] {
+		if f(BaseWeightedEdge{BaseEdge{U: v, V: adjacent}, weight}) {
+			return
+		}
+	}
+}
+
+// Enumerates the vertices adjacent to the provided vertex.
+func (g *weightedUndirected) EachAdjacent(vertex Vertex, f VertexLambda) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.eachAdjacent(vertex, f)
+}
+
+func (g *weightedUndirected) eachAdjacent(vertex Vertex, f VertexLambda) {
+	if _, exists := g.list[vertex]; exists {
+		for adjacent, _ := range g.list[vertex] {
+			if f(adjacent) {
+				return
 			}
 		}
 	}
