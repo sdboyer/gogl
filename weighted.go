@@ -22,7 +22,9 @@ func (g *baseWeighted) EachVertex(f VertexLambda) {
 	defer g.mu.RUnlock()
 
 	for v := range g.list {
-		f(v)
+		if f(v) {
+			return
+		}
 	}
 }
 
@@ -39,7 +41,9 @@ func (g *baseWeighted) EachAdjacent(vertex Vertex, f VertexLambda) {
 func (g *baseWeighted) eachAdjacent(vertex Vertex, f VertexLambda) {
 	if _, exists := g.list[vertex]; exists {
 		for adjacent, _ := range g.list[vertex] {
-			f(adjacent)
+			if f(adjacent) {
+				return
+			}
 		}
 	}
 }
@@ -148,10 +152,11 @@ func (g *weightedDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) {
+			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
 				if v == vertex {
 					degree++
 				}
+				return
 			})
 		}
 	}
@@ -167,7 +172,9 @@ func (g *weightedDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, weight := range adjacent {
-			f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight})
+			if f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight}) {
+				return
+			}
 		}
 	}
 }
@@ -365,7 +372,9 @@ func (g *weightedUndirected) EachEdge(f EdgeLambda) {
 			e := BaseWeightedEdge{be, weight}
 			if !visited.Has(BaseEdge{U: target, V: source}) {
 				visited.Add(be)
-				f(e)
+				if f(e) {
+					return
+				}
 			}
 		}
 	}
@@ -444,8 +453,9 @@ func (g *weightedUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacent(vertex, func(adjacent Vertex) {
+			g.eachAdjacent(vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
+				return
 			})
 			g.size -= len(g.list[vertex])
 			delete(g.list, vertex)

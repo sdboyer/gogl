@@ -16,13 +16,15 @@ type Vertex interface{}
 
 /* Atomic graph interfaces */
 
-// EdgeLambdas are used as arguments to various enumerators. They are called once for
-// each edge produced by the enumerator.
-type EdgeLambda func(Edge)
+// EdgeLambdas are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
+//
+// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type EdgeLambda func(Edge) (terminate bool)
 
-// VertexLambdas are used as arguments to various enumerators. They are called once for
-// each vertex produced by the enumerator.
-type VertexLambda func(Vertex)
+// VertexLambdas are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
+//
+// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type VertexLambda func(Vertex) (terminate bool)
 
 // A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {

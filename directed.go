@@ -45,10 +45,11 @@ func (g *mutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) {
+			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
 				if v == vertex {
 					degree++
 				}
+				return
 			})
 		}
 	}
@@ -64,7 +65,9 @@ func (g *mutableDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(BaseEdge{U: source, V: target})
+			if f(BaseEdge{U: source, V: target}) {
+				return
+			}
 		}
 	}
 }
@@ -202,18 +205,20 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]struct{})
 
-	g.EachEdge(func(edge Edge) {
+	g.EachEdge(func(edge Edge) (terminate bool) {
 		list.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := list.list[edge.Source()][edge.Target()]; !exists {
 			list.list[edge.Source()][edge.Target()] = keyExists
 			list.size++
 		}
+		return
 	})
 
 	if list.Order() != g.Order() {
-		g.EachVertex(func(vertex Vertex) {
+		g.EachVertex(func(vertex Vertex) (terminate bool) {
 			list.ensureVertex(vertex)
+			return
 		})
 	}
 
@@ -230,7 +235,9 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 func (g *immutableDirected) EachEdge(f EdgeLambda) {
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			f(BaseEdge{U: source, V: target})
+			if f(BaseEdge{U: source, V: target}) {
+				return
+			}
 		}
 	}
 }
@@ -266,10 +273,11 @@ func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) 
 	if exists = g.hasVertex(vertex); exists {
 		// This results in a double read-lock. Should be fine.
 		for e := range g.list {
-			g.EachAdjacent(e, func(v Vertex) {
+			g.EachAdjacent(e, func(v Vertex) (terminate bool) {
 				if v == vertex {
 					degree++
 				}
+				return
 			})
 		}
 	}
