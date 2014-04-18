@@ -37,6 +37,10 @@ func (g nullGraph) OutDegreeOf(Vertex) (degree int, exists bool) {
 	return 0, false
 }
 
+func (g nullGraph) DegreeOf(Vertex) (degree int, exists bool) {
+	return 0, false
+}
+
 func (g nullGraph) HasEdge(e Edge) bool {
 	return false
 }

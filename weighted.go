@@ -164,6 +164,16 @@ func (g *weightedDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	return
 }
 
+// Returns the degree of the given vertex, counting both in and out-edges.
+func (g *weightedDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	indegree, exists := g.InDegreeOf(vertex)
+	outdegree, exists := g.OutDegreeOf(vertex)
+	return indegree + outdegree, exists
+}
+
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
 func (g *weightedDirected) EachEdge(f EdgeLambda) {
@@ -340,9 +350,9 @@ func NewWeightedUndirected() MutableWeightedGraph {
 	return g
 }
 
-// Returns the outdegree of the provided vertex. If the vertex is not present in the
+// Returns the degree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *weightedUndirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
+func (g *weightedUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -350,12 +360,6 @@ func (g *weightedUndirected) OutDegreeOf(vertex Vertex) (degree int, exists bool
 		degree = len(g.list[vertex])
 	}
 	return
-}
-
-// Returns the indegree of the provided vertex. If the vertex is not present in the
-// graph, the second return value will be false.
-func (g *weightedUndirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
-	return g.OutDegreeOf(vertex)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the

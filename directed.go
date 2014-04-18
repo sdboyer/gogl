@@ -57,6 +57,16 @@ func (g *mutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	return
 }
 
+// Returns the degree of the provided vertex, counting both in and out-edges.
+func (g *mutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	indegree, exists := g.InDegreeOf(vertex)
+	outdegree, exists := g.OutDegreeOf(vertex)
+	return indegree + outdegree, exists
+}
+
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
 func (g *mutableDirected) EachEdge(f EdgeLambda) {
@@ -283,6 +293,13 @@ func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) 
 	}
 
 	return
+}
+
+// Returns the degree of the vertex, counting both in and out-edges.
+func (g *immutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
+	indegree, exists := g.InDegreeOf(vertex)
+	outdegree, exists := g.OutDegreeOf(vertex)
+	return indegree + outdegree, exists
 }
 
 // Returns a graph with the same vertex and edge set, but with the

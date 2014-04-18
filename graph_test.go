@@ -355,30 +355,27 @@ func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-// This test is carefully constructed to be fully correct for directed graphs,
-// and incidentally correct for undirected graphs.
-func (s *GraphSuite) TestOutDegreeOf(c *C) {
-	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
+func (s *GraphSuite) TestDegreeOf(c *C) {
+	g := s.Factory.CreateGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
 
-	count, exists := g.OutDegreeOf("foo")
+	// TODO test vertex isolates...can't make them in current testing harness
+	count, exists := g.DegreeOf("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 2)
+
+	count, exists = g.DegreeOf("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 2)
+
+	count, exists = g.DegreeOf("baz")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 1)
 
-	count, exists = g.OutDegreeOf("missing")
-	c.Assert(exists, Equals, false)
-	c.Assert(count, Equals, 0)
-}
-
-// This test is carefully constructed to be fully correct for directed graphs,
-// and incidentally correct for undirected graphs.
-func (s *GraphSuite) TestInDegreeOf(c *C) {
-	g := s.Factory.CreateGraphFromEdges(&BaseEdge{"foo", "bar"})
-
-	count, exists := g.InDegreeOf("bar")
+	count, exists = g.DegreeOf("qux")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 1)
 
-	count, exists = g.InDegreeOf("missing")
+	count, exists = g.DegreeOf("missing")
 	c.Assert(exists, Equals, false)
 	c.Assert(count, Equals, 0)
 }
@@ -414,6 +411,56 @@ func (s *DirectedGraphSuite) TestTranspose(c *C) {
 
 	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge)), Equals, false)
 	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge)), Equals, false)
+}
+
+func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
+
+	// TODO test vertex isolates...can't make them in current testing harness
+	count, exists := g.OutDegreeOf("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 2)
+
+	count, exists = g.OutDegreeOf("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.OutDegreeOf("baz")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.OutDegreeOf("qux")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.OutDegreeOf("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
+}
+
+func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
+
+	// TODO test vertex isolates...can't make them in current testing harness
+	count, exists := g.InDegreeOf("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.InDegreeOf("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.InDegreeOf("baz")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.InDegreeOf("qux")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.InDegreeOf("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
 }
 
 /* SimpleGraphSuite - tests for simple graph methods */

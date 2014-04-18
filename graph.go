@@ -58,14 +58,13 @@ type VertexMembershipChecker interface {
 	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
 }
 
-// An DegreeChecker reports the number of edges incident to a given vertex.
-// TODO use this
+// A DegreeChecker reports the number of edges incident to a given vertex.
 type DegreeChecker interface {
 	DegreeOf(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
 }
 
-// An InOutDegreeChecker reports the number of in or out-edges incident to given vertex.
-type InOutDegreeChecker interface {
+// A DirectedDegreeChecker reports the number of in or out-edges incident to given vertex.
+type DirectedDegreeChecker interface {
 	InDegreeOf(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
 	OutDegreeOf(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
 }
@@ -131,9 +130,9 @@ type Graph interface {
 	AdjacencyEnumerator     // Allows enumerated traversal of a vertex's adjacent vertices
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
-	InOutDegreeChecker      // Reports in- and out-degree of vertices
-	Order() int             // Total number of vertices in the graph
-	Size() int              // Total number of edges in the graph
+	DegreeChecker           // Reports degree of vertices
+	Order() int             // Reports total number of vertices in the graph
+	Size() int              // Reports total number of edges in the graph
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.
@@ -142,7 +141,8 @@ type Graph interface {
 // that a graph's edges are directed.
 type DirectedGraph interface {
 	Graph
-	Transposer // DirectedGraphs can produce a transpose of themselves
+	DirectedDegreeChecker // Reports in- and out-degree of vertices
+	Transposer            // DirectedGraphs can produce a transpose of themselves
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
