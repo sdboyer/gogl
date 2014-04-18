@@ -38,14 +38,14 @@ type EdgeEnumerator interface {
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
-	EachEdgeIncidentTo(Vertex, incidentEdgeLambda EdgeLambda)
+	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
 // One enumerator provides inbound edges, the other outbound edges.
 type IncidentArcEnumerator interface {
-	EachArcFrom(Vertex, outEdgeLambda EdgeLambda)
-	EachArcTo(Vertex, inEdgeLambda EdgeLambda)
+	EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)
+	EachArcTo(v Vertex, inEdgeLambda EdgeLambda)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
@@ -125,9 +125,10 @@ type Transposer interface {
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	VertexEnumerator        // Allows enumerated traversal of vertices
-	EdgeEnumerator          // Allows enumerated traversal of edges
-	AdjacencyEnumerator     // Allows enumerated traversal of a vertex's adjacent vertices
+	VertexEnumerator        // Enumerates vertices to an injected lambda
+	EdgeEnumerator          // Enumerates edges to an injected lambda
+	AdjacencyEnumerator     // Enumerates a vertex's adjacent vertices to an injected lambda
+	IncidentEdgeEnumerator  // Enumerates a vertex's incident edges to an injected lambda
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
 	DegreeChecker           // Reports degree of vertices
@@ -137,10 +138,11 @@ type Graph interface {
 
 // DirectedGraph describes a Graph all of whose edges are directed.
 //
-// Implementing DirectedGraph is the only unambiguous signal gogl provides
-// that a graph's edges are directed.
+// gogl treats edge directionality as a property of the graph, not the edge itself.
+// Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
 type DirectedGraph interface {
 	Graph
+	IncidentArcEnumerator // Enumerates a vertex's incident in- and out-arcs to an injected lambda
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	Transposer            // DirectedGraphs can produce a transpose of themselves
 }

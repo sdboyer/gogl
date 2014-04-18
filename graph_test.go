@@ -278,17 +278,20 @@ func (s *GraphSuite) TestHasEdge(c *C) {
 }
 
 func (s *GraphSuite) TestEachVertex(c *C) {
-	var hit int
-	f := func(v Vertex) (terminate bool) {
-		hit++
-		c.Log("EachVertex hit closure, hit count", hit)
-		return
-	}
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
 
-	s.Graph.EachVertex(f)
-	if !c.Check(hit, Equals, 3) {
-		c.Error("EachVertex should have called injected closure iterator 3 times, actual count was ", hit)
-	}
+	vset := set.NewNonTS()
+	var hit int
+	g.EachVertex(func(v Vertex) (terminate bool) {
+		hit++
+		vset.Add(v)
+		return
+	})
+
+	c.Assert(vset.Has("foo"), Equals, true)
+	c.Assert(vset.Has("bar"), Equals, true)
+	c.Assert(vset.Has("baz"), Equals, true)
+	c.Assert(hit, Equals, 3)
 }
 
 func (s *GraphSuite) TestEachVertexTermination(c *C) {
@@ -304,17 +307,15 @@ func (s *GraphSuite) TestEachVertexTermination(c *C) {
 }
 
 func (s *GraphSuite) TestEachEdge(c *C) {
-	var hit int
-	f := func(e Edge) (terminate bool) {
-		hit++
-		c.Log("EachAdjacent hit closure with edge pair ", e.Source(), " ", e.Target(), " at hit count ", hit)
-		return
-	}
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
 
-	s.Graph.EachEdge(f)
-	if !c.Check(hit, Equals, 2) {
-		c.Error("EachEdge should have called injected closure iterator 2 times, actual count was ", hit)
-	}
+	var hit int
+	g.EachEdge(func(e Edge) bool {
+		hit++
+		return
+	})
+
+	c.Assert(hit, Equals, 2)
 }
 
 func (s *GraphSuite) TestEachEdgeTermination(c *C) {
@@ -330,17 +331,20 @@ func (s *GraphSuite) TestEachEdgeTermination(c *C) {
 }
 
 func (s *GraphSuite) TestEachAdjacent(c *C) {
-	var hit int
-	f := func(adj Vertex) (terminate bool) {
-		hit++
-		c.Log("EachAdjacent hit closure with vertex ", adj, " at hit count ", hit)
-		return
-	}
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
 
-	s.Graph.EachAdjacent("foo", f)
-	if !c.Check(hit, Equals, 1) {
-		c.Error("EachEdge should have called injected closure iterator 2 times, actual count was ", hit)
-	}
+	vset := set.NewNonTS()
+	var hit int
+	g.EachAdjacent("bar", func(adj Vertex) (terminate bool) {
+		hit++
+		vset.Add(adj)
+		return
+	})
+
+	c.Assert(vset.Has("foo"), Equals, true)
+	c.Assert(vset.Has("bar"), Equals, false)
+	c.Assert(vset.Has("baz"), Equals, true)
+	c.Assert(hit, Equals, 2)
 }
 
 func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
@@ -348,6 +352,60 @@ func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
 
 	var hit int
 	g.EachAdjacent("foo", func(adjacent Vertex) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
+func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+	flipset = []Edge{
+		BaseEdge{edgeSet[0].Swap()},
+		BaseEdge{edgeSet[1].Swap()},
+	}
+
+	eset := set.NewNonTS()
+	var hit int
+	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
+		hit++
+		eset.Add(e)
+		return
+	})
+
+	c.Assert(hit, Equals, 1)
+	if s.Directed {
+		c.Assert(eset.Has(edgeSet[0]), Equals, true)
+		c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	} else {
+		c.Assert(eset.Has(edgeSet[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(edgeSet[1]) != eset.Has(flipset[1]), Equals, false)
+		c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	}
+
+	eset = set.NewNonTS()
+	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
+		hit++
+		eset.Add(e)
+		return
+	})
+
+	c.Assert(hit, Equals, 3)
+	if s.Directed {
+		c.Assert(eset.Has(edgeSet[0]), Equals, true)
+		c.Assert(eset.Has(edgeSet[1]), Equals, true)
+	} else {
+		c.Assert(eset.Has(edgeSet[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(edgeSet[1]) != eset.Has(flipset[1]), Equals, true)
+	}
+}
+
+func (s *GraphSuite) TestEachEdgeIncidentToTermination(c *C) {
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+
+	var hit int
+	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})
@@ -463,6 +521,88 @@ func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
+func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"qux", "bar"})...)
+
+	eset := set.NewNonTS()
+	var hit int
+	g.EachArcTo("foo", func(e Edge) (terminate bool) {
+		c.Error("Vertex 'foo' should have no in-edges")
+		c.FailNow()
+		return
+	})
+
+	g.EachArcTo("bar", func(e Edge) (terminate bool) {
+		set.Add(e)
+		hit++
+		return
+	})
+
+	c.Assert(hit, Equals, 2)
+	c.Assert(eset.Has(edgeSet[0]), Equals, true)
+	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(BaseEdge{"qux", "bar"}), Equals, true)
+}
+
+func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"qux", "baz"})...)
+
+	var hit int
+	g.EachArcTo("baz", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
+func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
+
+	eset := set.NewNonTS()
+	var hit int
+	g.EachArcFrom("baz", func(e Edge) (terminate bool) {
+		c.Error("Vertex 'baz' should have no out-edges")
+		c.FailNow()
+		return
+	})
+
+	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+		set.Add(e)
+		hit++
+		return
+	})
+
+	c.Assert(hit, Equals, 2)
+	c.Assert(eset.Has(edgeSet[0]), Equals, true)
+	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(BaseEdge{"foo", "qux"}), Equals, true)
+}
+
+func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
+	g := s.Factory.CreateDirectedGraphFromEdges(append(edgeSet, BaseEdge{"foo", "qux"})...)
+
+	var hit int
+	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
+func (s *DirectedGraphSuite) TestEachEdgeIncidentToTermination(c *C) {
+	g := s.Factory.CreateGraphFromEdges(edgeSet...)
+
+	var hit int
+	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
 /* SimpleGraphSuite - tests for simple graph methods */
 
 type SimpleGraphSuite struct {
@@ -473,6 +613,7 @@ type SimpleGraphSuite struct {
 
 func (s *SimpleGraphSuite) TestDensity(c *C) {
 	empty := s.Factory.CreateEmptySimpleGraph()
+	// TODO just compare directly to math.NaN()
 	c.Assert(math.IsNaN(empty.Density()), Equals, true)
 
 	vev := s.Factory.CreateSimpleGraphFromEdges(BaseEdge{1, 2})

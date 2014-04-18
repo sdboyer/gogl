@@ -20,6 +20,9 @@ var _ PropertyGraph = nullGraph(false)
 
 func (g nullGraph) EachVertex(f VertexLambda)                 {}
 func (g nullGraph) EachEdge(f EdgeLambda)                     {}
+func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeLambda)     {}
+func (g nullGraph) EachArcFrom(Vertex, EdgeLambda)            {}
+func (g nullGraph) EachArcTo(Vertex, EdgeLambda)              {}
 func (g nullGraph) EachWeightedEdge(f func(e WeightedEdge))   {}
 func (g nullGraph) EachLabeledEdge(f func(e LabeledEdge))     {}
 func (g nullGraph) EachPropertyEdge(f func(e PropertyEdge))   {}
