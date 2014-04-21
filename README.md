@@ -5,7 +5,9 @@
 
 gogl is a graph library in Go. Its goal is to provide simple, unifying interfaces and implementations of graph algorithms and datastructures that can scale from use cases for small graphs up to very large (read: distributed) graphs.
 
-There's still a lot to do - gogl is still deciding major aspects of how its public API works.
+gogl is based on the premise that graph computation problems can be [decomplected](http://www.infoq.com/presentations/Simple-Made-Easy) by focusing, first and foremost, on an API modeled on nothing more (or less) than the intrinsic beauty of graph theory - in essence, an isomorphism. Certainly a lofty goal, and possibly a silly premise.
+
+There's still a lot to do - gogl is still firming up significant aspects of how its API works.
 
 ## Principles
 
@@ -44,7 +46,7 @@ func main() {
     g := gogl.NewDirected()
     // Adds two edges (and implicitly, their vertices)
     g.AddEdge(gogl.BaseEdge{"foo", "bar"}, gogl.BaseEdge{"bar", "baz"}))
-    
+
     // Topologically sort your graph from a given start point, producing a slice of vertices
     var tsl []gogl.Vertex
     tsl, _ = dfs.Toposort(g, "foo") // second return is an error
