@@ -279,12 +279,7 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 	list.list = make(map[Vertex]map[Vertex]struct{})
 
 	g.EachEdge(func(edge Edge) (terminate bool) {
-		list.ensureVertex(edge.Source(), edge.Target())
-
-		if _, exists := list.list[edge.Source()][edge.Target()]; !exists {
-			list.list[edge.Source()][edge.Target()] = keyExists
-			list.size++
-		}
+		list.addEdges(edge)
 		return
 	})
 
