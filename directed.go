@@ -442,3 +442,15 @@ func (g *immutableDirected) Transpose() DirectedGraph {
 
 	return g2
 }
+
+// Adds a new edge to the graph.
+func (g *immutableDirected) addEdges(edges ...Edge) {
+	for _, edge := range edges {
+		g.ensureVertex(edge.Source(), edge.Target())
+
+		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+			g.list[edge.Source()][edge.Target()] = keyExists
+			g.size++
+		}
+	}
+}
