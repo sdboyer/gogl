@@ -7,7 +7,8 @@ import (
 )
 
 type GraphBuilder interface {
-	From(g Graph) GraphBuilder
+	Using(g Graph) GraphBuilder
+	Graph() Graph
 }
 
 //type graphStructSpawner struct {
@@ -39,6 +40,14 @@ func (b builderImmutableDirected) Create() *immutableDirected {
 	return g
 }
 
+func (b builderImmutableDirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderImmutableDirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
+}
+
 // Builder/Mutable/Basic/Directed
 var BMBD = builder.Register(builderMutableDirected{}, mutableDirected{al_basic_mut{al_basic{list: make(map[Vertex]map[Vertex]struct{})}, sync.RWMutex{}}}).(builderMutableDirected)
 
@@ -58,6 +67,14 @@ func (b builderMutableDirected) Create() *mutableDirected {
 	}
 
 	return g
+}
+
+func (b builderMutableDirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableDirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
 }
 
 // Builder/Mutable/Basic/Undirected
@@ -81,6 +98,14 @@ func (b builderMutableUndirected) Create() *mutableUndirected {
 	return g
 }
 
+func (b builderMutableUndirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableUndirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
+}
+
 // Builder/Mutable/Weighted/Directed
 var BMWD = builder.Register(builderMutableWeightedDirected{}, weightedDirected{baseWeighted{list: make(map[Vertex]map[Vertex]int), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedDirected)
 
@@ -100,6 +125,14 @@ func (b builderMutableWeightedDirected) Create() *weightedDirected {
 	}
 
 	return g
+}
+
+func (b builderMutableWeightedDirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableWeightedDirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
 }
 
 // Builder/Mutable/Weighted/Undirected
@@ -123,6 +156,14 @@ func (b builderMutableWeightedUndirected) Create() *weightedUndirected {
 	return g
 }
 
+func (b builderMutableWeightedUndirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableWeightedUndirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
+}
+
 // Builder/Mutable/Labeled/Directed
 var BMLD = builder.Register(builderMutableLabeledDirected{}, labeledDirected{baseLabeled{list: make(map[Vertex]map[Vertex]string), size: 0, mu: sync.RWMutex{}}}).(builderMutableLabeledDirected)
 
@@ -142,6 +183,14 @@ func (b builderMutableLabeledDirected) Create() *labeledDirected {
 	}
 
 	return g
+}
+
+func (b builderMutableLabeledDirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableLabeledDirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
 }
 
 // Builder/Mutable/Labeled/Undirected
@@ -165,6 +214,14 @@ func (b builderMutableLabeledUndirected) Create() *labeledUndirected {
 	return g
 }
 
+func (b builderMutableLabeledUndirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutableLabeledUndirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
+}
+
 // Builder/Mutable/Property/Directed
 var BMPD = builder.Register(builderMutablePropertyDirected{}, propertyDirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyDirected)
 
@@ -186,6 +243,14 @@ func (b builderMutablePropertyDirected) Create() *propertyDirected {
 	return g
 }
 
+func (b builderMutablePropertyDirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutablePropertyDirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
+}
+
 // Builder/Mutable/Property/Undirected
 var BMPU = builder.Register(builderMutablePropertyUndirected{}, propertyUndirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyUndirected)
 
@@ -205,4 +270,12 @@ func (b builderMutablePropertyUndirected) Create() *propertyUndirected {
 	}
 
 	return g
+}
+
+func (b builderMutablePropertyUndirected) Graph() Graph {
+	return b.Create()
+}
+
+func (b builderMutablePropertyUndirected) Using(g Graph) GraphBuilder {
+	return b.From(g)
 }
