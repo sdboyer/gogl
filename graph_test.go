@@ -43,10 +43,6 @@ func SetUpSimpleGraphTests(g Graph) bool {
 	// Set up the basic Graph suite unconditionally
 	Suite(&GraphSuite{Graph: g, Factory: gf, Directed: directed})
 
-	if wg, ok := g.(WeightedGraph); ok {
-		Suite(&WeightedGraphSuite{Graph: wg, Factory: gf, Directed: directed})
-	}
-
 	if mwg, ok := g.(MutableWeightedGraph); ok {
 		Suite(&MutableWeightedGraphSuite{Graph: mwg, Factory: gf, Directed: directed})
 	}
@@ -444,56 +440,6 @@ func (s *GraphSuite) TestOrder(c *C) {
 
 	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
-}
-
-/* WeightedGraphSuite - tests for weighted graphs */
-
-type WeightedGraphSuite struct {
-	Graph    WeightedGraph
-	Factory  WeightedGraphCreator
-	Directed bool
-}
-
-func (s *WeightedGraphSuite) TestEachEdge(c *C) {
-	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachEdge() iterator actually do implement WeightedEdge.
-	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
-
-	var we WeightedEdge
-	g.EachEdge(func(e Edge) (terminate bool) {
-		c.Assert(e, Implements, &we)
-		return
-	})
-}
-
-func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
-	g := s.Factory.CreateWeightedGraphFromEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
-
-	edgeset := set.NewNonTS()
-	g.EachWeightedEdge(func(e WeightedEdge) {
-		edgeset.Add(e)
-	})
-
-	if s.Directed {
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
-	} else {
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
-	}
-}
-
-func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
-	edges := []WeightedEdge{BaseWeightedEdge{BaseEdge{1, 2}, 5}}
-	g := s.Factory.CreateWeightedGraphFromEdges(edges...)
-
-	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasWeightedEdge(edges[0]), Equals, true)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
 }
 
 /* MutableWeightedGraphSuite - tests for mutable weighted graphs */

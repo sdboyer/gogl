@@ -14,6 +14,11 @@ import (
 
 var graphFixtures = make(map[string]Graph)
 
+var baseWeightedEdgeSet = []WeightedEdge{
+	BaseWeightedEdge{BaseEdge{1, 2}, 5},
+	BaseWeightedEdge{BaseEdge{2, 3}, -5},
+}
+
 func init() {
 	// TODO use hardcoded fixtures, like the NullGraph (...?)
 	// TODO improve naming basis/patterns for these
@@ -34,6 +39,10 @@ func init() {
 	pair := BMBD.Create()
 	pair.AddEdges(BaseEdge{1, 2})
 	graphFixtures["pair"] = BIBD.From(pair).Create()
+
+	weightedbase := BMWD.Create()
+	weightedbase.AddEdges(baseWeightedEdgeSet...)
+	graphFixtures["w-2e3v"] = BMWD.From(weightedbase).Create()
 }
 
 var _ = SetUpTestsFromBuilder(BMBD)
@@ -65,6 +74,10 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 
 	if _, ok := g.(MutableGraph); ok {
 		Suite(&MutableGraphSuite{b, directed})
+	}
+
+	if _, ok := g.(WeightedGraph); ok {
+		Suite(&WeightedGraphSuite{b, directed})
 	}
 
 	return true
@@ -533,4 +546,52 @@ func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 	g.RemoveVertex(1)
 
 	c.Assert(g.Size(), Equals, 1)
+}
+
+/* WeightedGraphSuite - tests for weighted graphs */
+
+type WeightedGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *WeightedGraphSuite) TestEachEdge(c *C) {
+	// This method is not redundant with the base Graph suite as it ensures that the edges
+	// provided by the EachEdge() iterator actually do implement WeightedEdge.
+	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
+
+	var we WeightedEdge
+	g.EachEdge(func(e Edge) (terminate bool) {
+		c.Assert(e, Implements, &we)
+		return
+	})
+}
+
+func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
+	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
+
+	edgeset := set.NewNonTS()
+	g.EachWeightedEdge(func(e WeightedEdge) {
+		edgeset.Add(e)
+	})
+
+	if s.Directed {
+		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
+		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, true)
+		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
+		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
+	} else {
+		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
+		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
+		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
+		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
+	}
+}
+
+func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
+	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
+
+	// TODO figure out how to meaningfully test undirected graphs' logic here
+	c.Assert(g.HasWeightedEdge(baseWeightedEdgeSet[0]), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
 }
