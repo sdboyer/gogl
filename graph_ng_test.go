@@ -80,6 +80,10 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 		Suite(&WeightedGraphSuite{b, directed})
 	}
 
+	if _, ok := g.(MutableWeightedGraph); ok {
+		Suite(&MutableWeightedGraphSuite{b, directed})
+	}
+
 	return true
 }
 
@@ -594,4 +598,109 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasWeightedEdge(baseWeightedEdgeSet[0]), Equals, true)
 	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
+}
+
+/* MutableWeightedGraphSuite - tests for mutable weighted graphs */
+
+type MutableWeightedGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+
+	g.EnsureVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.RemoveVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.AddEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+
+	g.RemoveEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+}
+
+func (s *MutableWeightedGraphSuite) TestEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+
+	g.EnsureVertex("foo")
+	c.Assert(g.HasVertex("foo"), Equals, true)
+}
+
+func (s *MutableWeightedGraphSuite) TestMultiEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+
+	g.EnsureVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, true)
+	c.Assert(g.HasVertex("baz"), Equals, true)
+}
+
+func (s *MutableWeightedGraphSuite) TestRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+}
+
+func (s *MutableWeightedGraphSuite) TestMultiRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+	c.Assert(g.HasVertex("baz"), Equals, false)
+}
+
+func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 3}), Equals, false)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, -3}), Equals, false)
+
+	// Now test removal
+	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, false)
+}
+
+func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableWeightedGraph)
+	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+
+	// Basic edge tests first
+	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
+	// Thus, this is not just duplicate testing of the Has*Edge() method.
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
+
+	// Now weighted edge tests
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 3}), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 3}), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, 1}), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{3, 2}, 1}), Equals, false) // wrong weight
+
+	// Now test removal
+	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, false)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
 }
