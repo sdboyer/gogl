@@ -59,3 +59,150 @@ func (b builderMutableDirected) Create() *mutableDirected {
 
 	return g
 }
+
+// Builder/Mutable/Basic/Undirected
+var BMBU = builder.Register(builderMutableUndirected{}, mutableUndirected{al_basic_mut{al_basic{list: make(map[Vertex]map[Vertex]struct{})}, sync.RWMutex{}}}).(builderMutableUndirected)
+
+type builderMutableUndirected builder.Builder
+
+func (b builderMutableUndirected) From(g Graph) builderMutableUndirected {
+	return builder.Set(b, "from", g).(builderMutableUndirected)
+}
+
+func (b builderMutableUndirected) Create() *mutableUndirected {
+	gv := builder.GetStruct(b).(mutableUndirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Weighted/Directed
+var BMWD = builder.Register(builderMutableWeightedDirected{}, weightedDirected{baseWeighted{list: make(map[Vertex]map[Vertex]int), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedDirected)
+
+type builderMutableWeightedDirected builder.Builder
+
+func (b builderMutableWeightedDirected) From(g Graph) builderMutableWeightedDirected {
+	return builder.Set(b, "from", g).(builderMutableWeightedDirected)
+}
+
+func (b builderMutableWeightedDirected) Create() *weightedDirected {
+	gv := builder.GetStruct(b).(weightedDirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Weighted/Undirected
+var BMWU = builder.Register(builderMutableWeightedUndirected{}, weightedUndirected{baseWeighted{list: make(map[Vertex]map[Vertex]int), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedUndirected)
+
+type builderMutableWeightedUndirected builder.Builder
+
+func (b builderMutableWeightedUndirected) From(g Graph) builderMutableWeightedUndirected {
+	return builder.Set(b, "from", g).(builderMutableWeightedUndirected)
+}
+
+func (b builderMutableWeightedUndirected) Create() *weightedUndirected {
+	gv := builder.GetStruct(b).(weightedUndirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Labeled/Directed
+var BMLD = builder.Register(builderMutableLabeledDirected{}, labeledDirected{baseLabeled{list: make(map[Vertex]map[Vertex]string), size: 0, mu: sync.RWMutex{}}}).(builderMutableLabeledDirected)
+
+type builderMutableLabeledDirected builder.Builder
+
+func (b builderMutableLabeledDirected) From(g Graph) builderMutableLabeledDirected {
+	return builder.Set(b, "from", g).(builderMutableLabeledDirected)
+}
+
+func (b builderMutableLabeledDirected) Create() *labeledDirected {
+	gv := builder.GetStruct(b).(labeledDirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Labeled/Undirected
+var BMLU = builder.Register(builderMutableLabeledUndirected{}, labeledUndirected{baseLabeled{list: make(map[Vertex]map[Vertex]string), size: 0, mu: sync.RWMutex{}}}).(builderMutableLabeledUndirected)
+
+type builderMutableLabeledUndirected builder.Builder
+
+func (b builderMutableLabeledUndirected) From(g Graph) builderMutableLabeledUndirected {
+	return builder.Set(b, "from", g).(builderMutableLabeledUndirected)
+}
+
+func (b builderMutableLabeledUndirected) Create() *labeledUndirected {
+	gv := builder.GetStruct(b).(labeledUndirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Property/Directed
+var BMPD = builder.Register(builderMutablePropertyDirected{}, propertyDirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyDirected)
+
+type builderMutablePropertyDirected builder.Builder
+
+func (b builderMutablePropertyDirected) From(g Graph) builderMutablePropertyDirected {
+	return builder.Set(b, "from", g).(builderMutablePropertyDirected)
+}
+
+func (b builderMutablePropertyDirected) Create() *propertyDirected {
+	gv := builder.GetStruct(b).(propertyDirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
+
+// Builder/Mutable/Property/Undirected
+var BMPU = builder.Register(builderMutablePropertyUndirected{}, propertyUndirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyUndirected)
+
+type builderMutablePropertyUndirected builder.Builder
+
+func (b builderMutablePropertyUndirected) From(g Graph) builderMutablePropertyUndirected {
+	return builder.Set(b, "from", g).(builderMutablePropertyUndirected)
+}
+
+func (b builderMutablePropertyUndirected) Create() *propertyUndirected {
+	gv := builder.GetStruct(b).(propertyUndirected)
+	g := &gv
+
+	if from, exists := builder.Get(b, "from"); exists {
+		from := from.(Graph)
+		functorToAdjacencyList(from, g)
+	}
+
+	return g
+}
