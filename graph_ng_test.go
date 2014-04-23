@@ -14,15 +14,21 @@ import (
 var graphFixtures = make(map[string]Graph)
 
 func init() {
+	// TODO use hardcoded fixtures, like the NullGraph (...?)
+	// TODO improve naming basis/patterns for these
 	base := BMBD.Create()
 	base.AddEdges(edgeSet...)
 	graphFixtures["2e3v"] = BIBD.From(base).Create()
 
 	base.AddEdges(BaseEdge{"foo", "qux"})
+	base2 := BMBD.From(base).Create()
 	graphFixtures["3e4v"] = BIBD.From(base).Create()
 
 	base.EnsureVertex("isolate")
 	graphFixtures["3e5v1i"] = BIBD.From(base).Create()
+
+	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
+	graphFixtures["arctest"] = BIBD.From(base2).Create()
 }
 
 var _ = SetUpTestsFromBuilder(BMBD)
@@ -36,7 +42,14 @@ var _ = SetUpTestsFromBuilder(BMPD)
 var _ = SetUpTestsFromBuilder(BMPU)
 
 func SetUpTestsFromBuilder(b GraphBuilder) bool {
-	_, directed := b.Graph().(DirectedGraph)
+	var directed bool
+
+	g := b.Graph()
+
+	if _, ok := g.(DirectedGraph); ok {
+		directed = true
+		Suite(&DirectedGraphSuite{Builder: b})
+	}
 
 	// Set up the basic Graph suite unconditionally
 	Suite(&GraphSuiteNG{Builder: b, Directed: directed})
@@ -238,4 +251,150 @@ func (s *GraphSuiteNG) TestSize(c *C) {
 func (s *GraphSuiteNG) TestOrder(c *C) {
 	c.Assert(s.Builder.Graph().Order(), Equals, 0)
 	c.Assert(s.Builder.Using(graphFixtures["2e3v"]).Graph().Order(), Equals, 3)
+}
+
+/* DirectedGraphSuite - tests for directed graph methods */
+
+type DirectedGraphSuite struct {
+	Builder GraphBuilder
+}
+
+func (s *DirectedGraphSuite) TestTranspose(c *C) {
+	g := s.Builder.Using(graphFixtures["2e3v"]).Graph().(DirectedGraph)
+
+	g2 := g.Transpose()
+
+	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge).swap()), Equals, true)
+
+	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge)), Equals, false)
+}
+
+func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
+	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph().(DirectedGraph)
+
+	count, exists := g.OutDegreeOf("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 2)
+
+	count, exists = g.OutDegreeOf("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.OutDegreeOf("baz")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.OutDegreeOf("qux")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.DegreeOf("isolate")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.OutDegreeOf("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
+}
+
+func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
+	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph().(DirectedGraph)
+
+	count, exists := g.InDegreeOf("foo")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.InDegreeOf("bar")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.InDegreeOf("baz")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.InDegreeOf("qux")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 1)
+
+	count, exists = g.DegreeOf("isolate")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
+
+	count, exists = g.InDegreeOf("missing")
+	c.Assert(exists, Equals, false)
+	c.Assert(count, Equals, 0)
+}
+
+func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
+	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+
+	eset := set.NewNonTS()
+	var hit int
+	g.EachArcTo("foo", func(e Edge) (terminate bool) {
+		c.Error("Vertex 'foo' should have no in-edges")
+		c.FailNow()
+		return
+	})
+
+	g.EachArcTo("bar", func(e Edge) (terminate bool) {
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		hit++
+		return
+	})
+
+	c.Assert(hit, Equals, 2)
+	c.Assert(eset.Has(edgeSet[0]), Equals, true)
+	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(BaseEdge{"qux", "bar"}), Equals, true)
+}
+
+func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
+	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+
+	var hit int
+	g.EachArcTo("baz", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
+func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
+	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+
+	eset := set.NewNonTS()
+	var hit int
+	g.EachArcFrom("baz", func(e Edge) (terminate bool) {
+		c.Error("Vertex 'baz' should have no out-edges")
+		c.FailNow()
+		return
+	})
+
+	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+		// A more specific edge type may be passed, but in this test we care only about the base
+		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		hit++
+		return
+	})
+
+	c.Assert(hit, Equals, 2)
+	c.Assert(eset.Has(edgeSet[0]), Equals, true)
+	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(BaseEdge{"foo", "qux"}), Equals, true)
+}
+
+func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
+	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+
+	var hit int
+	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
 }
