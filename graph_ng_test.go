@@ -20,6 +20,9 @@ func init() {
 
 	base.AddEdges(BaseEdge{"foo", "qux"})
 	graphFixtures["3e4v"] = BIBD.From(base).Create()
+
+	base.EnsureVertex("isolate")
+	graphFixtures["3e5v1i"] = BIBD.From(base).Create()
 }
 
 var _ = SetUpTestsFromBuilder(BMBD)
@@ -200,9 +203,8 @@ func (s *GraphSuiteNG) TestEachEdgeIncidentToTermination(c *C) {
 }
 
 func (s *GraphSuiteNG) TestDegreeOf(c *C) {
-	g := s.Builder.Using(graphFixtures["3e4v"]).Graph()
+	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph()
 
-	// TODO test vertex isolates...can't make them in current testing harness
 	count, exists := g.DegreeOf("foo")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 2)
@@ -218,6 +220,10 @@ func (s *GraphSuiteNG) TestDegreeOf(c *C) {
 	count, exists = g.DegreeOf("qux")
 	c.Assert(exists, Equals, true)
 	c.Assert(count, Equals, 1)
+
+	count, exists = g.DegreeOf("isolate")
+	c.Assert(exists, Equals, true)
+	c.Assert(count, Equals, 0)
 
 	count, exists = g.DegreeOf("missing")
 	c.Assert(exists, Equals, false)
