@@ -1,12 +1,13 @@
 package gogl
 
 import (
+	"fmt"
+	"math"
+	"reflect"
+	"testing"
+
 	"gopkg.in/fatih/set.v0"
 	. "launchpad.net/gocheck"
-	"math"
-	"testing"
-	"reflect"
-	"fmt"
 )
 
 /////////////////////////////////////////////////////////////////////

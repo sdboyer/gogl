@@ -2,8 +2,9 @@ package gogl
 
 // Defines a builder for use in creating graph objects.
 import (
-	"github.com/lann/builder"
 	"sync"
+
+	"github.com/lann/builder"
 )
 
 type GraphBuilder interface {
