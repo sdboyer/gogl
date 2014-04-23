@@ -19,6 +19,11 @@ var baseWeightedEdgeSet = []WeightedEdge{
 	BaseWeightedEdge{BaseEdge{2, 3}, -5},
 }
 
+var baseLabeledEdgeSet = []LabeledEdge{
+	BaseLabeledEdge{BaseEdge{1, 2}, "foo"},
+	BaseLabeledEdge{BaseEdge{2, 3}, "bar"},
+}
+
 func init() {
 	// TODO use hardcoded fixtures, like the NullGraph (...?)
 	// TODO improve naming basis/patterns for these
@@ -43,6 +48,10 @@ func init() {
 	weightedbase := BMWD.Create()
 	weightedbase.AddEdges(baseWeightedEdgeSet...)
 	graphFixtures["w-2e3v"] = BMWD.From(weightedbase).Create()
+
+	labeledbase := BMLD.Create()
+	labeledbase.AddEdges(baseLabeledEdgeSet...)
+	graphFixtures["l-2e3v"] = BMLD.From(labeledbase).Create()
 }
 
 var _ = SetUpTestsFromBuilder(BMBD)
@@ -82,6 +91,14 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 
 	if _, ok := g.(MutableWeightedGraph); ok {
 		Suite(&MutableWeightedGraphSuite{b, directed})
+	}
+
+	if _, ok := g.(LabeledGraph); ok {
+		Suite(&LabeledGraphSuite{b, directed})
+	}
+
+	if _, ok := g.(MutableLabeledGraph); ok {
+		Suite(&MutableLabeledGraphSuite{b, directed})
 	}
 
 	return true
@@ -704,3 +721,158 @@ func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
 	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
 }
+
+/* LabeledGraphSuite - tests for labeled graphs */
+
+type LabeledGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *LabeledGraphSuite) TestEachEdge(c *C) {
+	// This method is not redundant with the base Graph suite as it ensures that the edges
+	// provided by the EachEdge() iterator actually do implement LabeledEdge.
+	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
+
+	var we LabeledEdge
+	g.EachEdge(func(e Edge) (terminate bool) {
+		c.Assert(e, Implements, &we)
+		return
+	})
+}
+
+func (s *LabeledGraphSuite) TestEachLabeledEdge(c *C) {
+	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
+
+	edgeset := set.NewNonTS()
+	g.EachLabeledEdge(func(e LabeledEdge) {
+		edgeset.Add(e)
+	})
+
+	if s.Directed {
+		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
+		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, true)
+		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
+		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
+	} else {
+		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}) != edgeset.Has(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, true)
+		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}) != edgeset.Has(BaseLabeledEdge{BaseEdge{3, 2}, "bar"}), Equals, true)
+		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
+		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
+	}
+}
+
+func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
+	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
+
+	// TODO figure out how to meaningfully test undirected graphs' logic here
+	c.Assert(g.HasLabeledEdge(baseLabeledEdgeSet[0]), Equals, true)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
+}
+
+/* MutableLabeledGraphSuite - tests for mutable labeled graphs */
+
+type MutableLabeledGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *MutableLabeledGraphSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+
+	g.EnsureVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.RemoveVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.AddEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+
+	g.RemoveEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+}
+
+func (s *MutableLabeledGraphSuite) TestEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+
+	g.EnsureVertex("foo")
+	c.Assert(g.HasVertex("foo"), Equals, true)
+}
+
+func (s *MutableLabeledGraphSuite) TestMultiEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+
+	g.EnsureVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, true)
+	c.Assert(g.HasVertex("baz"), Equals, true)
+}
+
+func (s *MutableLabeledGraphSuite) TestRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+}
+
+func (s *MutableLabeledGraphSuite) TestMultiRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+	c.Assert(g.HasVertex("baz"), Equals, false)
+}
+
+func (s *MutableLabeledGraphSuite) TestAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"})
+
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "baz"}), Equals, false)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "quark"}), Equals, false)
+
+	// Now test removal
+	g.RemoveEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"})
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+}
+
+func (s *MutableLabeledGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableLabeledGraph)
+	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
+
+	// Basic edge tests first
+	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
+	// Thus, this is not just duplicate testing of the Has*Edge() method.
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
+
+	// Now labeled edge tests
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "baz"}), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "baz"}), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, true)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{3, 2}, "bar"}), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{3, 2}, "qux"}), Equals, false) // wrong label
+
+	// Now test removal
+	g.RemoveEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+}
+
+
