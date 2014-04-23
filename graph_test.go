@@ -43,10 +43,6 @@ func SetUpSimpleGraphTests(g Graph) bool {
 	// Set up the basic Graph suite unconditionally
 	Suite(&GraphSuite{Graph: g, Factory: gf, Directed: directed})
 
-	if mg, ok := g.(MutableGraph); ok {
-		Suite(&MutableGraphSuite{Graph: mg, Factory: gf, Directed: directed})
-	}
-
 	if wg, ok := g.(WeightedGraph); ok {
 		Suite(&WeightedGraphSuite{Graph: wg, Factory: gf, Directed: directed})
 	}
@@ -448,105 +444,6 @@ func (s *GraphSuite) TestOrder(c *C) {
 
 	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
-}
-
-/* MutableGraphSuite - tests for mutable graph methods */
-
-type MutableGraphSuite struct {
-	Graph    MutableGraph
-	Factory  MutableGraphCreator
-	Directed bool
-}
-
-func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.EnsureVertex()
-	c.Assert(g.Order(), Equals, 0)
-
-	g.RemoveVertex()
-	c.Assert(g.Order(), Equals, 0)
-
-	g.AddEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
-
-	g.RemoveEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
-}
-
-func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.EnsureVertex("foo")
-	c.Assert(g.HasVertex("foo"), Equals, true)
-}
-
-func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.EnsureVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, true)
-	c.Assert(g.HasVertex("baz"), Equals, true)
-}
-
-func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-}
-
-func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-	c.Assert(g.HasVertex("baz"), Equals, false)
-}
-
-func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Factory.CreateMutableGraph()
-	g.AddEdges(&BaseEdge{1, 2})
-
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
-
-	// Now test removal
-	g.RemoveEdges(&BaseEdge{1, 2})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, false)
-}
-
-func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
-
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
-	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed)
-
-	// Now test removal
-	g.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
-}
-
-// Checks to ensure that removal works for both in-edges and out-edges.
-func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
-	g := s.Factory.CreateMutableGraph()
-
-	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
-	g.RemoveVertex(1)
-
-	c.Assert(g.Size(), Equals, 1)
 }
 
 /* WeightedGraphSuite - tests for weighted graphs */

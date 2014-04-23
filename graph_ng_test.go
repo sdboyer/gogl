@@ -63,6 +63,10 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 		Suite(&SimpleGraphSuite{b, directed})
 	}
 
+	if _, ok := g.(MutableGraph); ok {
+		Suite(&MutableGraphSuite{b, directed})
+	}
+
 	return true
 }
 
@@ -431,4 +435,102 @@ func (s *SimpleGraphSuite) TestDensity(c *C) {
 	} else {
 		c.Assert(g.Density(), Equals, float64(2)/float64(3))
 	}
+}
+
+/* MutableGraphSuite - tests for mutable graph methods */
+
+type MutableGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.EnsureVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.RemoveVertex()
+	c.Assert(g.Order(), Equals, 0)
+
+	g.AddEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+
+	g.RemoveEdges()
+	c.Assert(g.Order(), Equals, 0)
+	c.Assert(g.Size(), Equals, 0)
+}
+
+func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.EnsureVertex("foo")
+	c.Assert(g.HasVertex("foo"), Equals, true)
+}
+
+func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.EnsureVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, true)
+	c.Assert(g.HasVertex("baz"), Equals, true)
+}
+
+func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+}
+
+func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.EnsureVertex("bar", "baz")
+	g.RemoveVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+	c.Assert(g.HasVertex("baz"), Equals, false)
+}
+
+func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+	g.AddEdges(&BaseEdge{1, 2})
+
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+
+	// Now test removal
+	g.RemoveEdges(&BaseEdge{1, 2})
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, false)
+}
+
+func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
+	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed)
+
+	// Now test removal
+	g.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+}
+
+// Checks to ensure that removal works for both in-edges and out-edges.
+func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
+	g := s.Builder.Graph().(MutableGraph)
+
+	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
+	g.RemoveVertex(1)
+
+	c.Assert(g.Size(), Equals, 1)
 }
