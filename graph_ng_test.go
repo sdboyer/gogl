@@ -3,6 +3,7 @@ package gogl
 import (
 	"gopkg.in/fatih/set.v0"
 	. "launchpad.net/gocheck"
+	"math"
 )
 
 /////////////////////////////////////////////////////////////////////
@@ -29,6 +30,10 @@ func init() {
 
 	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
 	graphFixtures["arctest"] = BIBD.From(base2).Create()
+
+	pair := BMBD.Create()
+	pair.AddEdges(BaseEdge{1, 2})
+	graphFixtures["pair"] = BIBD.From(pair).Create()
 }
 
 var _ = SetUpTestsFromBuilder(BMBD)
@@ -52,7 +57,11 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 	}
 
 	// Set up the basic Graph suite unconditionally
-	Suite(&GraphSuiteNG{Builder: b, Directed: directed})
+	Suite(&GraphSuiteNG{b, directed})
+
+	if _, ok := g.(SimpleGraph); ok {
+		Suite(&SimpleGraphSuite{b, directed})
+	}
 
 	return true
 }
@@ -397,4 +406,29 @@ func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
 	})
 
 	c.Assert(hit, Equals, 1)
+}
+
+/* SimpleGraphSuite - tests for simple graph methods */
+
+type SimpleGraphSuite struct {
+	Builder  GraphBuilder
+	Directed bool
+}
+
+func (s *SimpleGraphSuite) TestDensity(c *C) {
+	c.Assert(math.IsNaN(s.Builder.Graph().(SimpleGraph).Density()), DeepEquals, true)
+
+	g := s.Builder.Using(graphFixtures["pair"]).Graph().(SimpleGraph)
+	if s.Directed {
+		c.Assert(g.Density(), Equals, float64(0.5))
+	} else {
+		c.Assert(g.Density(), Equals, float64(1))
+	}
+
+	g = s.Builder.Using(graphFixtures["2e3v"]).Graph().(SimpleGraph)
+	if s.Directed {
+		c.Assert(g.Density(), Equals, float64(2)/float64(6))
+	} else {
+		c.Assert(g.Density(), Equals, float64(2)/float64(3))
+	}
 }

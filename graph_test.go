@@ -2,7 +2,6 @@ package gogl
 
 import (
 	"fmt"
-	"math"
 	"reflect"
 	"testing"
 
@@ -70,10 +69,6 @@ func SetUpSimpleGraphTests(g Graph) bool {
 
 	if mpg, ok := g.(MutablePropertyGraph); ok {
 		Suite(&MutablePropertyGraphSuite{Graph: mpg, Factory: gf, Directed: directed})
-	}
-
-	if sg, ok := g.(SimpleGraph); ok {
-		Suite(&SimpleGraphSuite{Graph: sg, Factory: gf, Directed: directed})
 	}
 
 	return true
@@ -453,34 +448,6 @@ func (s *GraphSuite) TestOrder(c *C) {
 
 	g := s.Factory.CreateEmptyGraph()
 	c.Assert(g.Size(), Equals, 0)
-}
-
-/* SimpleGraphSuite - tests for simple graph methods */
-
-type SimpleGraphSuite struct {
-	Graph    Graph
-	Factory  SimpleGraphCreator
-	Directed bool
-}
-
-func (s *SimpleGraphSuite) TestDensity(c *C) {
-	empty := s.Factory.CreateEmptySimpleGraph()
-	// TODO just compare directly to math.NaN()
-	c.Assert(math.IsNaN(empty.Density()), Equals, true)
-
-	vev := s.Factory.CreateSimpleGraphFromEdges(BaseEdge{1, 2})
-	if s.Directed {
-		c.Assert(vev.Density(), Equals, float64(0.5))
-	} else {
-		c.Assert(vev.Density(), Equals, float64(1))
-	}
-
-	vevev := s.Factory.CreateSimpleGraphFromEdges(BaseEdge{1, 2}, BaseEdge{2, 3})
-	if s.Directed {
-		c.Assert(vevev.Density(), Equals, float64(2)/float64(6))
-	} else {
-		c.Assert(vevev.Density(), Equals, float64(2)/float64(3))
-	}
 }
 
 /* MutableGraphSuite - tests for mutable graph methods */
