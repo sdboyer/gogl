@@ -3,31 +3,12 @@ package gogl
 import (
 	"fmt"
 	"reflect"
-	"testing"
 
 	"gopkg.in/fatih/set.v0"
 	. "launchpad.net/gocheck"
 )
 
 var _ = fmt.Println
-
-// Hook gocheck into the go test runner
-func Test(t *testing.T) { TestingT(t) }
-
-var edgeSet = []Edge{
-	BaseEdge{"foo", "bar"},
-	BaseEdge{"bar", "baz"},
-}
-
-// swap method is useful for some testing shorthand
-func (e BaseEdge) swap() Edge {
-	return BaseEdge{e.V, e.U}
-}
-
-func gdebug(g Graph, args ...interface{}) {
-	fmt.Println("DEBUG: graph type", reflect.New(reflect.Indirect(reflect.ValueOf(g)).Type()))
-	fmt.Println(args...)
-}
 
 // This function automatically sets up suites of black box unit tests for
 // graphs by determining which gogl interfaces they implement.

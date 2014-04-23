@@ -4,6 +4,9 @@ import (
 	"gopkg.in/fatih/set.v0"
 	. "launchpad.net/gocheck"
 	"math"
+	"testing"
+	"reflect"
+	"fmt"
 )
 
 /////////////////////////////////////////////////////////////////////
@@ -13,6 +16,11 @@ import (
 /////////////////////////////////////////////////////////////////////
 
 var graphFixtures = make(map[string]Graph)
+
+var edgeSet = []Edge{
+	BaseEdge{"foo", "bar"},
+	BaseEdge{"bar", "baz"},
+}
 
 var baseWeightedEdgeSet = []WeightedEdge{
 	BaseWeightedEdge{BaseEdge{1, 2}, 5},
@@ -63,15 +71,30 @@ func init() {
 	graphFixtures["p-2e3v"] = BMPD.From(propertybase).Create()
 }
 
-var _ = SetUpTestsFromBuilder(BMBD)
-var _ = SetUpTestsFromBuilder(BMBU)
-var _ = SetUpTestsFromBuilder(BIBD)
-var _ = SetUpTestsFromBuilder(BMWD)
-var _ = SetUpTestsFromBuilder(BMWU)
-var _ = SetUpTestsFromBuilder(BMLD)
-var _ = SetUpTestsFromBuilder(BMLU)
-var _ = SetUpTestsFromBuilder(BMPD)
-var _ = SetUpTestsFromBuilder(BMPU)
+/////////////////////////////////////////////////////////////////////
+//
+// HELPERS
+//
+/////////////////////////////////////////////////////////////////////
+
+// Hook gocheck into the go test runner
+func TestHookup(t *testing.T) { TestingT(t) }
+
+// swap method is useful for some testing shorthand
+func (e BaseEdge) swap() Edge {
+	return BaseEdge{e.V, e.U}
+}
+
+func gdebug(g Graph, args ...interface{}) {
+	fmt.Println("DEBUG: graph type", reflect.New(reflect.Indirect(reflect.ValueOf(g)).Type()))
+	fmt.Println(args...)
+}
+
+/////////////////////////////////////////////////////////////////////
+//
+// SUITE SETUP
+//
+/////////////////////////////////////////////////////////////////////
 
 func SetUpTestsFromBuilder(b GraphBuilder) bool {
 	var directed bool
@@ -120,6 +143,22 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 
 	return true
 }
+
+var _ = SetUpTestsFromBuilder(BMBD)
+var _ = SetUpTestsFromBuilder(BMBU)
+var _ = SetUpTestsFromBuilder(BIBD)
+var _ = SetUpTestsFromBuilder(BMWD)
+var _ = SetUpTestsFromBuilder(BMWU)
+var _ = SetUpTestsFromBuilder(BMLD)
+var _ = SetUpTestsFromBuilder(BMLU)
+var _ = SetUpTestsFromBuilder(BMPD)
+var _ = SetUpTestsFromBuilder(BMPU)
+
+/////////////////////////////////////////////////////////////////////
+//
+// SUITES
+//
+/////////////////////////////////////////////////////////////////////
 
 /* GraphSuiteNG - tests for non-mutable graph methods */
 
