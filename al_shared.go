@@ -25,7 +25,7 @@ func functorToAdjacencyList(from Graph, to interface{}) {
 			if e, ok := edge.(WeightedEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(BaseWeightedEdge{BaseEdge{U: e.Source(), V: e.Target()}, 0})
+				g.addEdges(BaseWeightedEdge{BaseEdge{U: edge.Source(), V: edge.Target()}, 0})
 			}
 			return
 		})
@@ -35,7 +35,7 @@ func functorToAdjacencyList(from Graph, to interface{}) {
 			if e, ok := edge.(LabeledEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(BaseLabeledEdge{BaseEdge{U: e.Source(), V: e.Target()}, ""})
+				g.addEdges(BaseLabeledEdge{BaseEdge{U: edge.Source(), V: edge.Target()}, ""})
 			}
 			return
 		})
@@ -45,7 +45,7 @@ func functorToAdjacencyList(from Graph, to interface{}) {
 			if e, ok := edge.(PropertyEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(BasePropertyEdge{BaseEdge{U: e.Source(), V: e.Target()}, struct{}{}})
+				g.addEdges(BasePropertyEdge{BaseEdge{U: edge.Source(), V: edge.Target()}, struct{}{}})
 			}
 			return
 		})
