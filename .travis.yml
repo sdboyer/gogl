@@ -5,4 +5,5 @@ go:
 install:
   - go get -t launchpad.net/gocheck
   - go get gopkg.in/fatih/set.v0
+  - go get github.com/lann/builder
 script: go test -v ./... -gocheck.v

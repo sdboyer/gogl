@@ -327,9 +327,9 @@ func (g *immutableDirected) EachAdjacent(start Vertex, f VertexLambda) {
 	g.EachEdgeIncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
-			return f(u)
-		} else {
 			return f(v)
+		} else {
+			return f(u)
 		}
 	})
 }
