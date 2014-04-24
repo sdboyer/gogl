@@ -233,12 +233,12 @@ func (s *GraphSuite) TestEachEdgeTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuite) TestEachAdjacent(c *C) {
+func (s *GraphSuite) TestEachAdjacentTo(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	vset := set.NewNonTS()
 	var hit int
-	g.EachAdjacent("bar", func(adj Vertex) (terminate bool) {
+	g.EachAdjacentTo("bar", func(adj Vertex) (terminate bool) {
 		hit++
 		vset.Add(adj)
 		return
@@ -250,11 +250,11 @@ func (s *GraphSuite) TestEachAdjacent(c *C) {
 	c.Assert(hit, Equals, 2)
 }
 
-func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
+func (s *GraphSuite) TestEachAdjacentToTermination(c *C) {
 	g := s.Builder.Using(graphFixtures["3e4v"]).Graph()
 
 	var hit int
-	g.EachAdjacent("foo", func(adjacent Vertex) bool {
+	g.EachAdjacentTo("foo", func(adjacent Vertex) bool {
 		hit++
 		return true
 	})

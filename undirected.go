@@ -71,7 +71,7 @@ func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *mutableUndirected) EachAdjacent(vertex Vertex, f VertexLambda) {
+func (g *mutableUndirected) EachAdjacentTo(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

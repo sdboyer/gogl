@@ -167,7 +167,7 @@ func (g *weightedDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *weightedDirected) EachAdjacent(start Vertex, f VertexLambda) {
+func (g *weightedDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -464,7 +464,7 @@ func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *weightedUndirected) EachAdjacent(vertex Vertex, f VertexLambda) {
+func (g *weightedUndirected) EachAdjacentTo(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

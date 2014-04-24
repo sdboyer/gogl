@@ -51,7 +51,7 @@ type IncidentArcEnumerator interface {
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
-	EachAdjacent(start Vertex, adjacentVertexLambda VertexLambda)
+	EachAdjacentTo(start Vertex, adjacentVertexLambda VertexLambda)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.

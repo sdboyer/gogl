@@ -404,7 +404,7 @@ func (w *walker) dfutraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachAdjacent(v, func(to gogl.Vertex) (terminate bool) {
+		w.g.EachAdjacentTo(v, func(to gogl.Vertex) (terminate bool) {
 			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
 			w.dfutraverse(to)
 			return

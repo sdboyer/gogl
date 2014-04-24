@@ -26,7 +26,7 @@ func (g nullGraph) EachArcTo(Vertex, EdgeLambda)              {}
 func (g nullGraph) EachWeightedEdge(f func(e WeightedEdge))   {}
 func (g nullGraph) EachLabeledEdge(f func(e LabeledEdge))     {}
 func (g nullGraph) EachPropertyEdge(f func(e PropertyEdge))   {}
-func (g nullGraph) EachAdjacent(start Vertex, f VertexLambda) {}
+func (g nullGraph) EachAdjacentTo(start Vertex, f VertexLambda) {}
 
 func (g nullGraph) HasVertex(v Vertex) bool {
 	return false
