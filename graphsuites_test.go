@@ -108,7 +108,7 @@ func SetUpTestsFromBuilder(b GraphBuilder) bool {
 	}
 
 	// Set up the basic Graph suite unconditionally
-	Suite(&GraphSuiteNG{b, directed})
+	Suite(&GraphSuite{b, directed})
 
 	if _, ok := g.(SimpleGraph); ok {
 		Suite(&SimpleGraphSuite{b, directed})
@@ -161,26 +161,26 @@ var _ = SetUpTestsFromBuilder(BMPU)
 //
 /////////////////////////////////////////////////////////////////////
 
-/* GraphSuiteNG - tests for non-mutable graph methods */
+/* GraphSuite - tests for non-mutable graph methods */
 
-type GraphSuiteNG struct {
+type GraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
 }
 
-func (s *GraphSuiteNG) TestHasVertex(c *C) {
+func (s *GraphSuite) TestHasVertex(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 	c.Assert(g.HasVertex("qux"), Equals, false)
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
-func (s *GraphSuiteNG) TestHasEdge(c *C) {
+func (s *GraphSuite) TestHasEdge(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 	c.Assert(g.HasEdge(edgeSet[0]), Equals, true)
 	c.Assert(g.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)
 }
 
-func (s *GraphSuiteNG) TestEachVertex(c *C) {
+func (s *GraphSuite) TestEachVertex(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	vset := set.NewNonTS()
@@ -197,7 +197,7 @@ func (s *GraphSuiteNG) TestEachVertex(c *C) {
 	c.Assert(hit, Equals, 3)
 }
 
-func (s *GraphSuiteNG) TestEachVertexTermination(c *C) {
+func (s *GraphSuite) TestEachVertexTermination(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	var hit int
@@ -209,7 +209,7 @@ func (s *GraphSuiteNG) TestEachVertexTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuiteNG) TestEachEdge(c *C) {
+func (s *GraphSuite) TestEachEdge(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	var hit int
@@ -221,7 +221,7 @@ func (s *GraphSuiteNG) TestEachEdge(c *C) {
 	c.Assert(hit, Equals, 2)
 }
 
-func (s *GraphSuiteNG) TestEachEdgeTermination(c *C) {
+func (s *GraphSuite) TestEachEdgeTermination(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	var hit int
@@ -233,7 +233,7 @@ func (s *GraphSuiteNG) TestEachEdgeTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuiteNG) TestEachAdjacent(c *C) {
+func (s *GraphSuite) TestEachAdjacent(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	vset := set.NewNonTS()
@@ -250,7 +250,7 @@ func (s *GraphSuiteNG) TestEachAdjacent(c *C) {
 	c.Assert(hit, Equals, 2)
 }
 
-func (s *GraphSuiteNG) TestEachAdjacentTermination(c *C) {
+func (s *GraphSuite) TestEachAdjacentTermination(c *C) {
 	g := s.Builder.Using(graphFixtures["3e4v"]).Graph()
 
 	var hit int
@@ -262,7 +262,7 @@ func (s *GraphSuiteNG) TestEachAdjacentTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuiteNG) TestEachEdgeIncidentTo(c *C) {
+func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	flipset := []Edge{
@@ -307,7 +307,7 @@ func (s *GraphSuiteNG) TestEachEdgeIncidentTo(c *C) {
 	}
 }
 
-func (s *GraphSuiteNG) TestEachEdgeIncidentToTermination(c *C) {
+func (s *GraphSuite) TestEachEdgeIncidentToTermination(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
 
 	var hit int
@@ -319,7 +319,7 @@ func (s *GraphSuiteNG) TestEachEdgeIncidentToTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuiteNG) TestDegreeOf(c *C) {
+func (s *GraphSuite) TestDegreeOf(c *C) {
 	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph()
 
 	count, exists := g.DegreeOf("foo")
@@ -347,12 +347,12 @@ func (s *GraphSuiteNG) TestDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
-func (s *GraphSuiteNG) TestSize(c *C) {
+func (s *GraphSuite) TestSize(c *C) {
 	c.Assert(s.Builder.Graph().Size(), Equals, 0)
 	c.Assert(s.Builder.Using(graphFixtures["2e3v"]).Graph().Size(), Equals, 2)
 }
 
-func (s *GraphSuiteNG) TestOrder(c *C) {
+func (s *GraphSuite) TestOrder(c *C) {
 	c.Assert(s.Builder.Graph().Order(), Equals, 0)
 	c.Assert(s.Builder.Using(graphFixtures["2e3v"]).Graph().Order(), Equals, 3)
 }
