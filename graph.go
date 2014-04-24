@@ -1,5 +1,10 @@
 package gogl
 
+import "fmt"
+
+// for great justice
+var fml = fmt.Println
+
 /* Vertex structures */
 
 // As a rule, gogl tries to place as low a requirement on its vertices as
