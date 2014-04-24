@@ -2,11 +2,10 @@ package dfs
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
+	. "github.com/sdboyer/gocheck"
 	"github.com/sdboyer/gogl"
-	. "launchpad.net/gocheck"
 )
 
 // Hook gocheck into the go test runner
@@ -16,49 +15,6 @@ var dfEdgeSet = []gogl.Edge{
 	&gogl.BaseEdge{"foo", "bar"},
 	&gogl.BaseEdge{"bar", "baz"},
 	&gogl.BaseEdge{"baz", "qux"},
-}
-
-type containsChecker struct {
-	*CheckerInfo
-}
-
-var contains Checker = &containsChecker{
-	&CheckerInfo{Name: "Contains", Params: []string{"haystack", "needle"}},
-}
-
-func (cc *containsChecker) Check(params []interface{}, names []string) (result bool, error string) {
-	needle := reflect.ValueOf(params[1])
-	haystack := reflect.ValueOf(params[0])
-
-	switch haystack.Kind() {
-	default:
-		return false, "Haystack must be a slice or array."
-	case reflect.Slice, reflect.Array:
-	}
-
-	haylen := haystack.Len()
-	if haylen == 0 {
-		// have to check this before type because can't check type reliably without a value
-		return false, ""
-	}
-
-	typealign := true
-	if reflect.SliceOf(needle.Type()) != haystack.Type() {
-		typealign = haystack.Index(0).Kind() == reflect.Interface &&
-			haystack.Index(0).Elem().Type() == needle.Type()
-	}
-
-	if !typealign {
-		return false, "Haystack must be a slice with the same element type as needle."
-	}
-
-	for i := 0; i < haylen; i++ {
-		if reflect.DeepEqual(haystack.Index(i).Interface(), needle.Interface()) {
-			return true, ""
-		}
-	}
-
-	return false, ""
 }
 
 type DepthFirstSearchSuite struct{}
@@ -120,7 +76,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 		[]gogl.Vertex{"foo", "quark"},
 		[]gogl.Vertex{"quark", "foo"},
 	}
-	c.Assert(possibles, contains, sources)
+	c.Assert(possibles, Contains, sources)
 	c.Assert(err, IsNil)
 }
 
@@ -178,7 +134,7 @@ func (v *TestVisitor) OnStartVertex(vertex gogl.Vertex) {
 }
 
 func (v *TestVisitor) OnExamineEdge(edge gogl.Edge) {
-	v.c.Assert(v.found_edges, Not(contains), edge)
+	v.c.Assert(v.found_edges, Not(Contains), edge)
 	v.found_edges = append(v.found_edges, edge)
 }
 
@@ -218,7 +174,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 	}
 
 	for _, e := range edgeset {
-		c.Assert(v.found_edges, contains, e)
+		c.Assert(v.found_edges, Contains, e)
 	}
 	c.Assert(len(v.found_edges), Equals, len(edgeset))
 }
