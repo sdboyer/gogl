@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
+	. "github.com/sdboyer/gocheck"
 	"gopkg.in/fatih/set.v0"
-	. "launchpad.net/gocheck"
 )
 
 /////////////////////////////////////////////////////////////////////
@@ -166,6 +166,10 @@ var _ = SetUpTestsFromBuilder(BMPU)
 type GraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
+}
+
+func (s *GraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
 func (s *GraphSuite) TestHasVertex(c *C) {
@@ -363,6 +367,10 @@ type DirectedGraphSuite struct {
 	Builder GraphBuilder
 }
 
+func (s *DirectedGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
+}
+
 func (s *DirectedGraphSuite) TestTranspose(c *C) {
 	g := s.Builder.Using(graphFixtures["2e3v"]).Graph().(DirectedGraph)
 
@@ -510,6 +518,10 @@ type SimpleGraphSuite struct {
 	Directed bool
 }
 
+func (s *SimpleGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
+}
+
 func (s *SimpleGraphSuite) TestDensity(c *C) {
 	c.Assert(math.IsNaN(s.Builder.Graph().(SimpleGraph).Density()), DeepEquals, true)
 
@@ -533,6 +545,10 @@ func (s *SimpleGraphSuite) TestDensity(c *C) {
 type MutableGraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
+}
+
+func (s *MutableGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
 func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
@@ -633,6 +649,10 @@ type WeightedGraphSuite struct {
 	Directed bool
 }
 
+func (s *WeightedGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
+}
+
 func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement WeightedEdge.
@@ -679,6 +699,10 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 type MutableWeightedGraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
+}
+
+func (s *MutableWeightedGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
 func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
@@ -798,6 +822,10 @@ func (s *LabeledGraphSuite) TestEachEdge(c *C) {
 	})
 }
 
+func (s *LabeledGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
+}
+
 func (s *LabeledGraphSuite) TestEachLabeledEdge(c *C) {
 	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
 
@@ -832,6 +860,10 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 type MutableLabeledGraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
+}
+
+func (s *MutableLabeledGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
 func (s *MutableLabeledGraphSuite) TestGracefulEmptyVariadics(c *C) {
@@ -939,6 +971,10 @@ type PropertyGraphSuite struct {
 	Directed bool
 }
 
+func (s *PropertyGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
+}
+
 func (s *PropertyGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement PropertyEdge.
@@ -985,6 +1021,10 @@ func (s *PropertyGraphSuite) TestHasPropertyEdge(c *C) {
 type MutablePropertyGraphSuite struct {
 	Builder  GraphBuilder
 	Directed bool
+}
+
+func (s *MutablePropertyGraphSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
 func (s *MutablePropertyGraphSuite) TestGracefulEmptyVariadics(c *C) {
