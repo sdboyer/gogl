@@ -232,19 +232,6 @@ func (g *propertyDirected) EachEdge(f EdgeLambda) {
 	}
 }
 
-// Traverses the set of edges in the graph, passing each edge and its property
-// to the provided closure.
-func (g *propertyDirected) EachPropertyEdge(f func(edge PropertyEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	for source, adjacent := range g.list {
-		for target, property := range adjacent {
-			f(BasePropertyEdge{BaseEdge{U: source, V: target}, property})
-		}
-	}
-}
-
 // Indicates whether or not the given edge is present in the graph. It matches
 // based solely on the presence of an edge, disregarding edge property.
 func (g *propertyDirected) HasEdge(edge Edge) bool {
@@ -422,26 +409,6 @@ func (g *propertyUndirected) EachEdge(f EdgeLambda) {
 				if f(e) {
 					return
 				}
-			}
-		}
-	}
-}
-
-// Traverses the set of edges in the graph, passing each edge and its property
-// to the provided closure.
-func (g *propertyUndirected) EachPropertyEdge(f func(edge PropertyEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	visited := set.NewNonTS()
-
-	for source, adjacent := range g.list {
-		for target, property := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BasePropertyEdge{be, property}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
-				f(e)
 			}
 		}
 	}

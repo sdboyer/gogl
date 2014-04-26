@@ -232,19 +232,6 @@ func (g *weightedDirected) EachEdge(f EdgeLambda) {
 	}
 }
 
-// Traverses the set of edges in the graph, passing each edge and its weight
-// to the provided closure.
-func (g *weightedDirected) EachWeightedEdge(f func(edge WeightedEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	for source, adjacent := range g.list {
-		for target, weight := range adjacent {
-			f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight})
-		}
-	}
-}
-
 // Indicates whether or not the given edge is present in the graph. It matches
 // based solely on the presence of an edge, disregarding edge weight.
 func (g *weightedDirected) HasEdge(edge Edge) bool {
@@ -422,26 +409,6 @@ func (g *weightedUndirected) EachEdge(f EdgeLambda) {
 				if f(e) {
 					return
 				}
-			}
-		}
-	}
-}
-
-// Traverses the set of edges in the graph, passing each edge and its weight
-// to the provided closure.
-func (g *weightedUndirected) EachWeightedEdge(f func(edge WeightedEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	visited := set.NewNonTS()
-
-	for source, adjacent := range g.list {
-		for target, weight := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BaseWeightedEdge{be, weight}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
-				f(e)
 			}
 		}
 	}

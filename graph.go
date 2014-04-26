@@ -179,7 +179,6 @@ type SimpleGraph interface {
 type WeightedGraph interface {
 	Graph
 	HasWeightedEdge(e WeightedEdge) bool
-	EachWeightedEdge(f func(edge WeightedEdge))
 }
 
 // MutableWeightedGraph is the mutable version of a weighted graph. Its
@@ -207,7 +206,6 @@ type MutableWeightedGraph interface {
 type LabeledGraph interface {
 	Graph
 	HasLabeledEdge(e LabeledEdge) bool
-	EachLabeledEdge(f func(edge LabeledEdge))
 }
 
 // LabeledWeightedGraph is the mutable version of a labeled graph. Its
@@ -238,7 +236,6 @@ type MutableLabeledGraph interface {
 type PropertyGraph interface {
 	Graph
 	HasPropertyEdge(e PropertyEdge) bool
-	EachPropertyEdge(f func(edge PropertyEdge))
 }
 
 // MutablePropertyGraph is the mutable version of a propety graph. Its

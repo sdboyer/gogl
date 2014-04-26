@@ -665,27 +665,6 @@ func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 	})
 }
 
-func (s *WeightedGraphSuite) TestEachWeightedEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
-
-	edgeset := set.NewNonTS()
-	g.EachWeightedEdge(func(e WeightedEdge) {
-		edgeset.Add(e)
-	})
-
-	if s.Directed {
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
-	} else {
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{1, 2}, 5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, true)
-		c.Assert(edgeset.Has(BaseWeightedEdge{BaseEdge{2, 3}, -5}) != edgeset.Has(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
-	}
-}
-
 func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
 
@@ -826,27 +805,6 @@ func (s *LabeledGraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Builder.Graph())
 }
 
-func (s *LabeledGraphSuite) TestEachLabeledEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
-
-	edgeset := set.NewNonTS()
-	g.EachLabeledEdge(func(e LabeledEdge) {
-		edgeset.Add(e)
-	})
-
-	if s.Directed {
-		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
-	} else {
-		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}) != edgeset.Has(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, true)
-		c.Assert(edgeset.Has(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}) != edgeset.Has(BaseLabeledEdge{BaseEdge{3, 2}, "bar"}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
-	}
-}
-
 func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
 
@@ -985,27 +943,6 @@ func (s *PropertyGraphSuite) TestEachEdge(c *C) {
 		c.Assert(e, Implements, &we)
 		return
 	})
-}
-
-func (s *PropertyGraphSuite) TestEachPropertyEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["p-2e3v"]).Graph().(PropertyGraph)
-
-	edgeset := set.NewNonTS()
-	g.EachPropertyEdge(func(e PropertyEdge) {
-		edgeset.Add(e)
-	})
-
-	if s.Directed {
-		c.Assert(edgeset.Has(BasePropertyEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-		c.Assert(edgeset.Has(BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}), Equals, false)
-	} else {
-		c.Assert(edgeset.Has(BasePropertyEdge{BaseEdge{1, 2}, "foo"}) != edgeset.Has(BasePropertyEdge{BaseEdge{2, 1}, "foo"}), Equals, true)
-		c.Assert(edgeset.Has(BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}) != edgeset.Has(BasePropertyEdge{BaseEdge{3, 2}, struct{ a int }{a: 2}}), Equals, true)
-		c.Assert(edgeset.Has(BaseEdge{1, 2}) || edgeset.Has(BaseEdge{2, 1}), Equals, false)
-		c.Assert(edgeset.Has(BaseEdge{2, 3}) || edgeset.Has(BaseEdge{3, 2}), Equals, false)
-	}
 }
 
 func (s *PropertyGraphSuite) TestHasPropertyEdge(c *C) {

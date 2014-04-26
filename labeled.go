@@ -232,19 +232,6 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	}
 }
 
-// Traverses the set of edges in the graph, passing each edge and its label
-// to the provided closure.
-func (g *labeledDirected) EachLabeledEdge(f func(edge LabeledEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	for source, adjacent := range g.list {
-		for target, label := range adjacent {
-			f(BaseLabeledEdge{BaseEdge{U: source, V: target}, label})
-		}
-	}
-}
-
 // Indicates whether or not the given edge is present in the graph. It matches
 // based solely on the presence of an edge, disregarding edge label.
 func (g *labeledDirected) HasEdge(edge Edge) bool {
@@ -422,26 +409,6 @@ func (g *labeledUndirected) EachEdge(f EdgeLambda) {
 				if f(e) {
 					return
 				}
-			}
-		}
-	}
-}
-
-// Traverses the set of edges in the graph, passing each edge and its label
-// to the provided closure.
-func (g *labeledUndirected) EachLabeledEdge(f func(edge LabeledEdge)) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	visited := set.NewNonTS()
-
-	for source, adjacent := range g.list {
-		for target, label := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BaseLabeledEdge{be, label}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
-				f(e)
 			}
 		}
 	}
