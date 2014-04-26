@@ -3,7 +3,7 @@ go:
   - 1.2
   - tip
 install:
-  - go get -t launchpad.net/gocheck
   - go get gopkg.in/fatih/set.v0
   - go get github.com/lann/builder
+  - go get -t github.com/sdboyer/gocheck
 script: go test -v ./... -gocheck.v
