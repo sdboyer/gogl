@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kr/pretty"
 	. "github.com/sdboyer/gocheck"
 	"gopkg.in/fatih/set.v0"
 )
@@ -88,7 +89,7 @@ func (e BaseEdge) swap() Edge {
 
 func gdebug(g Graph, args ...interface{}) {
 	fmt.Println("DEBUG: graph type", reflect.New(reflect.Indirect(reflect.ValueOf(g)).Type()))
-	fmt.Println(args...)
+	pretty.Print(args...)
 }
 
 /////////////////////////////////////////////////////////////////////
