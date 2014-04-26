@@ -24,8 +24,8 @@ var edgeSet = []Edge{
 }
 
 var baseWeightedEdgeSet = []WeightedEdge{
-	BaseWeightedEdge{BaseEdge{1, 2}, 5},
-	BaseWeightedEdge{BaseEdge{2, 3}, -5},
+	BaseWeightedEdge{BaseEdge{1, 2}, 5.23},
+	BaseWeightedEdge{BaseEdge{2, 3}, 5.821},
 }
 
 var baseLabeledEdgeSet = []LabeledEdge{
@@ -736,20 +736,20 @@ func (s *MutableWeightedGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Builder.Graph().(MutableWeightedGraph)
-	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5.23})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
 	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
 
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5.23}), Equals, true)
 	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 3}), Equals, false)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, !s.Directed)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, -3}), Equals, false)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5.23}), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, -3.22771}), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5})
+	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5.23})
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, false)
+	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5.23}), Equals, false)
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {

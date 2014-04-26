@@ -23,7 +23,7 @@ type Edge interface {
 // A WeightedEdge is an Edge that also has a numerical weight.
 type WeightedEdge interface {
 	Edge
-	Weight() int
+	Weight() float64
 }
 
 // A LabeledEdge is an Edge that also has a string label.
@@ -61,10 +61,10 @@ func (e BaseEdge) Both() (Vertex, Vertex) {
 // BaseWeightedEdge extends BaseEdge with weight data.
 type BaseWeightedEdge struct {
 	BaseEdge
-	W int
+	W float64
 }
 
-func (e BaseWeightedEdge) Weight() int {
+func (e BaseWeightedEdge) Weight() float64 {
 	return e.W
 }
 

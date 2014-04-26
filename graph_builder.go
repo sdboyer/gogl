@@ -108,7 +108,7 @@ func (b builderMutableUndirected) Using(g Graph) GraphBuilder {
 }
 
 // Builder/Mutable/Weighted/Directed
-var BMWD = builder.Register(builderMutableWeightedDirected{}, weightedDirected{baseWeighted{list: make(map[Vertex]map[Vertex]int), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedDirected)
+var BMWD = builder.Register(builderMutableWeightedDirected{}, weightedDirected{baseWeighted{list: make(map[Vertex]map[Vertex]float64), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedDirected)
 
 type builderMutableWeightedDirected builder.Builder
 
@@ -137,7 +137,7 @@ func (b builderMutableWeightedDirected) Using(g Graph) GraphBuilder {
 }
 
 // Builder/Mutable/Weighted/Undirected
-var BMWU = builder.Register(builderMutableWeightedUndirected{}, weightedUndirected{baseWeighted{list: make(map[Vertex]map[Vertex]int), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedUndirected)
+var BMWU = builder.Register(builderMutableWeightedUndirected{}, weightedUndirected{baseWeighted{list: make(map[Vertex]map[Vertex]float64), size: 0, mu: sync.RWMutex{}}}).(builderMutableWeightedUndirected)
 
 type builderMutableWeightedUndirected builder.Builder
 

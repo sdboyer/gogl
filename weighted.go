@@ -8,7 +8,7 @@ import (
 
 // This is implemented as an adjacency list, because those are simple.
 type baseWeighted struct {
-	list map[Vertex]map[Vertex]int
+	list map[Vertex]map[Vertex]float64
 	size int
 	mu   sync.RWMutex
 }
@@ -74,13 +74,13 @@ func (g *baseWeighted) EnsureVertex(vertices ...Vertex) {
 func (g *baseWeighted) ensureVertex(vertices ...Vertex) {
 	// TODO this is horrible, but the reflection approach in the testing harness requires it...for now
 	if g.list == nil {
-		g.list = make(map[Vertex]map[Vertex]int)
+		g.list = make(map[Vertex]map[Vertex]float64)
 	}
 
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?
-			g.list[vertex] = make(map[Vertex]int, 10)
+			g.list[vertex] = make(map[Vertex]float64, 10)
 		}
 	}
 
@@ -96,7 +96,7 @@ type weightedDirected struct {
 func NewWeightedDirected() MutableWeightedGraph {
 	list := &weightedDirected{}
 	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]int)
+	list.list = make(map[Vertex]map[Vertex]float64)
 
 	// Type assertions to ensure interfaces are met
 	var _ Graph = list
@@ -339,19 +339,19 @@ func (g *weightedDirected) Transpose() DirectedGraph {
 	defer g.mu.RUnlock()
 
 	g2 := &weightedDirected{}
-	g2.list = make(map[Vertex]map[Vertex]int)
+	g2.list = make(map[Vertex]map[Vertex]float64)
 
 	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
 	startcap := int(g.Size() / g.Order())
 
 	for source, adjacent := range g.list {
 		if !g2.hasVertex(source) {
-			g2.list[source] = make(map[Vertex]int, startcap+1)
+			g2.list[source] = make(map[Vertex]float64, startcap+1)
 		}
 
 		for target, weight := range adjacent {
 			if !g2.hasVertex(target) {
-				g2.list[target] = make(map[Vertex]int, startcap+1)
+				g2.list[target] = make(map[Vertex]float64, startcap+1)
 			}
 			g2.list[target][source] = weight
 		}
@@ -369,7 +369,7 @@ type weightedUndirected struct {
 func NewWeightedUndirected() MutableWeightedGraph {
 	g := &weightedUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
-	g.list = make(map[Vertex]map[Vertex]int)
+	g.list = make(map[Vertex]map[Vertex]float64)
 
 	// Type assertions to ensure interfaces are met
 	var _ Graph = g
