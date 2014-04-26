@@ -32,6 +32,7 @@ func (b builderImmutableDirected) From(g Graph) builderImmutableDirected {
 func (b builderImmutableDirected) Create() *immutableDirected {
 	gv := builder.GetStruct(b).(immutableDirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -61,6 +62,7 @@ func (b builderMutableDirected) From(g Graph) builderMutableDirected {
 func (b builderMutableDirected) Create() *mutableDirected {
 	gv := builder.GetStruct(b).(mutableDirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -90,6 +92,7 @@ func (b builderMutableUndirected) From(g Graph) builderMutableUndirected {
 func (b builderMutableUndirected) Create() *mutableUndirected {
 	gv := builder.GetStruct(b).(mutableUndirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -119,6 +122,7 @@ func (b builderMutableWeightedDirected) From(g Graph) builderMutableWeightedDire
 func (b builderMutableWeightedDirected) Create() *weightedDirected {
 	gv := builder.GetStruct(b).(weightedDirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]float64)
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -148,6 +152,7 @@ func (b builderMutableWeightedUndirected) From(g Graph) builderMutableWeightedUn
 func (b builderMutableWeightedUndirected) Create() *weightedUndirected {
 	gv := builder.GetStruct(b).(weightedUndirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]float64)
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -177,6 +182,7 @@ func (b builderMutableLabeledDirected) From(g Graph) builderMutableLabeledDirect
 func (b builderMutableLabeledDirected) Create() *labeledDirected {
 	gv := builder.GetStruct(b).(labeledDirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]string)
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -206,6 +212,7 @@ func (b builderMutableLabeledUndirected) From(g Graph) builderMutableLabeledUndi
 func (b builderMutableLabeledUndirected) Create() *labeledUndirected {
 	gv := builder.GetStruct(b).(labeledUndirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]string)
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -235,6 +242,7 @@ func (b builderMutablePropertyDirected) From(g Graph) builderMutablePropertyDire
 func (b builderMutablePropertyDirected) Create() *propertyDirected {
 	gv := builder.GetStruct(b).(propertyDirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]interface{})
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
@@ -264,6 +272,7 @@ func (b builderMutablePropertyUndirected) From(g Graph) builderMutablePropertyUn
 func (b builderMutablePropertyUndirected) Create() *propertyUndirected {
 	gv := builder.GetStruct(b).(propertyUndirected)
 	g := &gv
+	g.list = make(map[Vertex]map[Vertex]interface{})
 
 	if from, exists := builder.Get(b, "from"); exists {
 		from := from.(Graph)
