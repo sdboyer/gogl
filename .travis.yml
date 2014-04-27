@@ -5,5 +5,6 @@ go:
 install:
   - go get gopkg.in/fatih/set.v0
   - go get github.com/lann/builder
+  - go get github.com/kr/pretty
   - go get -t github.com/sdboyer/gocheck
 script: go test -v ./... -gocheck.v
