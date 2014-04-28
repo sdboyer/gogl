@@ -1,5 +1,32 @@
 package gogl
 
+// Contains behaviors shared across adjacency list implementations.
+
+type al_mutver interface {
+	ensureVertex(...Vertex)
+	Order() int
+}
+
+type al_ea interface {
+	al_mutver
+	addEdges(...Edge)
+}
+
+type al_wea interface {
+	al_mutver
+	addEdges(...WeightedEdge)
+}
+
+type al_lea interface {
+	al_mutver
+	addEdges(...LabeledEdge)
+}
+
+type al_pea interface {
+	al_mutver
+	addEdges(...PropertyEdge)
+}
+
 // Copies an incoming graph into any of the implemented adjacency list types.
 //
 // This encapsulates the full matrix of conversion possibilities between
@@ -53,30 +80,43 @@ func functorToAdjacencyList(from Graph, to interface{}) {
 	} else {
 		panic("Target graph did not implement a recognized adjacency list internal type")
 	}
-
 }
 
-type al_mutver interface {
-	ensureVertex(...Vertex)
-	Order() int
-}
-
-type al_ea interface {
-	al_mutver
-	addEdges(...Edge)
-}
-
-type al_wea interface {
-	al_mutver
-	addEdges(...WeightedEdge)
-}
-
-type al_lea interface {
-	al_mutver
-	addEdges(...LabeledEdge)
-}
-
-type al_pea interface {
-	al_mutver
-	addEdges(...PropertyEdge)
+func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexLambda) {
+	switch l := list.(type) {
+	case map[Vertex]map[Vertex]struct{}:
+		if _, exists := l[vertex]; exists {
+			for adjacent, _ := range l[vertex] {
+				if vl(adjacent) {
+					return
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]float64:
+		if _, exists := l[vertex]; exists {
+			for adjacent, _ := range l[vertex] {
+				if vl(adjacent) {
+					return
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]string:
+		if _, exists := l[vertex]; exists {
+			for adjacent, _ := range l[vertex] {
+				if vl(adjacent) {
+					return
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]interface{}:
+		if _, exists := l[vertex]; exists {
+			for adjacent, _ := range l[vertex] {
+				if vl(adjacent) {
+					return
+				}
+			}
+		}
+	default:
+		panic("Unrecognized adjacency list map type.")
+	}
 }

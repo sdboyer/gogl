@@ -75,7 +75,7 @@ func (g *mutableUndirected) EachAdjacentTo(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.eachAdjacentUnd(vertex, f)
+	eachAdjacentToUndirected(g.list, vertex, f)
 }
 
 // Indicates whether or not the given edge is present in the graph.
@@ -114,7 +114,7 @@ func (g *mutableUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacentUnd(vertex, func(adjacent Vertex) (terminate bool) {
+			eachAdjacentToUndirected(g.list, vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
 				return
 			})

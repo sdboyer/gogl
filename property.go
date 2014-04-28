@@ -430,17 +430,7 @@ func (g *propertyUndirected) EachAdjacentTo(vertex Vertex, f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.eachAdjacent(vertex, f)
-}
-
-func (g *propertyUndirected) eachAdjacent(vertex Vertex, f VertexLambda) {
-	if _, exists := g.list[vertex]; exists {
-		for adjacent, _ := range g.list[vertex] {
-			if f(adjacent) {
-				return
-			}
-		}
-	}
+	eachAdjacentToUndirected(g.list, vertex, f)
 }
 
 // Indicates whether or not the given edge is present in the graph. It matches
@@ -496,7 +486,7 @@ func (g *propertyUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			g.eachAdjacent(vertex, func(adjacent Vertex) (terminate bool) {
+			eachAdjacentToUndirected(g.list, vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
 				return
 			})

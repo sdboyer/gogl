@@ -24,17 +24,6 @@ type al_basic struct {
 // Helper to not have to write struct{} everywhere.
 var keyExists = struct{}{}
 
-// Internal adjacency traverser that bypasses locking.
-func (g *al_basic) eachAdjacentUnd(vertex Vertex, f VertexLambda) {
-	if _, exists := g.list[vertex]; exists {
-		for adjacent, _ := range g.list[vertex] {
-			if f(adjacent) {
-				return
-			}
-		}
-	}
-}
-
 // Indicates whether or not the given vertex is present in the graph.
 func (g *al_basic) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.list[vertex]
@@ -49,11 +38,6 @@ func (g *al_basic) Size() int {
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
 func (g *al_basic) ensureVertex(vertices ...Vertex) {
-	// TODO this is horrible, but the reflection approach in the testing harness requires it...for now
-	if g.list == nil {
-		g.list = make(map[Vertex]map[Vertex]struct{})
-	}
-
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?
