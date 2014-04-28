@@ -2,28 +2,29 @@ package gogl
 
 // Contains behaviors shared across adjacency list implementations.
 
-type al_mutver interface {
+type al_internal_interface interface {
+	Graph
 	ensureVertex(...Vertex)
-	Order() int
+	hasVertex(Vertex) bool
 }
 
 type al_ea interface {
-	al_mutver
+	al_internal_interface
 	addEdges(...Edge)
 }
 
 type al_wea interface {
-	al_mutver
+	al_internal_interface
 	addEdges(...WeightedEdge)
 }
 
 type al_lea interface {
-	al_mutver
+	al_internal_interface
 	addEdges(...LabeledEdge)
 }
 
 type al_pea interface {
-	al_mutver
+	al_internal_interface
 	addEdges(...PropertyEdge)
 }
 
@@ -32,7 +33,7 @@ type al_pea interface {
 // This encapsulates the full matrix of conversion possibilities between
 // different graph edge types.
 func functorToAdjacencyList(from Graph, to interface{}) {
-	vf := func(from Graph, to al_mutver) {
+	vf := func(from Graph, to al_internal_interface) {
 		if to.Order() != from.Order() {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
@@ -119,4 +120,16 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexLambda) 
 	default:
 		panic("Unrecognized adjacency list map type.")
 	}
+}
+
+func inDegreeOf(g al_internal_interface, v Vertex) (degree int, exists bool) {
+	if exists = g.hasVertex(v); exists {
+		g.EachEdge(func(e Edge) (terminate bool) {
+			if v == e.Target() {
+				degree++
+			}
+			return
+		})
+	}
+	return
 }

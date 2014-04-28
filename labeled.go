@@ -123,17 +123,7 @@ func (g *labeledDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 func (g *labeledDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
-
-	if exists = g.hasVertex(vertex); exists {
-		g.EachEdge(func(e Edge) (terminate bool) {
-			if vertex == e.Target() {
-				degree++
-			}
-			return
-		})
-	}
-
-	return
+	return inDegreeOf(g, vertex)
 }
 
 // Returns the degree of the provided vertex, counting both in and out-edges.
@@ -141,7 +131,7 @@ func (g *labeledDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	indegree, exists := g.InDegreeOf(vertex)
+	indegree, exists := inDegreeOf(g, vertex)
 	outdegree, exists := g.OutDegreeOf(vertex)
 	return indegree + outdegree, exists
 }
