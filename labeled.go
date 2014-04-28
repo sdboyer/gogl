@@ -155,15 +155,7 @@ func (g *labeledDirected) EachEdge(f EdgeLambda) {
 func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
-
-	var terminate bool
-	interloper := func(e Edge) bool {
-		terminate = terminate || f(e)
-		return terminate
-	}
-
-	g.EachArcFrom(v, interloper)
-	g.EachArcTo(v, interloper)
+	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.

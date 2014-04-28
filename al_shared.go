@@ -2,29 +2,37 @@ package gogl
 
 // Contains behaviors shared across adjacency list implementations.
 
-type al_internal_interface interface {
+type al_graph interface {
 	Graph
 	ensureVertex(...Vertex)
 	hasVertex(Vertex) bool
 }
 
+type al_digraph interface {
+	al_graph
+	IncidentArcEnumerator
+	DirectedDegreeChecker
+	Transposer
+}
+
+
 type al_ea interface {
-	al_internal_interface
+	al_graph
 	addEdges(...Edge)
 }
 
 type al_wea interface {
-	al_internal_interface
+	al_graph
 	addEdges(...WeightedEdge)
 }
 
 type al_lea interface {
-	al_internal_interface
+	al_graph
 	addEdges(...LabeledEdge)
 }
 
 type al_pea interface {
-	al_internal_interface
+	al_graph
 	addEdges(...PropertyEdge)
 }
 
@@ -33,7 +41,7 @@ type al_pea interface {
 // This encapsulates the full matrix of conversion possibilities between
 // different graph edge types.
 func functorToAdjacencyList(from Graph, to interface{}) {
-	vf := func(from Graph, to al_internal_interface) {
+	vf := func(from Graph, to al_graph) {
 		if to.Order() != from.Order() {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
@@ -122,7 +130,7 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexLambda) 
 	}
 }
 
-func inDegreeOf(g al_internal_interface, v Vertex) (degree int, exists bool) {
+func inDegreeOf(g al_graph, v Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(v); exists {
 		g.EachEdge(func(e Edge) (terminate bool) {
 			if v == e.Target() {
@@ -133,3 +141,19 @@ func inDegreeOf(g al_internal_interface, v Vertex) (degree int, exists bool) {
 	}
 	return
 }
+
+func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeLambda) {
+	if !g.hasVertex(v) {
+		return
+	}
+
+	var terminate bool
+	interloper := func(e Edge) bool {
+		terminate = terminate || f(e)
+		return terminate
+	}
+
+	g.EachArcFrom(v, interloper)
+	g.EachArcTo(v, interloper)
+}
+
