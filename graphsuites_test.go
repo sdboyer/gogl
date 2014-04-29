@@ -524,7 +524,7 @@ func (s *SimpleGraphSuite) SuiteLabel() string {
 }
 
 func (s *SimpleGraphSuite) TestDensity(c *C) {
-	c.Assert(math.IsNaN(s.Builder.Graph().(SimpleGraph).Density()), DeepEquals, true)
+	c.Assert(math.IsNaN(s.Builder.Graph().(SimpleGraph).Density()), Equals, true)
 
 	g := s.Builder.Using(graphFixtures["pair"]).Graph().(SimpleGraph)
 	if s.Directed {
