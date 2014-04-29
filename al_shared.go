@@ -15,7 +15,6 @@ type al_digraph interface {
 	Transposer
 }
 
-
 type al_ea interface {
 	al_graph
 	addEdges(...Edge)
@@ -156,4 +155,3 @@ func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeLambda) {
 	g.EachArcFrom(v, interloper)
 	g.EachArcTo(v, interloper)
 }
-

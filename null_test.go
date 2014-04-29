@@ -42,25 +42,25 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 }
 
 func (s NullGraphSuite) TestMembership(c *C) {
-	c.Assert(NullGraph.HasVertex("foo"), Equals, false) // must always be false
-	c.Assert(NullGraph.HasEdge(BaseEdge{"qux", "quark"}), Equals, false) // must always be false
-	c.Assert(NullGraph.HasWeightedEdge(BaseWeightedEdge{BaseEdge{"qux", "quark"}, 0}), Equals, false) // must always be false
-	c.Assert(NullGraph.HasLabeledEdge(BaseLabeledEdge{BaseEdge{"qux", "quark"}, ""}), Equals, false) // must always be false
-	c.Assert(NullGraph.HasPropertyEdge(BasePropertyEdge{BaseEdge{"qux", "quark"}, func(){}}), Equals, false) // must always be false
+	c.Assert(NullGraph.HasVertex("foo"), Equals, false)                                                       // must always be false
+	c.Assert(NullGraph.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)                                      // must always be false
+	c.Assert(NullGraph.HasWeightedEdge(BaseWeightedEdge{BaseEdge{"qux", "quark"}, 0}), Equals, false)         // must always be false
+	c.Assert(NullGraph.HasLabeledEdge(BaseLabeledEdge{BaseEdge{"qux", "quark"}, ""}), Equals, false)          // must always be false
+	c.Assert(NullGraph.HasPropertyEdge(BasePropertyEdge{BaseEdge{"qux", "quark"}, func() {}}), Equals, false) // must always be false
 }
 
 func (s NullGraphSuite) TestDegree(c *C) {
 	deg, exists := NullGraph.DegreeOf("foo")
 	c.Assert(exists, Equals, false) // vertex is not present in graph
-	c.Assert(deg, Equals, 0) // always will have degree 0
+	c.Assert(deg, Equals, 0)        // always will have degree 0
 
 	deg, exists = NullGraph.InDegreeOf("foo")
 	c.Assert(exists, Equals, false) // vertex is not present in graph
-	c.Assert(deg, Equals, 0) // always will have indegree 0
+	c.Assert(deg, Equals, 0)        // always will have indegree 0
 
 	deg, exists = NullGraph.OutDegreeOf("foo")
 	c.Assert(exists, Equals, false) // vertex is not present in graph
-	c.Assert(deg, Equals, 0) // always will have outdegree 0
+	c.Assert(deg, Equals, 0)        // always will have outdegree 0
 }
 
 func (s NullGraphSuite) TestSizingOps(c *C) {
