@@ -10,7 +10,8 @@
 echo "mode: set" > acc.out
 fail=0
 
-for dir in $(find . -maxdepth 10 -not -path './.git*' -type d);
+# Standard go tooling behavior is to ignore dirs with leading underscors
+for dir in $(find . -maxdepth 10 -not -path './.git*' -not -path '*/_*' -type d);
 do
   if ls $dir/*.go &> /dev/null; then
     go test -coverprofile=profile.out $dir || fail=1
