@@ -37,6 +37,12 @@ type EdgeEnumerator interface {
 	EachEdge(EdgeLambda)
 }
 
+// An enumerator of both vertices and edges.
+type GraphEnumerator interface {
+	VertexEnumerator
+	EdgeEnumerator
+}
+
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
 	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)

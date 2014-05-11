@@ -58,7 +58,7 @@ func (e benchEdge) Property() interface{} {
 	return e.P
 }
 
-func bernoulliDistributionGenerator(vertexCount uint, edgeProbability int, src rand.Source) Graph {
+func bernoulliDistributionGenerator(vertexCount uint, edgeProbability int, src rand.Source) GraphEnumerator {
 	if edgeProbability > 100 || edgeProbability < 1 {
 		panic("Must designate an edge probability between 1 and 100")
 	}
@@ -70,7 +70,6 @@ func bernoulliDistributionGenerator(vertexCount uint, edgeProbability int, src r
 	r := rand.New(src)
 
 	list := make([][]benchEdge, vertexCount, vertexCount)
-	//vlist := make([]benchEdge, vertexCount, vertexCount)
 
 	size := 0
 	vc := int(vertexCount)
@@ -116,43 +115,6 @@ func (g *benchGraph) EachEdge(f EdgeLambda) {
 			}
 		}
 	}
-}
-
-func (g *benchGraph) Size() int {
-	return len(g.list)
-}
-
-func (g *benchGraph) Order() int {
-	return g.size
-}
-
-// skip all of these, for now
-func (g *benchGraph) EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda) {}
-func (g *benchGraph) EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)             {}
-func (g *benchGraph) EachArcTo(v Vertex, inEdgeLambda EdgeLambda)                {}
-func (g *benchGraph) EachAdjacentTo(start Vertex, f VertexLambda)                {}
-func (g *benchGraph) InDegreeOf(Vertex) (degree int, exists bool) {
-	return 0, false
-}
-
-func (g *benchGraph) OutDegreeOf(Vertex) (degree int, exists bool) {
-	return 0, false
-}
-
-func (g *benchGraph) DegreeOf(Vertex) (degree int, exists bool) {
-	return 0, false
-}
-
-func (g *benchGraph) HasEdge(e Edge) bool {
-	return false
-}
-
-func (g *benchGraph) HasVertex(v Vertex) bool {
-	return false
-}
-
-func (g *benchGraph) Transpose() DirectedGraph {
-	return g
 }
 
 // back to reality

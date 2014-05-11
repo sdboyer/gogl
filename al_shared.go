@@ -39,9 +39,16 @@ type al_pea interface {
 //
 // This encapsulates the full matrix of conversion possibilities between
 // different graph edge types.
-func functorToAdjacencyList(from Graph, to interface{}) {
-	vf := func(from Graph, to al_graph) {
-		if to.Order() != from.Order() {
+func functorToAdjacencyList(from GraphEnumerator, to interface{}) {
+	vf := func(from GraphEnumerator, to al_graph) {
+		if f2, ok := from.(Graph); ok {
+			if to.Order() != f2.Order() {
+				f2.EachVertex(func(vertex Vertex) (terminate bool) {
+					to.ensureVertex(vertex)
+					return
+				})
+			}
+		} else {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return
