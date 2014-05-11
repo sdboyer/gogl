@@ -27,14 +27,16 @@ type EdgeLambda func(Edge) (terminate bool)
 // If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type VertexLambda func(Vertex) (terminate bool)
 
-// A VertexEnumerator iteratively enumerates vertices.
+// A VertexEnumerator iteratively enumerates vertices, and can indicate the number of vertices present.
 type VertexEnumerator interface {
 	EachVertex(VertexLambda)
+	Order() int // Reports total number of vertices in the graph
 }
 
-// An EdgeEnumerator iteratively enumerates edges.
+// An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
 type EdgeEnumerator interface {
 	EachEdge(EdgeLambda)
+	Size() int // Reports total number of edges in the graph
 }
 
 // An enumerator of both vertices and edges.
@@ -139,8 +141,6 @@ type Graph interface {
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
 	DegreeChecker           // Reports degree of vertices
-	Order() int             // Reports total number of vertices in the graph
-	Size() int              // Reports total number of edges in the graph
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.

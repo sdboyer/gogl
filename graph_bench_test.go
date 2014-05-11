@@ -117,6 +117,14 @@ func (g *benchGraph) EachEdge(f EdgeLambda) {
 	}
 }
 
+func (g *benchGraph) Size() int {
+	return g.size
+}
+
+func (g *benchGraph) Order() int {
+	return len(g.list)
+}
+
 // back to reality
 
 func (s *GraphBenchSuite) SetUpSuite(c *C) {
