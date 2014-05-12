@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Generates a random graph of order n with Bernoulli distribution probability p of edge existing between any two vertices.
+// Generates a random graph of order n with Bernoulli distribution probability ρ of edge existing between any two vertices.
 //
 // This produces simple graphs only - no loops, no multiple edges. Graphs can be either directed or undirected, governed
 // by the appropriately named parameter.
@@ -21,9 +21,9 @@ import (
 //
 // Note that calling the Size() method on an unstable graph will create a prediction based on the Bernoulli number, but
 // is not guaranteed to be exactly the same as the number of edges traversed through EachEdge().
-func BernoulliDistribution(n uint, ρ int, directed bool, stable bool, src stdrand.Source) gogl.GraphEnumerator {
-	if ρ > 100 || ρ < 1 {
-		panic("Must designate an edge probability between 1 and 100")
+func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src stdrand.Source) gogl.GraphEnumerator {
+	if ρ < 0.0 || ρ >= 1.0 {
+		panic("ρ must be in the range [0.0,1.0).")
 	}
 
 	if src == nil {
@@ -31,9 +31,9 @@ func BernoulliDistribution(n uint, ρ int, directed bool, stable bool, src stdra
 	}
 
 	if stable {
-		return &stableBernoulliGraph{order: n, edgeProbability: ρ, directed: directed, source: src}
+		return &stableBernoulliGraph{order: n, ρ: ρ, directed: directed, source: src}
 	} else {
-		return unstableBernoulliGraph{order: n, edgeProbability: ρ, directed: directed, source: src}
+		return unstableBernoulliGraph{order: n, ρ: ρ, directed: directed, source: src}
 	}
 }
 
@@ -41,7 +41,7 @@ type stableBernoulliGraph struct {
 	order uint
 	size int
 	directed bool
-	edgeProbability int
+	ρ float64
 	source stdrand.Source
 	list [][]struct{}
 }
@@ -68,9 +68,9 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
 		}
 
 		if g.directed {
-			bernoulliArcCreator(ff, int(g.order), g.edgeProbability, r)
+			bernoulliArcCreator(ff, int(g.order), g.ρ, r)
 		} else {
-			bernoulliEdgeCreator(ff, int(g.order), g.edgeProbability, r)
+			bernoulliEdgeCreator(ff, int(g.order), g.ρ, r)
 		}
 	} else {
 		var e gogl.BaseEdge
@@ -99,7 +99,7 @@ func (g *stableBernoulliGraph) Size() int {
 type unstableBernoulliGraph struct {
 	order uint
 	directed bool
-	edgeProbability int
+	ρ float64
 	source stdrand.Source
 }
 
@@ -114,9 +114,9 @@ func (g unstableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
 
 func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
 	if g.directed {
-		bernoulliArcCreator(f, int(g.order), g.edgeProbability, stdrand.New(g.source))
+		bernoulliArcCreator(f, int(g.order), g.ρ, stdrand.New(g.source))
 	} else {
-		bernoulliEdgeCreator(f, int(g.order), g.edgeProbability, stdrand.New(g.source))
+		bernoulliEdgeCreator(f, int(g.order), g.ρ, stdrand.New(g.source))
 	}
 }
 
@@ -136,16 +136,16 @@ func (g unstableBernoulliGraph) Size() int {
 		cs = cs/2
 	}
 
-	return int(float64(cs) * (float64(g.edgeProbability) / 100))
+	return int(float64(cs) * (float64(g.ρ) / 100))
 }
 
-var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, edgeProbability int, r *stdrand.Rand) {
+var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, r *stdrand.Rand) {
 	var e gogl.BaseEdge
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
 		// we only evaluate each unique edge pair once, as gogl's implicit contract requires.
 		for v := u + 1; v < order; v++ {
-			if r.Intn(100) <= edgeProbability {
+			if r.Float64() < ρ {
 				e.U, e.V = u, v
 				if el(e) {
 					return
@@ -155,11 +155,11 @@ var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, edgeProbability i
 	}
 }
 
-var bernoulliArcCreator = func(el gogl.EdgeLambda, order int, edgeProbability int, r *stdrand.Rand) {
+var bernoulliArcCreator = func(el gogl.EdgeLambda, order int, ρ float64, r *stdrand.Rand) {
 	var e gogl.BaseEdge
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {
-			if u != v && r.Intn(100) <= edgeProbability {
+			if u != v && r.Float64() < ρ {
 				e.U, e.V = u, v
 				if el(e) {
 					return
@@ -168,5 +168,3 @@ var bernoulliArcCreator = func(el gogl.EdgeLambda, order int, edgeProbability in
 		}
 	}
 }
-
-//func UnstableBernoulliDistribution(order uint, edgeProbability int, src stdrand.Source)
