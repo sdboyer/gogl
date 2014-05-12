@@ -1,8 +1,9 @@
 package rand
 
 import (
-	"github.com/sdboyer/gogl"
 	stdrand "math/rand"
+
+	"github.com/sdboyer/gogl"
 )
 
 // Generates a random graph of vertex count n with probability ρ of an edge existing between any two vertices.
@@ -52,12 +53,12 @@ func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src s
 type bTrial func(ρ float64) bool
 
 type stableBernoulliGraph struct {
-	order uint
-	ρ float64
-	trial bTrial
-	size int
+	order    uint
+	ρ        float64
+	trial    bTrial
+	size     int
 	directed bool
-	list [][]struct{}
+	list     [][]struct{}
 }
 
 func (g *stableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
@@ -74,7 +75,7 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
 		g.list = make([][]struct{}, g.order, g.order)
 
 		// Wrapping edge lambda; records edges into the adjacency list, then passes edge along
-		ff := func (e gogl.Edge) bool {
+		ff := func(e gogl.Edge) bool {
 			if g.list[e.Source().(int)] == nil {
 				g.list[e.Source().(int)] = make([]struct{}, g.order)
 			}
@@ -106,16 +107,16 @@ func (g *stableBernoulliGraph) Order() int {
 }
 
 func (g *stableBernoulliGraph) Size() int {
-	g.EachEdge(func (e gogl.Edge) (terminate bool) {
+	g.EachEdge(func(e gogl.Edge) (terminate bool) {
 		return
 	})
 	return g.size
 }
 
 type unstableBernoulliGraph struct {
-	order uint
-	ρ float64
-	trial bTrial
+	order    uint
+	ρ        float64
+	trial    bTrial
 	directed bool
 }
 
@@ -149,7 +150,7 @@ func (g unstableBernoulliGraph) Size() int {
 
 	cs = int(g.order) * (int(g.order) - 1)
 	if !g.directed {
-		cs = cs/2
+		cs = cs / 2
 	}
 
 	return int(float64(cs) * (g.ρ))
