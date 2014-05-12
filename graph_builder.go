@@ -8,7 +8,7 @@ import (
 )
 
 type GraphBuilder interface {
-	Using(g GraphEnumerator) GraphBuilder
+	Using(g GraphSource) GraphBuilder
 	Graph() Graph
 }
 
@@ -25,7 +25,7 @@ var BIBD = builder.Register(builderImmutableDirected{}, immutableDirected{al_bas
 
 type builderImmutableDirected builder.Builder
 
-func (b builderImmutableDirected) From(g GraphEnumerator) builderImmutableDirected {
+func (b builderImmutableDirected) From(g GraphSource) builderImmutableDirected {
 	return builder.Set(b, "from", g).(builderImmutableDirected)
 }
 
@@ -35,7 +35,7 @@ func (b builderImmutableDirected) Create() *immutableDirected {
 	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -46,7 +46,7 @@ func (b builderImmutableDirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderImmutableDirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderImmutableDirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -55,7 +55,7 @@ var BMBD = builder.Register(builderMutableDirected{}, mutableDirected{al_basic_m
 
 type builderMutableDirected builder.Builder
 
-func (b builderMutableDirected) From(g GraphEnumerator) builderMutableDirected {
+func (b builderMutableDirected) From(g GraphSource) builderMutableDirected {
 	return builder.Set(b, "from", g).(builderMutableDirected)
 }
 
@@ -65,7 +65,7 @@ func (b builderMutableDirected) Create() *mutableDirected {
 	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -76,7 +76,7 @@ func (b builderMutableDirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableDirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableDirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -85,7 +85,7 @@ var BMBU = builder.Register(builderMutableUndirected{}, mutableUndirected{al_bas
 
 type builderMutableUndirected builder.Builder
 
-func (b builderMutableUndirected) From(g GraphEnumerator) builderMutableUndirected {
+func (b builderMutableUndirected) From(g GraphSource) builderMutableUndirected {
 	return builder.Set(b, "from", g).(builderMutableUndirected)
 }
 
@@ -95,7 +95,7 @@ func (b builderMutableUndirected) Create() *mutableUndirected {
 	g.list = make(map[Vertex]map[Vertex]struct{})
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -106,7 +106,7 @@ func (b builderMutableUndirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableUndirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableUndirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -115,7 +115,7 @@ var BMWD = builder.Register(builderMutableWeightedDirected{}, weightedDirected{b
 
 type builderMutableWeightedDirected builder.Builder
 
-func (b builderMutableWeightedDirected) From(g GraphEnumerator) builderMutableWeightedDirected {
+func (b builderMutableWeightedDirected) From(g GraphSource) builderMutableWeightedDirected {
 	return builder.Set(b, "from", g).(builderMutableWeightedDirected)
 }
 
@@ -125,7 +125,7 @@ func (b builderMutableWeightedDirected) Create() *weightedDirected {
 	g.list = make(map[Vertex]map[Vertex]float64)
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -136,7 +136,7 @@ func (b builderMutableWeightedDirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableWeightedDirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableWeightedDirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -145,7 +145,7 @@ var BMWU = builder.Register(builderMutableWeightedUndirected{}, weightedUndirect
 
 type builderMutableWeightedUndirected builder.Builder
 
-func (b builderMutableWeightedUndirected) From(g GraphEnumerator) builderMutableWeightedUndirected {
+func (b builderMutableWeightedUndirected) From(g GraphSource) builderMutableWeightedUndirected {
 	return builder.Set(b, "from", g).(builderMutableWeightedUndirected)
 }
 
@@ -155,7 +155,7 @@ func (b builderMutableWeightedUndirected) Create() *weightedUndirected {
 	g.list = make(map[Vertex]map[Vertex]float64)
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -166,7 +166,7 @@ func (b builderMutableWeightedUndirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableWeightedUndirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableWeightedUndirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -175,7 +175,7 @@ var BMLD = builder.Register(builderMutableLabeledDirected{}, labeledDirected{bas
 
 type builderMutableLabeledDirected builder.Builder
 
-func (b builderMutableLabeledDirected) From(g GraphEnumerator) builderMutableLabeledDirected {
+func (b builderMutableLabeledDirected) From(g GraphSource) builderMutableLabeledDirected {
 	return builder.Set(b, "from", g).(builderMutableLabeledDirected)
 }
 
@@ -185,7 +185,7 @@ func (b builderMutableLabeledDirected) Create() *labeledDirected {
 	g.list = make(map[Vertex]map[Vertex]string)
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -196,7 +196,7 @@ func (b builderMutableLabeledDirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableLabeledDirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableLabeledDirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -205,7 +205,7 @@ var BMLU = builder.Register(builderMutableLabeledUndirected{}, labeledUndirected
 
 type builderMutableLabeledUndirected builder.Builder
 
-func (b builderMutableLabeledUndirected) From(g GraphEnumerator) builderMutableLabeledUndirected {
+func (b builderMutableLabeledUndirected) From(g GraphSource) builderMutableLabeledUndirected {
 	return builder.Set(b, "from", g).(builderMutableLabeledUndirected)
 }
 
@@ -215,7 +215,7 @@ func (b builderMutableLabeledUndirected) Create() *labeledUndirected {
 	g.list = make(map[Vertex]map[Vertex]string)
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -226,7 +226,7 @@ func (b builderMutableLabeledUndirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutableLabeledUndirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutableLabeledUndirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -235,7 +235,7 @@ var BMPD = builder.Register(builderMutablePropertyDirected{}, propertyDirected{b
 
 type builderMutablePropertyDirected builder.Builder
 
-func (b builderMutablePropertyDirected) From(g GraphEnumerator) builderMutablePropertyDirected {
+func (b builderMutablePropertyDirected) From(g GraphSource) builderMutablePropertyDirected {
 	return builder.Set(b, "from", g).(builderMutablePropertyDirected)
 }
 
@@ -245,7 +245,7 @@ func (b builderMutablePropertyDirected) Create() *propertyDirected {
 	g.list = make(map[Vertex]map[Vertex]interface{})
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -256,7 +256,7 @@ func (b builderMutablePropertyDirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutablePropertyDirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutablePropertyDirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }
 
@@ -265,7 +265,7 @@ var BMPU = builder.Register(builderMutablePropertyUndirected{}, propertyUndirect
 
 type builderMutablePropertyUndirected builder.Builder
 
-func (b builderMutablePropertyUndirected) From(g GraphEnumerator) builderMutablePropertyUndirected {
+func (b builderMutablePropertyUndirected) From(g GraphSource) builderMutablePropertyUndirected {
 	return builder.Set(b, "from", g).(builderMutablePropertyUndirected)
 }
 
@@ -275,7 +275,7 @@ func (b builderMutablePropertyUndirected) Create() *propertyUndirected {
 	g.list = make(map[Vertex]map[Vertex]interface{})
 
 	if from, exists := builder.Get(b, "from"); exists {
-		from := from.(GraphEnumerator)
+		from := from.(GraphSource)
 		functorToAdjacencyList(from, g)
 	}
 
@@ -286,6 +286,6 @@ func (b builderMutablePropertyUndirected) Graph() Graph {
 	return b.Create()
 }
 
-func (b builderMutablePropertyUndirected) Using(g GraphEnumerator) GraphBuilder {
+func (b builderMutablePropertyUndirected) Using(g GraphSource) GraphBuilder {
 	return b.From(g)
 }

@@ -58,7 +58,7 @@ func (e benchEdge) Property() interface{} {
 	return e.P
 }
 
-func bernoulliDistributionGenerator(vertexCount uint, edgeProbability int, src rand.Source) GraphEnumerator {
+func bernoulliDistributionGenerator(vertexCount uint, edgeProbability int, src rand.Source) GraphSource {
 	if edgeProbability > 100 || edgeProbability < 1 {
 		panic("Must designate an edge probability between 1 and 100")
 	}

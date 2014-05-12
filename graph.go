@@ -30,19 +30,11 @@ type VertexLambda func(Vertex) (terminate bool)
 // A VertexEnumerator iteratively enumerates vertices, and can indicate the number of vertices present.
 type VertexEnumerator interface {
 	EachVertex(VertexLambda)
-	Order() int // Reports total number of vertices in the graph
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
 type EdgeEnumerator interface {
 	EachEdge(EdgeLambda)
-	Size() int // Reports total number of edges in the graph
-}
-
-// An enumerator of both vertices and edges.
-type GraphEnumerator interface {
-	VertexEnumerator
-	EdgeEnumerator
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
@@ -141,6 +133,16 @@ type Graph interface {
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
 	DegreeChecker           // Reports degree of vertices
+	Order() int             // Reports total number of vertices in the graph
+	Size() int              // Reports total number of edges in the graph
+}
+
+// GraphSource is a subinterface of Graph, describing the minimal set of methods
+// necessary to accomplish a naive full graph traversal and copy.
+type GraphSource interface {
+	VertexEnumerator
+	EdgeEnumerator
+	Order() int
 }
 
 // DirectedGraph describes a Graph all of whose edges are directed.

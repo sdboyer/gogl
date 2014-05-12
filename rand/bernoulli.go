@@ -21,11 +21,8 @@ import (
 // allocations, but is still CPU intensive for successive runs (and produces a different edge set). Given these
 // characteristics, unstable graphs should always be used for single-use random graphs.
 //
-// Note that calling the Size() method on an unstable graph will create a prediction based on the Bernoulli number, but
-// is not guaranteed to be exactly the same as the number of edges traversed through EachEdge().
-//
 // Binomial trials require a rand source. If none is provided, the builtin math lib's global rand source is used.
-func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src stdrand.Source) gogl.GraphEnumerator {
+func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src stdrand.Source) gogl.GraphSource {
 	if ρ < 0.0 || ρ >= 1.0 {
 		panic("ρ must be in the range [0.0,1.0).")
 	}
@@ -106,13 +103,6 @@ func (g *stableBernoulliGraph) Order() int {
 	return int(g.order)
 }
 
-func (g *stableBernoulliGraph) Size() int {
-	g.EachEdge(func(e gogl.Edge) (terminate bool) {
-		return
-	})
-	return g.size
-}
-
 type unstableBernoulliGraph struct {
 	order    uint
 	ρ        float64
@@ -139,21 +129,6 @@ func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
 
 func (g unstableBernoulliGraph) Order() int {
 	return int(g.order)
-}
-
-// The return value here is hogwash; as the generator is rerun with each passthrough, there is
-// no guarantee the size will actually be exactly the same as the size produced by iterating EachEdge().
-// It should be reasonably close...but rarely exactly correct, with the likelihood inversely proportional
-// to the order of the graph.
-func (g unstableBernoulliGraph) Size() int {
-	var cs int
-
-	cs = int(g.order) * (int(g.order) - 1)
-	if !g.directed {
-		cs = cs / 2
-	}
-
-	return int(float64(cs) * (g.ρ))
 }
 
 var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp bTrial) {
