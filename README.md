@@ -15,16 +15,13 @@ These principles guide the way that gogl works:
 
 Graph systems are often big, complicated affairs. gogl is trying to not be that. These are the operant principles:
 
-1. Attain simplicity by focusing on the intrinsic nature of graphs; other stuff is noise
-2. Express that intrinsic nature through simple interfaces
-3. Ensure that the interfaces are sufficient for implementing known graph algorithms efficiently
-4. Expect others to implement their own algorithms using gogl's graph datastructures
-5. Expect others to implement their own graph datastructures and use gogl's algorithms on them
-6. Build in layers, orient towards transforms, and remain generally functional in style
-7. Don't try to be a graph database (though being the basis for one is totally cool)
-8. Be unopinionated about vertices, and minimally opinionated about edges
-9. Utilize [commonly accepted graph terminology](http://en.wikipedia.org/wiki/Glossary_of_graph_theory) as much as possible
-10. Be as fast as possible, while abiding by these other constraints
+1. Attain simplicity by expressing the intrinsic nature of graphs through idiomatic Go interface. Other stuff is noise.
+1. Be as fast as design constraints and known-best algorithms allow.
+1. Expect others to implement their own algorithms using gogl's graph datastructures, and gogl's algorithms with their graph implementations.
+1. Build in layers, orient towards transforms, and remain generally functional in style.
+1. Don't try to be a graph database (though being the basis for one is totally cool).
+1. Be unopinionated about vertices, and minimally opinionated about edges.
+1. Utilize [commonly accepted graph terminology](http://en.wikipedia.org/wiki/Glossary_of_graph_theory) where possible.
 
 The [godoc](https://godoc.org/github.com/sdboyer/gogl) contains a lot more discussion about gogl's philosophy. But godoc is a reference, not a tutorial.
 
@@ -54,4 +51,4 @@ func main() {
 }
 ```
 
-TODO lots and lots and lots more
+TODO lots and lots and lots more!
