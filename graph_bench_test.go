@@ -54,7 +54,7 @@ func (e benchEdge) Label() string {
 	return e.L
 }
 
-func (e benchEdge) Property() interface{} {
+func (e benchEdge) Data() interface{} {
 	return e.P
 }
 

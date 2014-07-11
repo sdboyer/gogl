@@ -42,11 +42,11 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 }
 
 func (s NullGraphSuite) TestMembership(c *C) {
-	c.Assert(NullGraph.HasVertex("foo"), Equals, false)                                                       // must always be false
-	c.Assert(NullGraph.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)                                      // must always be false
-	c.Assert(NullGraph.HasWeightedEdge(BaseWeightedEdge{BaseEdge{"qux", "quark"}, 0}), Equals, false)         // must always be false
-	c.Assert(NullGraph.HasLabeledEdge(BaseLabeledEdge{BaseEdge{"qux", "quark"}, ""}), Equals, false)          // must always be false
-	c.Assert(NullGraph.HasPropertyEdge(BasePropertyEdge{BaseEdge{"qux", "quark"}, func() {}}), Equals, false) // must always be false
+	c.Assert(NullGraph.HasVertex("foo"), Equals, false)                                                   // must always be false
+	c.Assert(NullGraph.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)                                  // must always be false
+	c.Assert(NullGraph.HasWeightedEdge(BaseWeightedEdge{BaseEdge{"qux", "quark"}, 0}), Equals, false)     // must always be false
+	c.Assert(NullGraph.HasLabeledEdge(BaseLabeledEdge{BaseEdge{"qux", "quark"}, ""}), Equals, false)      // must always be false
+	c.Assert(NullGraph.HasPropertyEdge(BaseDataEdge{BaseEdge{"qux", "quark"}, func() {}}), Equals, false) // must always be false
 }
 
 func (s NullGraphSuite) TestDegree(c *C) {

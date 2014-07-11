@@ -32,7 +32,7 @@ type al_lea interface {
 
 type al_pea interface {
 	al_graph
-	addEdges(...PropertyEdge)
+	addEdges(...DataEdge)
 }
 
 // Copies an incoming graph into any of the implemented adjacency list types.
@@ -77,10 +77,10 @@ func functorToAdjacencyList(from GraphSource, to interface{}) {
 		vf(from, g)
 	} else if g, ok := to.(al_pea); ok {
 		from.EachEdge(func(edge Edge) (terminate bool) {
-			if e, ok := edge.(PropertyEdge); ok {
+			if e, ok := edge.(DataEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(BasePropertyEdge{BaseEdge{U: edge.Source(), V: edge.Target()}, struct{}{}})
+				g.addEdges(BaseDataEdge{BaseEdge{U: edge.Source(), V: edge.Target()}, struct{}{}})
 			}
 			return
 		})

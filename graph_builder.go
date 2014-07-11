@@ -231,7 +231,7 @@ func (b builderMutableLabeledUndirected) Using(g GraphSource) GraphBuilder {
 }
 
 // Builder/Mutable/Property/Directed
-var BMPD = builder.Register(builderMutablePropertyDirected{}, propertyDirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyDirected)
+var BMDD = builder.Register(builderMutablePropertyDirected{}, dataDirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyDirected)
 
 type builderMutablePropertyDirected builder.Builder
 
@@ -239,8 +239,8 @@ func (b builderMutablePropertyDirected) From(g GraphSource) builderMutableProper
 	return builder.Set(b, "from", g).(builderMutablePropertyDirected)
 }
 
-func (b builderMutablePropertyDirected) Create() *propertyDirected {
-	gv := builder.GetStruct(b).(propertyDirected)
+func (b builderMutablePropertyDirected) Create() *dataDirected {
+	gv := builder.GetStruct(b).(dataDirected)
 	g := &gv
 	g.list = make(map[Vertex]map[Vertex]interface{})
 
@@ -261,7 +261,7 @@ func (b builderMutablePropertyDirected) Using(g GraphSource) GraphBuilder {
 }
 
 // Builder/Mutable/Property/Undirected
-var BMPU = builder.Register(builderMutablePropertyUndirected{}, propertyUndirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyUndirected)
+var BMDU = builder.Register(builderMutablePropertyUndirected{}, dataUndirected{baseProperty{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}).(builderMutablePropertyUndirected)
 
 type builderMutablePropertyUndirected builder.Builder
 
@@ -269,8 +269,8 @@ func (b builderMutablePropertyUndirected) From(g GraphSource) builderMutableProp
 	return builder.Set(b, "from", g).(builderMutablePropertyUndirected)
 }
 
-func (b builderMutablePropertyUndirected) Create() *propertyUndirected {
-	gv := builder.GetStruct(b).(propertyUndirected)
+func (b builderMutablePropertyUndirected) Create() *dataUndirected {
+	gv := builder.GetStruct(b).(dataUndirected)
 	g := &gv
 	g.list = make(map[Vertex]map[Vertex]interface{})
 

@@ -34,9 +34,9 @@ var baseLabeledEdgeSet = []LabeledEdge{
 	BaseLabeledEdge{BaseEdge{2, 3}, "bar"},
 }
 
-var basePropertyEdgeSet = []PropertyEdge{
-	BasePropertyEdge{BaseEdge{1, 2}, "foo"},
-	BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}},
+var basePropertyEdgeSet = []DataEdge{
+	BaseDataEdge{BaseEdge{1, 2}, "foo"},
+	BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}},
 }
 
 func init() {
@@ -68,9 +68,9 @@ func init() {
 	labeledbase.AddEdges(baseLabeledEdgeSet...)
 	graphFixtures["l-2e3v"] = BMLD.From(labeledbase).Create()
 
-	propertybase := BMPD.Create()
-	propertybase.AddEdges(basePropertyEdgeSet...)
-	graphFixtures["p-2e3v"] = BMPD.From(propertybase).Create()
+	data_base := BMDD.Create()
+	data_base.AddEdges(basePropertyEdgeSet...)
+	graphFixtures["p-2e3v"] = BMDD.From(data_base).Create()
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -153,8 +153,8 @@ var _ = SetUpTestsFromBuilder(BMWD)
 var _ = SetUpTestsFromBuilder(BMWU)
 var _ = SetUpTestsFromBuilder(BMLD)
 var _ = SetUpTestsFromBuilder(BMLU)
-var _ = SetUpTestsFromBuilder(BMPD)
-var _ = SetUpTestsFromBuilder(BMPU)
+var _ = SetUpTestsFromBuilder(BMDD)
+var _ = SetUpTestsFromBuilder(BMDU)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -939,7 +939,7 @@ func (s *PropertyGraphSuite) TestEachEdge(c *C) {
 	// provided by the EachEdge() iterator actually do implement PropertyEdge.
 	g := s.Builder.Using(graphFixtures["p-2e3v"]).Graph().(PropertyGraph)
 
-	var we PropertyEdge
+	var we DataEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
 		return
@@ -951,7 +951,7 @@ func (s *PropertyGraphSuite) TestHasPropertyEdge(c *C) {
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasPropertyEdge(basePropertyEdgeSet[1]), Equals, true)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
 }
 
 /* MutablePropertyGraphSuite - tests for mutable labeled graphs */
@@ -1017,25 +1017,25 @@ func (s *MutablePropertyGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutablePropertyGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Builder.Graph().(MutablePropertyGraph)
-	g.AddEdges(BasePropertyEdge{BaseEdge{1, 2}, "foo"})
+	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
 	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
 
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "baz"}), Equals, false)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 1}, "quark"}), Equals, false)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "baz"}), Equals, false)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 1}, "quark"}), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(BasePropertyEdge{BaseEdge{1, 2}, "foo"})
+	g.RemoveEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"})
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
 }
 
 func (s *MutablePropertyGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	g := s.Builder.Graph().(MutablePropertyGraph)
-	g.AddEdges(BasePropertyEdge{BaseEdge{1, 2}, "foo"}, BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
+	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"}, BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
 
 	// Basic edge tests first
 	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
@@ -1046,19 +1046,19 @@ func (s *MutablePropertyGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
 
 	// Now labeled edge tests
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 1}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, true)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 3}, "qux"}), Equals, false) // wrong label
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{3, 2}, struct{ a int }{a: 2}}), Equals, !s.Directed)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{3, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "baz"}), Equals, false) // wrong label
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 1}, "baz"}), Equals, false) // wrong label
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, true)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 3}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{3, 2}, struct{ a int }{a: 2}}), Equals, !s.Directed)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{3, 2}, "qux"}), Equals, false) // wrong label
 
 	// Now test removal
-	g.RemoveEdges(BasePropertyEdge{BaseEdge{1, 2}, "foo"}, BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
-	c.Assert(g.HasPropertyEdge(BasePropertyEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, false)
+	g.RemoveEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"}, BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+	c.Assert(g.HasPropertyEdge(BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, false)
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
 	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
 }

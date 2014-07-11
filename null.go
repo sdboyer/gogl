@@ -53,7 +53,7 @@ func (g nullGraph) HasLabeledEdge(e LabeledEdge) bool {
 	return false
 }
 
-func (g nullGraph) HasPropertyEdge(e PropertyEdge) bool {
+func (g nullGraph) HasPropertyEdge(e DataEdge) bool {
 	return false
 }
 

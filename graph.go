@@ -101,8 +101,8 @@ type LabeledEdgeSetMutator interface {
 
 // A PropertyEdgeSetMutator allows the addition and removal of data edges from a set.
 type PropertyEdgeSetMutator interface {
-	AddEdges(edges ...PropertyEdge)
-	RemoveEdges(edges ...PropertyEdge)
+	AddEdges(edges ...DataEdge)
+	RemoveEdges(edges ...DataEdge)
 }
 
 // A Transposer produces a transposed version of a DirectedGraph.
@@ -243,7 +243,7 @@ type MutableLabeledGraph interface {
 // cause a panic.
 type PropertyGraph interface {
 	Graph
-	HasPropertyEdge(e PropertyEdge) bool
+	HasPropertyEdge(e DataEdge) bool
 }
 
 // MutablePropertyGraph is the mutable version of a propety graph. Its
@@ -316,11 +316,11 @@ func CopyGraph(from Graph, to interface{}) interface{} {
 		}
 	} else if g, ok := to.(pgm); ok {
 		el = func(e Edge) (terminate bool) {
-			if ee, ok := e.(PropertyEdge); ok {
+			if ee, ok := e.(DataEdge); ok {
 				g.AddEdges(ee)
 			} else {
 				// TODO should this case panic?
-				g.AddEdges(BasePropertyEdge{BaseEdge{U: e.Source(), V: e.Target()}, struct{}{}})
+				g.AddEdges(BaseDataEdge{BaseEdge{U: e.Source(), V: e.Target()}, struct{}{}})
 			}
 			return
 		}
