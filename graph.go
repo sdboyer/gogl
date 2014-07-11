@@ -99,8 +99,8 @@ type LabeledEdgeSetMutator interface {
 	RemoveEdges(edges ...LabeledEdge)
 }
 
-// A PropertyEdgeSetMutator allows the addition and removal of data edges from a set.
-type PropertyEdgeSetMutator interface {
+// A DataEdgeSetMutator allows the addition and removal of data edges from a set.
+type DataEdgeSetMutator interface {
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
 }
@@ -226,33 +226,33 @@ type MutableLabeledGraph interface {
 }
 
 // A data graph is a graph subtype where the edges carry arbitrary Go data;
-// as described by the PropertyEdge interface, this identifier is an interface{}.
+// as described by the DataEdge interface, this identifier is an interface{}.
 //
-// PropertyGraphs have both the HasEdge() and HasPropertyEdge() methods.
+// DataGraphs have both the HasEdge() and HasDataEdge() methods.
 // Correct implementations should treat the difference as a matter of strictness:
 //
 // HasEdge() should return true as long as an edge exists
 // connecting the two given vertices (respecting directed or undirected as
 // appropriate), regardless of its label.
 //
-// HasPropertyEdge() should return true iff an edge exists connecting the
+// HasDataEdge() should return true iff an edge exists connecting the
 // two given vertices (respecting directed or undirected as appropriate),
 // AND if the edge data is the same. Simple comparison will typically be used
 // to establish data equality, which means that using noncomparables (a slice,
 // map, or non-pointer struct containing a slice or a map) for the data will
 // cause a panic.
-type PropertyGraph interface {
+type DataGraph interface {
 	Graph
-	HasPropertyEdge(e DataEdge) bool
+	HasDataEdge(e DataEdge) bool
 }
 
-// MutablePropertyGraph is the mutable version of a propety graph. Its
+// MutableDataGraph is the mutable version of a propety graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only property edges can be present in the graph.
-type MutablePropertyGraph interface {
-	PropertyGraph
+type MutableDataGraph interface {
+	DataGraph
 	VertexSetMutator
-	PropertyEdgeSetMutator
+	DataEdgeSetMutator
 }
 
 /* Graph creation */
@@ -269,7 +269,7 @@ type wgm interface {
 }
 
 type pgm interface {
-	PropertyEdgeSetMutator
+	DataEdgeSetMutator
 	VertexSetMutator
 }
 

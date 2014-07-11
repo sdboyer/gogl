@@ -7,17 +7,17 @@ import (
 )
 
 // This is implemented as an adjacency list, because those are simple.
-type baseProperty struct {
+type baseData struct {
 	list map[Vertex]map[Vertex]interface{}
 	size int
 	mu   sync.RWMutex
 }
 
-/* baseProperty shared methods */
+/* baseData shared methods */
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseProperty) EachVertex(f VertexLambda) {
+func (g *baseData) EachVertex(f VertexLambda) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -29,7 +29,7 @@ func (g *baseProperty) EachVertex(f VertexLambda) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseProperty) HasVertex(vertex Vertex) (exists bool) {
+func (g *baseData) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -38,13 +38,13 @@ func (g *baseProperty) HasVertex(vertex Vertex) (exists bool) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseProperty) hasVertex(vertex Vertex) (exists bool) {
+func (g *baseData) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.list[vertex]
 	return
 }
 
 // Returns the order (number of vertices) in the graph.
-func (g *baseProperty) Order() int {
+func (g *baseData) Order() int {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -52,13 +52,13 @@ func (g *baseProperty) Order() int {
 }
 
 // Returns the size (number of edges) in the graph.
-func (g *baseProperty) Size() int {
+func (g *baseData) Size() int {
 	return g.size
 }
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseProperty) EnsureVertex(vertices ...Vertex) {
+func (g *baseData) EnsureVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -71,7 +71,7 @@ func (g *baseProperty) EnsureVertex(vertices ...Vertex) {
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseProperty) ensureVertex(vertices ...Vertex) {
+func (g *baseData) ensureVertex(vertices ...Vertex) {
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?
@@ -82,13 +82,13 @@ func (g *baseProperty) ensureVertex(vertices ...Vertex) {
 	return
 }
 
-/* DirectedProperty implementation */
+/* DirectedData implementation */
 
 type dataDirected struct {
-	baseProperty
+	baseData
 }
 
-func NewPropertyDirected() MutablePropertyGraph {
+func NewDataDirected() MutableDataGraph {
 	list := &dataDirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	list.list = make(map[Vertex]map[Vertex]interface{})
@@ -97,8 +97,8 @@ func NewPropertyDirected() MutablePropertyGraph {
 	var _ Graph = list
 	var _ SimpleGraph = list
 	var _ DirectedGraph = list
-	var _ PropertyGraph = list
-	var _ MutablePropertyGraph = list
+	var _ DataGraph = list
+	var _ MutableDataGraph = list
 
 	return list
 }
@@ -220,9 +220,9 @@ func (g *dataDirected) HasEdge(edge Edge) bool {
 }
 
 // Indicates whether or not the given property edge is present in the graph.
-// It will only match if the provided PropertyEdge has the same property as
+// It will only match if the provided DataEdge has the same property as
 // the edge contained in the graph.
-func (g *dataDirected) HasPropertyEdge(edge DataEdge) bool {
+func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -337,13 +337,13 @@ func (g *dataDirected) Transpose() DirectedGraph {
 	return g2
 }
 
-/* UndirectedProperty implementation */
+/* UndirectedData implementation */
 
 type dataUndirected struct {
-	baseProperty
+	baseData
 }
 
-func NewPropertyUndirected() MutablePropertyGraph {
+func NewDataUndirected() MutableDataGraph {
 	g := &dataUndirected{}
 	// Cannot assign to promoted fields in a composite literals.
 	g.list = make(map[Vertex]map[Vertex]interface{})
@@ -351,8 +351,8 @@ func NewPropertyUndirected() MutablePropertyGraph {
 	// Type assertions to ensure interfaces are met
 	var _ Graph = g
 	var _ SimpleGraph = g
-	var _ PropertyGraph = g
-	var _ MutablePropertyGraph = g
+	var _ DataGraph = g
+	var _ MutableDataGraph = g
 
 	return g
 }
@@ -431,9 +431,9 @@ func (g *dataUndirected) HasEdge(edge Edge) bool {
 }
 
 // Indicates whether or not the given property edge is present in the graph.
-// It will only match if the provided PropertyEdge has the same property as
+// It will only match if the provided DataEdge has the same property as
 // the edge contained in the graph.
-func (g *dataUndirected) HasPropertyEdge(edge DataEdge) bool {
+func (g *dataUndirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
