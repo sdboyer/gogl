@@ -1,5 +1,7 @@
 package gogl
 
+/* Edge interfaces */
+
 // A graph's behaviors are primarily a product of the constraints and
 // capabilities it places on its edges. These constraints and capabilities
 // determine whether certain types of operations are possible on the graph, as
@@ -32,11 +34,13 @@ type LabeledEdge interface {
 	Label() string
 }
 
-// A DataEdge is an Edge that also has arbitrary property data.
+// A DataEdge is an Edge that also holds arbitrary data.
 type DataEdge interface {
 	Edge
 	Data() interface{}
 }
+
+/* Base implementations of Edge interfaces */
 
 // BaseEdge is a struct used to represent edges and meet the Edge interface
 // requirements. It uses the standard graph notation, (U,V), for its

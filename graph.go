@@ -5,112 +5,7 @@ import "fmt"
 // for great justice
 var fml = fmt.Println
 
-/* Vertex structures */
-
-// As a rule, gogl tries to place as low a requirement on its vertices as
-// possible. This is because, from a purely graph theoretic perspective,
-// vertices are inert. Boring, even. Graphs are more about the topology, the
-// characteristics of the edges connecting the points than the points
-// themselves. Your use case cares about the content of your vertices, but gogl
-// does not.  Consequently, anything can act as a vertex.
-type Vertex interface{}
-
-/* Atomic graph interfaces */
-
-// EdgeLambdas are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
-//
-// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
-type EdgeLambda func(Edge) (terminate bool)
-
-// VertexLambdas are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
-//
-// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
-type VertexLambda func(Vertex) (terminate bool)
-
-// A VertexEnumerator iteratively enumerates vertices, and can indicate the number of vertices present.
-type VertexEnumerator interface {
-	EachVertex(VertexLambda)
-}
-
-// An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
-type EdgeEnumerator interface {
-	EachEdge(EdgeLambda)
-}
-
-// An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
-type IncidentEdgeEnumerator interface {
-	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)
-}
-
-// An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
-// One enumerator provides inbound edges, the other outbound edges.
-type IncidentArcEnumerator interface {
-	EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)
-	EachArcTo(v Vertex, inEdgeLambda EdgeLambda)
-}
-
-// An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
-type AdjacencyEnumerator interface {
-	EachAdjacentTo(start Vertex, adjacentVertexLambda VertexLambda)
-}
-
-// A VertexMembershipChecker can indicate the presence of a vertex.
-type VertexMembershipChecker interface {
-	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
-}
-
-// A DegreeChecker reports the number of edges incident to a given vertex.
-type DegreeChecker interface {
-	DegreeOf(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
-}
-
-// A DirectedDegreeChecker reports the number of in or out-edges incident to given vertex.
-type DirectedDegreeChecker interface {
-	InDegreeOf(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
-	OutDegreeOf(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
-}
-
-// An EdgeMembershipChecker can indicate the presence of an edge.
-type EdgeMembershipChecker interface {
-	HasEdge(Edge) bool
-}
-
-// A VertexSetMutator allows the addition and removal of vertices from a set.
-type VertexSetMutator interface {
-	EnsureVertex(...Vertex)
-	RemoveVertex(...Vertex)
-}
-
-// An EdgeSetMutator allows the addition and removal of edges from a set.
-type EdgeSetMutator interface {
-	AddEdges(edges ...Edge)
-	RemoveEdges(edges ...Edge)
-}
-
-// A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
-type WeightedEdgeSetMutator interface {
-	AddEdges(edges ...WeightedEdge)
-	RemoveEdges(edges ...WeightedEdge)
-}
-
-// A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
-type LabeledEdgeSetMutator interface {
-	AddEdges(edges ...LabeledEdge)
-	RemoveEdges(edges ...LabeledEdge)
-}
-
-// A DataEdgeSetMutator allows the addition and removal of data edges from a set.
-type DataEdgeSetMutator interface {
-	AddEdges(edges ...DataEdge)
-	RemoveEdges(edges ...DataEdge)
-}
-
-// A Transposer produces a transposed version of a DirectedGraph.
-type Transposer interface {
-	Transpose() DirectedGraph
-}
-
-/* Aggregate graph interfaces */
+/* Composite graph interfaces */
 
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
@@ -254,88 +149,97 @@ type MutableDataGraph interface {
 	VertexSetMutator
 	DataEdgeSetMutator
 }
+/* Atomic graph interfaces */
 
-/* Graph creation */
-
-// These interfaces are convenient shorthand
-type gm interface {
-	EdgeSetMutator
-	VertexSetMutator
-}
-
-type wgm interface {
-	WeightedEdgeSetMutator
-	VertexSetMutator
-}
-
-type pgm interface {
-	DataEdgeSetMutator
-	VertexSetMutator
-}
-
-type lgm interface {
-	LabeledEdgeSetMutator
-	VertexSetMutator
-}
-
-// Copies the first graph's edges and vertices into the second, and returns the second.
+// EdgeLambdas are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
 //
-// The second argument must be some flavor of MutableGraph, otherwise this function will panic.
+// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type EdgeLambda func(Edge) (terminate bool)
+
+// VertexLambdas are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
 //
-// Generally speaking, this is a very naive copy operation; it should not be relied on for complex cases.
-func CopyGraph(from Graph, to interface{}) interface{} {
-	var el EdgeLambda
-	var g VertexSetMutator
+// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type VertexLambda func(Vertex) (terminate bool)
 
-	// Establish the mutable type of the second graph, then dispatch to
-	// a specialized copyer depending on whether the types correspond.
-	if g, ok := to.(gm); ok {
-		el = func(e Edge) (terminate bool) {
-			g.AddEdges(e)
-			return
-		}
-	} else if g, ok := to.(wgm); ok {
-		el = func(e Edge) (terminate bool) {
-			if ee, ok := e.(WeightedEdge); ok {
-				g.AddEdges(ee)
-			} else {
-				// TODO should this case panic?
-				g.AddEdges(BaseWeightedEdge{BaseEdge{U: e.Source(), V: e.Target()}, 0})
-			}
-			return
-		}
-	} else if g, ok := to.(lgm); ok {
-		el = func(e Edge) (terminate bool) {
-			if ee, ok := e.(LabeledEdge); ok {
-				g.AddEdges(ee)
-			} else {
-				// TODO should this case panic?
-				g.AddEdges(BaseLabeledEdge{BaseEdge{U: e.Source(), V: e.Target()}, ""})
-			}
-			return
-		}
-	} else if g, ok := to.(pgm); ok {
-		el = func(e Edge) (terminate bool) {
-			if ee, ok := e.(DataEdge); ok {
-				g.AddEdges(ee)
-			} else {
-				// TODO should this case panic?
-				g.AddEdges(BaseDataEdge{BaseEdge{U: e.Source(), V: e.Target()}, struct{}{}})
-			}
-			return
-		}
-	} else {
-		panic("Second graph passed to CopyGraph must be mutable.")
-	}
+// A VertexEnumerator iteratively enumerates vertices, and can indicate the number of vertices present.
+type VertexEnumerator interface {
+	EachVertex(VertexLambda)
+}
 
-	// Do the simplistic copy
-	from.EachEdge(el)
+// An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
+type EdgeEnumerator interface {
+	EachEdge(EdgeLambda)
+}
 
-	// Ensure vertex isolates come, too
-	from.EachVertex(func(v Vertex) (terminate bool) {
-		g.EnsureVertex(v)
-		return
-	})
+// An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
+type IncidentEdgeEnumerator interface {
+	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)
+}
 
-	return g
+// An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
+// One enumerator provides inbound edges, the other outbound edges.
+type IncidentArcEnumerator interface {
+	EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)
+	EachArcTo(v Vertex, inEdgeLambda EdgeLambda)
+}
+
+// An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
+type AdjacencyEnumerator interface {
+	EachAdjacentTo(start Vertex, adjacentVertexLambda VertexLambda)
+}
+
+// A VertexMembershipChecker can indicate the presence of a vertex.
+type VertexMembershipChecker interface {
+	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
+}
+
+// A DegreeChecker reports the number of edges incident to a given vertex.
+type DegreeChecker interface {
+	DegreeOf(Vertex) (degree int, exists bool) // Number of incident edges; if vertex is present
+}
+
+// A DirectedDegreeChecker reports the number of in or out-edges incident to given vertex.
+type DirectedDegreeChecker interface {
+	InDegreeOf(Vertex) (degree int, exists bool)  // Number of in-edges; if vertex is present
+	OutDegreeOf(Vertex) (degree int, exists bool) // Number of out-edges; if vertex is present
+}
+
+// An EdgeMembershipChecker can indicate the presence of an edge.
+type EdgeMembershipChecker interface {
+	HasEdge(Edge) bool
+}
+
+// A VertexSetMutator allows the addition and removal of vertices from a set.
+type VertexSetMutator interface {
+	EnsureVertex(...Vertex)
+	RemoveVertex(...Vertex)
+}
+
+// An EdgeSetMutator allows the addition and removal of edges from a set.
+type EdgeSetMutator interface {
+	AddEdges(edges ...Edge)
+	RemoveEdges(edges ...Edge)
+}
+
+// A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
+type WeightedEdgeSetMutator interface {
+	AddEdges(edges ...WeightedEdge)
+	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
+type LabeledEdgeSetMutator interface {
+	AddEdges(edges ...LabeledEdge)
+	RemoveEdges(edges ...LabeledEdge)
+}
+
+// A DataEdgeSetMutator allows the addition and removal of data edges from a set.
+type DataEdgeSetMutator interface {
+	AddEdges(edges ...DataEdge)
+	RemoveEdges(edges ...DataEdge)
+}
+
+// A Transposer produces a transposed version of a DirectedGraph.
+type Transposer interface {
+	Transpose() DirectedGraph
 }
