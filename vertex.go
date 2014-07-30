@@ -9,4 +9,3 @@ package gogl
 // that makes them unique has no bearing on the graph's behavior. In Go-speak, that
 // translates pretty nicely to interface{}.
 type Vertex interface{}
-

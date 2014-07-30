@@ -10,9 +10,9 @@ import (
 
 // TODO reimplement with specs
 //func SetUpBenchmarksFromBuilder(b GraphBuilder) bool {
-	//Suite(&GraphBenchSuite{b: b})
+//Suite(&GraphBenchSuite{b: b})
 
-	//return true
+//return true
 //}
 
 //var _ = SetUpBenchmarksFromBuilder(BMBD)

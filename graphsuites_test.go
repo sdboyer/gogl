@@ -169,7 +169,7 @@ func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
 /* GraphSuite - tests for non-mutable graph methods */
 
 type GraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -519,7 +519,7 @@ func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
 /* SimpleGraphSuite - tests for simple graph methods */
 
 type SimpleGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -548,7 +548,7 @@ func (s *SimpleGraphSuite) TestDensity(c *C) {
 /* MutableGraphSuite - tests for mutable graph methods */
 
 type MutableGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -650,7 +650,7 @@ func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 /* WeightedGraphSuite - tests for weighted graphs */
 
 type WeightedGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -681,7 +681,7 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 /* MutableWeightedGraphSuite - tests for mutable weighted graphs */
 
 type MutableWeightedGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -790,7 +790,7 @@ func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 /* LabeledGraphSuite - tests for labeled graphs */
 
 type LabeledGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -821,7 +821,7 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 /* MutableLabeledGraphSuite - tests for mutable labeled graphs */
 
 type MutableLabeledGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -930,7 +930,7 @@ func (s *MutableLabeledGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 /* DataGraphSuite - tests for labeled graphs */
 
 type DataGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
@@ -961,7 +961,7 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 /* MutableDataGraphSuite - tests for mutable labeled graphs */
 
 type MutableDataGraphSuite struct {
-	Factory func(GraphSource) Graph
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 

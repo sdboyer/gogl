@@ -26,11 +26,11 @@ const (
 	// Mutability. Immutable is the implied zero-value.
 	G_IMMUTABLE
 	G_MUTABLE
-	G_PERSISTENT = 1 << iota | G_MUTABLE // Persistent graphs are, kinda weirdly, both.
+	G_PERSISTENT = 1<<iota | G_MUTABLE // Persistent graphs are, kinda weirdly, both.
 )
 
 type GraphSpec struct {
-	Props GraphProperties
+	Props  GraphProperties
 	Source GraphSource
 }
 
@@ -130,9 +130,9 @@ func (b GraphSpec) Immutable() GraphSpec {
 // Specify that the graph is persistent.
 // TODO Commented out until this actually gets implemented
 //func (b GraphSpec) Persistent() GraphSpec {
-	//b.Props &^= G_IMMUTABLE
-	//b.Props |= G_PERSISTENT
-	//return b
+//b.Props &^= G_IMMUTABLE
+//b.Props |= G_PERSISTENT
+//return b
 //}
 
 // Creates a graph from the spec, using the provided creator function.
@@ -142,4 +142,3 @@ func (b GraphSpec) Immutable() GraphSpec {
 func (b GraphSpec) Create(f func(GraphSpec) Graph) Graph {
 	return f(b)
 }
-
