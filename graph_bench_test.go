@@ -18,7 +18,7 @@ import (
 //var _ = SetUpBenchmarksFromBuilder(BMBD)
 
 type GraphBenchSuite struct {
-	b       GraphBuilder
+	//b       GraphBuilder
 	g10     Graph
 	g100    Graph
 	g1000   Graph
@@ -129,10 +129,10 @@ func (g *benchGraph) Order() int {
 // back to reality
 
 func (s *GraphBenchSuite) SetUpSuite(c *C) {
-	src := rand.NewSource(time.Now().UnixNano())
-	s.g10 = s.b.Using(bernoulliDistributionGenerator(10, 50, src)).Graph()
-	s.g100 = s.b.Using(bernoulliDistributionGenerator(100, 50, src)).Graph()
-	s.g1000 = s.b.Using(bernoulliDistributionGenerator(1000, 50, src)).Graph()
+	//src := rand.NewSource(time.Now().UnixNano())
+	//s.g10 = s.b.Using(bernoulliDistributionGenerator(10, 50, src)).Graph()
+	//s.g100 = s.b.Using(bernoulliDistributionGenerator(100, 50, src)).Graph()
+	//s.g1000 = s.b.Using(bernoulliDistributionGenerator(1000, 50, src)).Graph()
 	//s.g10000 = s.b.Using(bernoulliDistributionGenerator(10000, 50, src)).Graph()
 	//	s.g100000 = s.b.Using(bernoulliDistributionGenerator(100000, 50, src)).Graph()
 }
