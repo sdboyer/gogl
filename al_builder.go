@@ -7,7 +7,7 @@ type GraphSpec struct {
 
 // Create a graph specification through a fluent builder-type interface.
 func BuildGraph() GraphSpec {
-	b := GraphSpec{Props: G_UNDIRECTED}
+	b := GraphSpec{Props: G_UNDIRECTED | G_SIMPLE | G_BASIC | G_MUTABLE}
 	return b
 }
 
@@ -37,8 +37,8 @@ func (b GraphSpec) Directed() GraphSpec {
 
 // Specify that the edges should be "basic" - no weights, labels, or data.
 func (b GraphSpec) BasicEdges() GraphSpec {
-	b.Props |= G_BASIC
 	b.Props &^= G_LABELED | G_WEIGHTED | G_DATA
+	b.Props |= G_BASIC
 	return b
 }
 
@@ -99,6 +99,7 @@ func (b GraphSpec) Immutable() GraphSpec {
 }
 
 // Specify that the graph is persistent.
+// TODO Commented out until this actually gets implemented
 //func (b GraphSpec) Persistent() GraphSpec {
 	//b.Props &^= G_IMMUTABLE
 	//b.Props |= G_PERSISTENT

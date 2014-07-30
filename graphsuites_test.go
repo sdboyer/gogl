@@ -42,35 +42,41 @@ var baseDataEdgeSet = []DataEdge{
 func init() {
 	// TODO use hardcoded fixtures, like the NullGraph (...?)
 	// TODO improve naming basis/patterns for these
-	base := BMBD.Create()
+	spec := BuildGraph().Mutable().BasicEdges().Directed()
+	base := spec.Create(AdjacencyList).(MutableGraph)
 	base.AddEdges(edgeSet...)
-	graphFixtures["2e3v"] = BIBD.From(base).Create()
+
+	ispec := BuildGraph().Immutable().BasicEdges().Directed()
+	graphFixtures["2e3v"] = ispec.Using(base).Create(AdjacencyList)
 
 	base.AddEdges(BaseEdge{"foo", "qux"})
-	base2 := BMBD.From(base).Create()
-	graphFixtures["3e4v"] = BIBD.From(base).Create()
+	base2 := spec.Using(base).Create(AdjacencyList).(MutableGraph)
+	graphFixtures["3e4v"] = ispec.Using(base).Create(AdjacencyList)
 
 	base.EnsureVertex("isolate")
-	graphFixtures["3e5v1i"] = BIBD.From(base).Create()
+	graphFixtures["3e5v1i"] = ispec.Using(base).Create(AdjacencyList)
 
 	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
-	graphFixtures["arctest"] = BIBD.From(base2).Create()
+	graphFixtures["arctest"] = ispec.Using(base2).Create(AdjacencyList)
 
-	pair := BMBD.Create()
+	pair := spec.Using(nil).Create(AdjacencyList).(MutableGraph)
 	pair.AddEdges(BaseEdge{1, 2})
-	graphFixtures["pair"] = BIBD.From(pair).Create()
+	graphFixtures["pair"] = ispec.Using(pair).Create(AdjacencyList)
 
-	weightedbase := BMWD.Create()
+	wb := BuildGraph().Directed().WeightedEdges()
+	weightedbase := wb.Create(AdjacencyList).(MutableWeightedGraph)
 	weightedbase.AddEdges(baseWeightedEdgeSet...)
-	graphFixtures["w-2e3v"] = BMWD.From(weightedbase).Create()
+	graphFixtures["w-2e3v"] = wb.Using(weightedbase).Create(AdjacencyList)
 
-	labeledbase := BMLD.Create()
+	lb := BuildGraph().Directed().LabeledEdges()
+	labeledbase := lb.Create(AdjacencyList).(MutableLabeledGraph)
 	labeledbase.AddEdges(baseLabeledEdgeSet...)
-	graphFixtures["l-2e3v"] = BMLD.From(labeledbase).Create()
+	graphFixtures["l-2e3v"] = lb.Using(labeledbase).Create(AdjacencyList)
 
-	data_base := BMDD.Create()
+	db := BuildGraph().Directed().DataEdges()
+	data_base := db.Create(AdjacencyList).(MutableDataGraph)
 	data_base.AddEdges(baseDataEdgeSet...)
-	graphFixtures["p-2e3v"] = BMDD.From(data_base).Create()
+	graphFixtures["p-2e3v"] = db.Using(data_base).Create(AdjacencyList)
 
 	for gp, _ := range alCreators {
 		SetUpTestsFromSpec(gp, AdjacencyList)
