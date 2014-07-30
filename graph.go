@@ -243,32 +243,3 @@ type DataEdgeSetMutator interface {
 type Transposer interface {
 	Transpose() DirectedGraph
 }
-
-/* Graph type constants. Used primarily for builders. */
-
-// Describes the properties of a graph as a bitfield.
-type GraphProperties uint16
-
-const (
-	// Edge directedness. Flags are provided for both, though gogl does not really support
-	// a hybrid graph containing both directed and undirected edges. Algorithms would have
-	// undefined results.
-	G_UNDIRECTED = 1 << iota
-	G_DIRECTED
-
-	// Edge type. Basic (untyped edges, represented solely by the Edge interface) is the implied zero-value.
-	G_BASIC
-	G_LABELED
-	G_WEIGHTED
-	G_DATA
-
-	// Multiplicity. Simple (no loops or multiple edges) is the implied zero-value.
-	G_SIMPLE
-	G_LOOPS
-	G_MULTI
-
-	// Mutability. Immutable is the implied zero-value.
-	G_IMMUTABLE
-	G_MUTABLE
-	G_PERSISTENT = 1 << iota | G_MUTABLE // Persistent graphs are, kinda weirdly, both.
-)
