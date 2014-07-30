@@ -84,6 +84,27 @@ func (b GraphSpec) LoopingGraph() GraphSpec {
 	return b
 }
 
+// Specify that the graph is mutable.
+func (b GraphSpec) Mutable() GraphSpec {
+	b.Props &^= G_IMMUTABLE | G_PERSISTENT
+	b.Props |= G_MUTABLE
+	return b
+}
+
+// Specify that the graph is immutable.
+func (b GraphSpec) Immutable() GraphSpec {
+	b.Props &^= G_PERSISTENT | G_MUTABLE // redundant, but being thorough
+	b.Props |= G_IMMUTABLE
+	return b
+}
+
+// Specify that the graph is persistent.
+//func (b GraphSpec) Persistent() GraphSpec {
+	//b.Props &^= G_IMMUTABLE
+	//b.Props |= G_PERSISTENT
+	//return b
+//}
+
 // Creates a graph from the spec, using the provided creator function.
 //
 // This is just a convenience method; the creator function can always
