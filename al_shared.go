@@ -39,7 +39,7 @@ type al_pea interface {
 //
 // This encapsulates the full matrix of conversion possibilities between
 // different graph edge types.
-func functorToAdjacencyList(from GraphSource, to interface{}) {
+func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 	vf := func(from GraphSource, to al_graph) {
 		if to.Order() != from.Order() {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
@@ -88,6 +88,8 @@ func functorToAdjacencyList(from GraphSource, to interface{}) {
 	} else {
 		panic("Target graph did not implement a recognized adjacency list internal type")
 	}
+
+	return to.(Graph)
 }
 
 func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexLambda) {

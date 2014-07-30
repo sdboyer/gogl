@@ -257,39 +257,18 @@ const (
 	G_DIRECTED
 
 	// Edge type. Basic (untyped edges, represented solely by the Edge interface) is the implied zero-value.
+	G_BASIC
 	G_LABELED
 	G_WEIGHTED
 	G_DATA
 
 	// Multiplicity. Simple (no loops or multiple edges) is the implied zero-value.
+	G_SIMPLE
 	G_LOOPS
 	G_MULTI
 
 	// Mutability. Immutable is the implied zero-value.
+	G_IMMUTABLE
 	G_MUTABLE
 	G_PERSISTENT = 1 << iota | G_MUTABLE // Persistent graphs are, kinda weirdly, both.
 )
-
-//const (
-	//G_UNDIRECTED = 0
-	//G_DIRECTED = 1
-//)
-
-//const (
-	//G_LABELED = 1 << iota
-	//G_WEIGHTED
-	//G_DATA
-	//G_BASIC = 0
-//)
-
-//const (
-	//G_LOOPS = 1 << iota
-	//G_MULTI
-	//G_SIMPLE = 0
-//)
-
-//const (
-	//G_IMMUTABLE = 0
-	//G_MUTABLE = 1
-	//G_PERSISTENT = 3
-//)
