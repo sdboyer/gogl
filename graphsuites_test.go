@@ -42,35 +42,45 @@ var baseDataEdgeSet = []DataEdge{
 func init() {
 	// TODO use hardcoded fixtures, like the NullGraph (...?)
 	// TODO improve naming basis/patterns for these
-	base := BMBD.Create()
+	spec := BuildGraph().Mutable().BasicEdges().Directed()
+	base := spec.Create(AdjacencyList).(MutableGraph)
 	base.AddEdges(edgeSet...)
-	graphFixtures["2e3v"] = BIBD.From(base).Create()
+
+	ispec := BuildGraph().Immutable().BasicEdges().Directed()
+	graphFixtures["2e3v"] = ispec.Using(base).Create(AdjacencyList)
 
 	base.AddEdges(BaseEdge{"foo", "qux"})
-	base2 := BMBD.From(base).Create()
-	graphFixtures["3e4v"] = BIBD.From(base).Create()
+	base2 := spec.Using(base).Create(AdjacencyList).(MutableGraph)
+	graphFixtures["3e4v"] = ispec.Using(base).Create(AdjacencyList)
 
 	base.EnsureVertex("isolate")
-	graphFixtures["3e5v1i"] = BIBD.From(base).Create()
+	graphFixtures["3e5v1i"] = ispec.Using(base).Create(AdjacencyList)
 
 	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
-	graphFixtures["arctest"] = BIBD.From(base2).Create()
+	graphFixtures["arctest"] = ispec.Using(base2).Create(AdjacencyList)
 
-	pair := BMBD.Create()
+	pair := spec.Using(nil).Create(AdjacencyList).(MutableGraph)
 	pair.AddEdges(BaseEdge{1, 2})
-	graphFixtures["pair"] = BIBD.From(pair).Create()
+	graphFixtures["pair"] = ispec.Using(pair).Create(AdjacencyList)
 
-	weightedbase := BMWD.Create()
+	wb := BuildGraph().Directed().WeightedEdges()
+	weightedbase := wb.Create(AdjacencyList).(MutableWeightedGraph)
 	weightedbase.AddEdges(baseWeightedEdgeSet...)
-	graphFixtures["w-2e3v"] = BMWD.From(weightedbase).Create()
+	graphFixtures["w-2e3v"] = wb.Using(weightedbase).Create(AdjacencyList)
 
-	labeledbase := BMLD.Create()
+	lb := BuildGraph().Directed().LabeledEdges()
+	labeledbase := lb.Create(AdjacencyList).(MutableLabeledGraph)
 	labeledbase.AddEdges(baseLabeledEdgeSet...)
-	graphFixtures["l-2e3v"] = BMLD.From(labeledbase).Create()
+	graphFixtures["l-2e3v"] = lb.Using(labeledbase).Create(AdjacencyList)
 
-	data_base := BMDD.Create()
+	db := BuildGraph().Directed().DataEdges()
+	data_base := db.Create(AdjacencyList).(MutableDataGraph)
 	data_base.AddEdges(baseDataEdgeSet...)
-	graphFixtures["p-2e3v"] = BMDD.From(data_base).Create()
+	graphFixtures["p-2e3v"] = db.Using(data_base).Create(AdjacencyList)
+
+	for gp, _ := range alCreators {
+		SetUpTestsFromSpec(gp, AdjacencyList)
+	}
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -98,63 +108,57 @@ func gdebug(g Graph, args ...interface{}) {
 //
 /////////////////////////////////////////////////////////////////////
 
-func SetUpTestsFromBuilder(b GraphBuilder) bool {
+func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
 	var directed bool
 
-	g := b.Graph()
+	g := fn(GraphSpec{Props: gp})
+
+	fact := func(gs GraphSource) Graph {
+		return fn(GraphSpec{Props: gp, Source: gs})
+	}
 
 	if _, ok := g.(DirectedGraph); ok {
 		directed = true
-		Suite(&DirectedGraphSuite{Builder: b})
+		Suite(&DirectedGraphSuite{Factory: fact})
 	}
 
 	// Set up the basic Graph suite unconditionally
-	Suite(&GraphSuite{b, directed})
+	Suite(&GraphSuite{fact, directed})
 
 	if _, ok := g.(SimpleGraph); ok {
-		Suite(&SimpleGraphSuite{b, directed})
+		Suite(&SimpleGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(MutableGraph); ok {
-		Suite(&MutableGraphSuite{b, directed})
+		Suite(&MutableGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(WeightedGraph); ok {
-		Suite(&WeightedGraphSuite{b, directed})
+		Suite(&WeightedGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(MutableWeightedGraph); ok {
-		Suite(&MutableWeightedGraphSuite{b, directed})
+		Suite(&MutableWeightedGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(LabeledGraph); ok {
-		Suite(&LabeledGraphSuite{b, directed})
+		Suite(&LabeledGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(MutableLabeledGraph); ok {
-		Suite(&MutableLabeledGraphSuite{b, directed})
+		Suite(&MutableLabeledGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(DataGraph); ok {
-		Suite(&DataGraphSuite{b, directed})
+		Suite(&DataGraphSuite{fact, directed})
 	}
 
 	if _, ok := g.(MutableDataGraph); ok {
-		Suite(&MutableDataGraphSuite{b, directed})
+		Suite(&MutableDataGraphSuite{fact, directed})
 	}
 
 	return true
 }
-
-var _ = SetUpTestsFromBuilder(BMBD)
-var _ = SetUpTestsFromBuilder(BMBU)
-var _ = SetUpTestsFromBuilder(BIBD)
-var _ = SetUpTestsFromBuilder(BMWD)
-var _ = SetUpTestsFromBuilder(BMWU)
-var _ = SetUpTestsFromBuilder(BMLD)
-var _ = SetUpTestsFromBuilder(BMLU)
-var _ = SetUpTestsFromBuilder(BMDD)
-var _ = SetUpTestsFromBuilder(BMDU)
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -165,28 +169,28 @@ var _ = SetUpTestsFromBuilder(BMDU)
 /* GraphSuite - tests for non-mutable graph methods */
 
 type GraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *GraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *GraphSuite) TestHasVertex(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 	c.Assert(g.HasVertex("qux"), Equals, false)
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *GraphSuite) TestHasEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 	c.Assert(g.HasEdge(edgeSet[0]), Equals, true)
 	c.Assert(g.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)
 }
 
 func (s *GraphSuite) TestEachVertex(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	vset := set.NewNonTS()
 	var hit int
@@ -203,7 +207,7 @@ func (s *GraphSuite) TestEachVertex(c *C) {
 }
 
 func (s *GraphSuite) TestEachVertexTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	var hit int
 	g.EachVertex(func(v Vertex) bool {
@@ -215,7 +219,7 @@ func (s *GraphSuite) TestEachVertexTermination(c *C) {
 }
 
 func (s *GraphSuite) TestEachEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	var hit int
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -227,7 +231,7 @@ func (s *GraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *GraphSuite) TestEachEdgeTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	var hit int
 	g.EachEdge(func(e Edge) bool {
@@ -239,7 +243,7 @@ func (s *GraphSuite) TestEachEdgeTermination(c *C) {
 }
 
 func (s *GraphSuite) TestEachAdjacentTo(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	vset := set.NewNonTS()
 	var hit int
@@ -256,7 +260,7 @@ func (s *GraphSuite) TestEachAdjacentTo(c *C) {
 }
 
 func (s *GraphSuite) TestEachAdjacentToTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["3e4v"]).Graph()
+	g := s.Factory(graphFixtures["3e4v"])
 
 	var hit int
 	g.EachAdjacentTo("foo", func(adjacent Vertex) bool {
@@ -268,7 +272,7 @@ func (s *GraphSuite) TestEachAdjacentToTermination(c *C) {
 }
 
 func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	flipset := []Edge{
 		edgeSet[0].(BaseEdge).swap(),
@@ -313,7 +317,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 }
 
 func (s *GraphSuite) TestEachEdgeIncidentToTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph()
+	g := s.Factory(graphFixtures["2e3v"])
 
 	var hit int
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
@@ -325,7 +329,7 @@ func (s *GraphSuite) TestEachEdgeIncidentToTermination(c *C) {
 }
 
 func (s *GraphSuite) TestDegreeOf(c *C) {
-	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph()
+	g := s.Factory(graphFixtures["3e5v1i"])
 
 	count, exists := g.DegreeOf("foo")
 	c.Assert(exists, Equals, true)
@@ -353,27 +357,27 @@ func (s *GraphSuite) TestDegreeOf(c *C) {
 }
 
 func (s *GraphSuite) TestSize(c *C) {
-	c.Assert(s.Builder.Graph().Size(), Equals, 0)
-	c.Assert(s.Builder.Using(graphFixtures["2e3v"]).Graph().Size(), Equals, 2)
+	c.Assert(s.Factory(NullGraph).Size(), Equals, 0)
+	c.Assert(s.Factory(graphFixtures["2e3v"]).Size(), Equals, 2)
 }
 
 func (s *GraphSuite) TestOrder(c *C) {
-	c.Assert(s.Builder.Graph().Order(), Equals, 0)
-	c.Assert(s.Builder.Using(graphFixtures["2e3v"]).Graph().Order(), Equals, 3)
+	c.Assert(s.Factory(NullGraph).Order(), Equals, 0)
+	c.Assert(s.Factory(graphFixtures["2e3v"]).Order(), Equals, 3)
 }
 
 /* DirectedGraphSuite - tests for directed graph methods */
 
 type DirectedGraphSuite struct {
-	Builder GraphBuilder
+	Factory func(GraphSource) Graph
 }
 
 func (s *DirectedGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *DirectedGraphSuite) TestTranspose(c *C) {
-	g := s.Builder.Using(graphFixtures["2e3v"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["2e3v"]).(DirectedGraph)
 
 	g2 := g.Transpose()
 
@@ -385,7 +389,7 @@ func (s *DirectedGraphSuite) TestTranspose(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
-	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["3e5v1i"]).(DirectedGraph)
 
 	count, exists := g.OutDegreeOf("foo")
 	c.Assert(exists, Equals, true)
@@ -413,7 +417,7 @@ func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
-	g := s.Builder.Using(graphFixtures["3e5v1i"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["3e5v1i"]).(DirectedGraph)
 
 	count, exists := g.InDegreeOf("foo")
 	c.Assert(exists, Equals, true)
@@ -441,7 +445,7 @@ func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
-	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
 
 	eset := set.NewNonTS()
 	var hit int
@@ -465,7 +469,7 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
 
 	var hit int
 	g.EachArcTo("baz", func(e Edge) (terminate bool) {
@@ -477,7 +481,7 @@ func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
-	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
 
 	eset := set.NewNonTS()
 	var hit int
@@ -501,7 +505,7 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 }
 
 func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
-	g := s.Builder.Using(graphFixtures["arctest"]).Graph().(DirectedGraph)
+	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
 
 	var hit int
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
@@ -515,25 +519,25 @@ func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
 /* SimpleGraphSuite - tests for simple graph methods */
 
 type SimpleGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *SimpleGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *SimpleGraphSuite) TestDensity(c *C) {
-	c.Assert(math.IsNaN(s.Builder.Graph().(SimpleGraph).Density()), Equals, true)
+	c.Assert(math.IsNaN(s.Factory(NullGraph).(SimpleGraph).Density()), Equals, true)
 
-	g := s.Builder.Using(graphFixtures["pair"]).Graph().(SimpleGraph)
+	g := s.Factory(graphFixtures["pair"]).(SimpleGraph)
 	if s.Directed {
 		c.Assert(g.Density(), Equals, float64(0.5))
 	} else {
 		c.Assert(g.Density(), Equals, float64(1))
 	}
 
-	g = s.Builder.Using(graphFixtures["2e3v"]).Graph().(SimpleGraph)
+	g = s.Factory(graphFixtures["2e3v"]).(SimpleGraph)
 	if s.Directed {
 		c.Assert(g.Density(), Equals, float64(2)/float64(6))
 	} else {
@@ -544,16 +548,16 @@ func (s *SimpleGraphSuite) TestDensity(c *C) {
 /* MutableGraphSuite - tests for mutable graph methods */
 
 type MutableGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *MutableGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex()
 	c.Assert(g.Order(), Equals, 0)
@@ -571,14 +575,14 @@ func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
 }
 
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex("foo")
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex("bar", "baz")
 	c.Assert(g.HasVertex("bar"), Equals, true)
@@ -586,7 +590,7 @@ func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
 }
 
 func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar")
@@ -594,7 +598,7 @@ func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
 }
 
 func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar", "baz")
@@ -603,7 +607,7 @@ func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
 }
 
 func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 	g.AddEdges(&BaseEdge{1, 2})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
@@ -616,7 +620,7 @@ func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
 }
 
 func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
 
@@ -635,7 +639,7 @@ func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 
 // Checks to ensure that removal works for both in-edges and out-edges.
 func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
-	g := s.Builder.Graph().(MutableGraph)
+	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
 	g.RemoveVertex(1)
@@ -646,18 +650,18 @@ func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 /* WeightedGraphSuite - tests for weighted graphs */
 
 type WeightedGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *WeightedGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement WeightedEdge.
-	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
+	g := s.Factory(graphFixtures["w-2e3v"]).(WeightedGraph)
 
 	var we WeightedEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -667,7 +671,7 @@ func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["w-2e3v"]).Graph().(WeightedGraph)
+	g := s.Factory(graphFixtures["w-2e3v"]).(WeightedGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasWeightedEdge(baseWeightedEdgeSet[0]), Equals, true)
@@ -677,16 +681,16 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 /* MutableWeightedGraphSuite - tests for mutable weighted graphs */
 
 type MutableWeightedGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *MutableWeightedGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex()
 	c.Assert(g.Order(), Equals, 0)
@@ -704,14 +708,14 @@ func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
 }
 
 func (s *MutableWeightedGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex("foo")
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex("bar", "baz")
 	c.Assert(g.HasVertex("bar"), Equals, true)
@@ -719,7 +723,7 @@ func (s *MutableWeightedGraphSuite) TestMultiEnsureVertex(c *C) {
 }
 
 func (s *MutableWeightedGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar")
@@ -727,7 +731,7 @@ func (s *MutableWeightedGraphSuite) TestRemoveVertex(c *C) {
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar", "baz")
@@ -736,7 +740,7 @@ func (s *MutableWeightedGraphSuite) TestMultiRemoveVertex(c *C) {
 }
 
 func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5.23})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
@@ -754,7 +758,7 @@ func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableWeightedGraph)
+	g := s.Factory(NullGraph).(MutableWeightedGraph)
 	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
 
 	// Basic edge tests first
@@ -786,14 +790,14 @@ func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 /* LabeledGraphSuite - tests for labeled graphs */
 
 type LabeledGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *LabeledGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement LabeledEdge.
-	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
+	g := s.Factory(graphFixtures["l-2e3v"]).(LabeledGraph)
 
 	var we LabeledEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -803,11 +807,11 @@ func (s *LabeledGraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *LabeledGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["l-2e3v"]).Graph().(LabeledGraph)
+	g := s.Factory(graphFixtures["l-2e3v"]).(LabeledGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasLabeledEdge(baseLabeledEdgeSet[0]), Equals, true)
@@ -817,16 +821,16 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 /* MutableLabeledGraphSuite - tests for mutable labeled graphs */
 
 type MutableLabeledGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *MutableLabeledGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *MutableLabeledGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex()
 	c.Assert(g.Order(), Equals, 0)
@@ -844,14 +848,14 @@ func (s *MutableLabeledGraphSuite) TestGracefulEmptyVariadics(c *C) {
 }
 
 func (s *MutableLabeledGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex("foo")
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *MutableLabeledGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex("bar", "baz")
 	c.Assert(g.HasVertex("bar"), Equals, true)
@@ -859,7 +863,7 @@ func (s *MutableLabeledGraphSuite) TestMultiEnsureVertex(c *C) {
 }
 
 func (s *MutableLabeledGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar")
@@ -867,7 +871,7 @@ func (s *MutableLabeledGraphSuite) TestRemoveVertex(c *C) {
 }
 
 func (s *MutableLabeledGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar", "baz")
@@ -876,7 +880,7 @@ func (s *MutableLabeledGraphSuite) TestMultiRemoveVertex(c *C) {
 }
 
 func (s *MutableLabeledGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
@@ -894,7 +898,7 @@ func (s *MutableLabeledGraphSuite) TestAddAndRemoveEdge(c *C) {
 }
 
 func (s *MutableLabeledGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableLabeledGraph)
+	g := s.Factory(NullGraph).(MutableLabeledGraph)
 	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
 
 	// Basic edge tests first
@@ -926,18 +930,18 @@ func (s *MutableLabeledGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 /* DataGraphSuite - tests for labeled graphs */
 
 type DataGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *DataGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *DataGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement DataEdge.
-	g := s.Builder.Using(graphFixtures["p-2e3v"]).Graph().(DataGraph)
+	g := s.Factory(graphFixtures["p-2e3v"]).(DataGraph)
 
 	var we DataEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -947,7 +951,7 @@ func (s *DataGraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *DataGraphSuite) TestHasDataEdge(c *C) {
-	g := s.Builder.Using(graphFixtures["p-2e3v"]).Graph().(DataGraph)
+	g := s.Factory(graphFixtures["p-2e3v"]).(DataGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasDataEdge(baseDataEdgeSet[1]), Equals, true)
@@ -957,16 +961,16 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 /* MutableDataGraphSuite - tests for mutable labeled graphs */
 
 type MutableDataGraphSuite struct {
-	Builder  GraphBuilder
+	Factory  func(GraphSource) Graph
 	Directed bool
 }
 
 func (s *MutableDataGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Builder.Graph())
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 func (s *MutableDataGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex()
 	c.Assert(g.Order(), Equals, 0)
@@ -984,14 +988,14 @@ func (s *MutableDataGraphSuite) TestGracefulEmptyVariadics(c *C) {
 }
 
 func (s *MutableDataGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex("foo")
 	c.Assert(g.HasVertex("foo"), Equals, true)
 }
 
 func (s *MutableDataGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex("bar", "baz")
 	c.Assert(g.HasVertex("bar"), Equals, true)
@@ -999,7 +1003,7 @@ func (s *MutableDataGraphSuite) TestMultiEnsureVertex(c *C) {
 }
 
 func (s *MutableDataGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar")
@@ -1007,7 +1011,7 @@ func (s *MutableDataGraphSuite) TestRemoveVertex(c *C) {
 }
 
 func (s *MutableDataGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex("bar", "baz")
 	g.RemoveVertex("bar", "baz")
@@ -1016,7 +1020,7 @@ func (s *MutableDataGraphSuite) TestMultiRemoveVertex(c *C) {
 }
 
 func (s *MutableDataGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"})
 
 	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
@@ -1034,7 +1038,7 @@ func (s *MutableDataGraphSuite) TestAddAndRemoveEdge(c *C) {
 }
 
 func (s *MutableDataGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Builder.Graph().(MutableDataGraph)
+	g := s.Factory(NullGraph).(MutableDataGraph)
 	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"}, BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
 
 	// Basic edge tests first

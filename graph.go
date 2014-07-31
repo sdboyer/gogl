@@ -149,6 +149,7 @@ type MutableDataGraph interface {
 	VertexSetMutator
 	DataEdgeSetMutator
 }
+
 /* Atomic graph interfaces */
 
 // EdgeLambdas are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.

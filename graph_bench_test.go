@@ -8,16 +8,17 @@ import (
 	. "github.com/sdboyer/gocheck"
 )
 
-func SetUpBenchmarksFromBuilder(b GraphBuilder) bool {
-	Suite(&GraphBenchSuite{b: b})
+// TODO reimplement with specs
+//func SetUpBenchmarksFromBuilder(b GraphBuilder) bool {
+//Suite(&GraphBenchSuite{b: b})
 
-	return true
-}
+//return true
+//}
 
-var _ = SetUpBenchmarksFromBuilder(BMBD)
+//var _ = SetUpBenchmarksFromBuilder(BMBD)
 
 type GraphBenchSuite struct {
-	b       GraphBuilder
+	//b       GraphBuilder
 	g10     Graph
 	g100    Graph
 	g1000   Graph
@@ -128,10 +129,10 @@ func (g *benchGraph) Order() int {
 // back to reality
 
 func (s *GraphBenchSuite) SetUpSuite(c *C) {
-	src := rand.NewSource(time.Now().UnixNano())
-	s.g10 = s.b.Using(bernoulliDistributionGenerator(10, 50, src)).Graph()
-	s.g100 = s.b.Using(bernoulliDistributionGenerator(100, 50, src)).Graph()
-	s.g1000 = s.b.Using(bernoulliDistributionGenerator(1000, 50, src)).Graph()
+	//src := rand.NewSource(time.Now().UnixNano())
+	//s.g10 = s.b.Using(bernoulliDistributionGenerator(10, 50, src)).Graph()
+	//s.g100 = s.b.Using(bernoulliDistributionGenerator(100, 50, src)).Graph()
+	//s.g1000 = s.b.Using(bernoulliDistributionGenerator(1000, 50, src)).Graph()
 	//s.g10000 = s.b.Using(bernoulliDistributionGenerator(10000, 50, src)).Graph()
 	//	s.g100000 = s.b.Using(bernoulliDistributionGenerator(100000, 50, src)).Graph()
 }
@@ -162,7 +163,7 @@ func benchHasVertex(g Graph, c *C) {
 	}
 }
 
-var bgraph = BMBD.From(bernoulliDistributionGenerator(1000, 50, nil)).Graph()
+var bgraph = BuildGraph().Directed().Using(bernoulliDistributionGenerator(1000, 50, nil)).Create(AdjacencyList)
 
 func BenchmarkHasVertex(b *testing.B) {
 	for i := 0; i < b.N; i++ {

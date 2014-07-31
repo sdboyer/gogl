@@ -16,6 +16,60 @@ gogl's adjacency lists are space-efficient; in a directed graph, the memory
 cost for the entire graph G is proportional to V + E; in an undirected graph,
 it is V + 2E.
 */
+
+var alCreators = map[GraphProperties]func() Graph{
+	GraphProperties(G_IMMUTABLE | G_DIRECTED | G_BASIC | G_SIMPLE): func() Graph {
+		return &immutableDirected{al_basic_immut{al_basic{list: make(map[Vertex]map[Vertex]struct{})}}}
+	},
+	GraphProperties(G_MUTABLE | G_DIRECTED | G_BASIC | G_SIMPLE): func() Graph {
+		return &mutableDirected{al_basic_mut{al_basic{list: make(map[Vertex]map[Vertex]struct{})}, sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_UNDIRECTED | G_BASIC | G_SIMPLE): func() Graph {
+		return &mutableUndirected{al_basic_mut{al_basic{list: make(map[Vertex]map[Vertex]struct{})}, sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_DIRECTED | G_WEIGHTED | G_SIMPLE): func() Graph {
+		return &weightedDirected{baseWeighted{list: make(map[Vertex]map[Vertex]float64), size: 0, mu: sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_UNDIRECTED | G_WEIGHTED | G_SIMPLE): func() Graph {
+		return &weightedUndirected{baseWeighted{list: make(map[Vertex]map[Vertex]float64), size: 0, mu: sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_DIRECTED | G_LABELED | G_SIMPLE): func() Graph {
+		return &labeledDirected{baseLabeled{list: make(map[Vertex]map[Vertex]string), size: 0, mu: sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_UNDIRECTED | G_LABELED | G_SIMPLE): func() Graph {
+		return &labeledUndirected{baseLabeled{list: make(map[Vertex]map[Vertex]string), size: 0, mu: sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_DIRECTED | G_DATA | G_SIMPLE): func() Graph {
+		return &dataDirected{baseData{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}
+	},
+	GraphProperties(G_MUTABLE | G_UNDIRECTED | G_DATA | G_SIMPLE): func() Graph {
+		return &dataUndirected{baseData{list: make(map[Vertex]map[Vertex]interface{}), size: 0, mu: sync.RWMutex{}}}
+	},
+}
+
+// Create a graph implementation in the adjacency list style from the provided GraphSpec.
+//
+// If the GraphSpec contains a GraphSource, it will be imported into the provided graph.
+// If the GraphSpec indicates a graph type that is not currently implemented, this function
+// will panic.
+func AdjacencyList(gs GraphSpec) Graph {
+	for gp, gf := range alCreators {
+		flipped := gp &^ gs.Props
+
+		// TODO satisfiability here is not so narrow
+		if flipped == 0 {
+			if gs.Source != nil {
+				return functorToAdjacencyList(gs.Source, gf())
+
+			} else {
+				return gf()
+			}
+		}
+	}
+
+	panic("No graph implementation found for spec")
+}
+
 type al_basic struct {
 	list map[Vertex]map[Vertex]struct{}
 	size int
