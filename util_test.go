@@ -6,7 +6,8 @@ import (
 )
 
 // Tests for collection functors
-type CollectionFunctorsSuite struct {}
+type CollectionFunctorsSuite struct{}
+
 var _ = Suite(&CollectionFunctorsSuite{})
 
 func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
