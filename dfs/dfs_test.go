@@ -12,9 +12,9 @@ import (
 func Test(t *testing.T) { TestingT(t) }
 
 var dfEdgeSet = []gogl.Edge{
-	&gogl.BaseEdge{"foo", "bar"},
-	&gogl.BaseEdge{"bar", "baz"},
-	&gogl.BaseEdge{"baz", "qux"},
+	gogl.NewEdge("foo", "bar"),
+	gogl.NewEdge("bar", "baz"),
+	gogl.NewEdge("baz", "qux"),
 }
 
 type DepthFirstSearchSuite struct{}
@@ -28,10 +28,10 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 
 	// must demonstrate that non-productive search paths are not included
 	edgeset := []gogl.Edge{
-		&gogl.BaseEdge{"foo", "bar"},
-		&gogl.BaseEdge{"bar", "baz"},
-		&gogl.BaseEdge{"bar", "quark"},
-		&gogl.BaseEdge{"baz", "qux"},
+		gogl.NewEdge("foo", "bar"),
+		gogl.NewEdge("bar", "baz"),
+		gogl.NewEdge("bar", "quark"),
+		gogl.NewEdge("baz", "qux"),
 	}
 
 	g.AddEdges(edgeset...)
@@ -69,7 +69,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	c.Assert(err, IsNil)
 
 	// Ensure it finds multiple, as well
-	g.AddEdges(&gogl.BaseEdge{"quark", "baz"})
+	g.AddEdges(gogl.NewEdge("quark", "baz"))
 	sources, err = FindSources(dg)
 
 	possibles := [][]gogl.Vertex{
@@ -90,7 +90,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 
 	// add a cycle, ensure error comes back
-	g.AddEdges(gogl.BaseEdge{"bar", "foo"})
+	g.AddEdges(gogl.NewEdge("bar", "foo"))
 	tsl, err = Toposort(g, "foo")
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
@@ -149,11 +149,11 @@ func (v *TestVisitor) TestTraverse(c *C) {
 	g := gogl.NewDirected()
 
 	edgeset := []gogl.Edge{
-		gogl.BaseEdge{"foo", "bar"},
-		gogl.BaseEdge{"bar", "baz"},
-		gogl.BaseEdge{"bar", "foo"},
-		gogl.BaseEdge{"bar", "quark"},
-		gogl.BaseEdge{"baz", "qux"},
+		gogl.NewEdge("foo", "bar"),
+		gogl.NewEdge("bar", "baz"),
+		gogl.NewEdge("bar", "foo"),
+		gogl.NewEdge("bar", "quark"),
+		gogl.NewEdge("baz", "qux"),
 	}
 	g.AddEdges(edgeset...)
 

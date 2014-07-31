@@ -168,7 +168,7 @@ func (g *dataDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, data := range g.list[v] {
-		if f(BaseDataEdge{BaseEdge{U: v, V: adjacent}, data}) {
+		if f(NewDataEdge(v, adjacent, data)) {
 			return
 		}
 	}
@@ -186,7 +186,7 @@ func (g *dataDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	for candidate, adjacent := range g.list {
 		for target, data := range adjacent {
 			if target == v {
-				if f(BaseDataEdge{BaseEdge{U: candidate, V: target}, data}) {
+				if f(NewDataEdge(candidate, target, data)) {
 					return
 				}
 			}
@@ -202,7 +202,7 @@ func (g *dataDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, data := range adjacent {
-			if f(BaseDataEdge{BaseEdge{U: source, V: target}, data}) {
+			if f(NewDataEdge(source, target, data)) {
 				return
 			}
 		}
@@ -377,12 +377,12 @@ func (g *dataUndirected) EachEdge(f EdgeLambda) {
 
 	visited := set.NewNonTS()
 
+	var e DataEdge
 	for source, adjacent := range g.list {
 		for target, data := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BaseDataEdge{be, data}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
+			e = NewDataEdge(source, target, data)
+			if !visited.Has(NewEdge(e.Both())) {
+				visited.Add(NewEdge(target, source))
 				if f(e) {
 					return
 				}
@@ -401,7 +401,7 @@ func (g *dataUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, data := range g.list[v] {
-		if f(BaseDataEdge{BaseEdge{U: v, V: adjacent}, data}) {
+		if f(NewDataEdge(v, adjacent, data)) {
 			return
 		}
 	}

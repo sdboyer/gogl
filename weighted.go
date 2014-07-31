@@ -168,7 +168,7 @@ func (g *weightedDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, weight := range g.list[v] {
-		if f(BaseWeightedEdge{BaseEdge{U: v, V: adjacent}, weight}) {
+		if f(NewWeightedEdge(v, adjacent, weight)) {
 			return
 		}
 	}
@@ -186,7 +186,7 @@ func (g *weightedDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	for candidate, adjacent := range g.list {
 		for target, weight := range adjacent {
 			if target == v {
-				if f(BaseWeightedEdge{BaseEdge{U: candidate, V: target}, weight}) {
+				if f(NewWeightedEdge(candidate, target, weight)) {
 					return
 				}
 			}
@@ -202,7 +202,7 @@ func (g *weightedDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, weight := range adjacent {
-			if f(BaseWeightedEdge{BaseEdge{U: source, V: target}, weight}) {
+			if f(NewWeightedEdge(source, target, weight)) {
 				return
 			}
 		}
@@ -377,12 +377,12 @@ func (g *weightedUndirected) EachEdge(f EdgeLambda) {
 
 	visited := set.NewNonTS()
 
+	var e WeightedEdge
 	for source, adjacent := range g.list {
 		for target, weight := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BaseWeightedEdge{be, weight}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
+			e = NewWeightedEdge(source, target, weight)
+			if !visited.Has(NewEdge(e.Both())) {
+				visited.Add(NewEdge(target, source))
 				if f(e) {
 					return
 				}
@@ -401,7 +401,7 @@ func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, weight := range g.list[v] {
-		if f(BaseWeightedEdge{BaseEdge{U: v, V: adjacent}, weight}) {
+		if f(NewWeightedEdge(v, adjacent, weight)) {
 			return
 		}
 	}

@@ -144,7 +144,7 @@ func (g *labeledDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, label := range adjacent {
-			if f(BaseLabeledEdge{BaseEdge{U: source, V: target}, label}) {
+			if f(NewLabeledEdge(source, target, label)) {
 				return
 			}
 		}
@@ -183,7 +183,7 @@ func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, label := range g.list[v] {
-		if f(BaseLabeledEdge{BaseEdge{U: v, V: adjacent}, label}) {
+		if f(NewLabeledEdge(v, adjacent, label)) {
 			return
 		}
 	}
@@ -201,7 +201,7 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	for candidate, adjacent := range g.list {
 		for target, label := range adjacent {
 			if target == v {
-				if f(BaseLabeledEdge{BaseEdge{U: candidate, V: target}, label}) {
+				if f(NewLabeledEdge(candidate, target, label)) {
 					return
 				}
 			}
@@ -377,12 +377,12 @@ func (g *labeledUndirected) EachEdge(f EdgeLambda) {
 
 	visited := set.NewNonTS()
 
+	var e LabeledEdge
 	for source, adjacent := range g.list {
 		for target, label := range adjacent {
-			be := BaseEdge{U: source, V: target}
-			e := BaseLabeledEdge{be, label}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
-				visited.Add(be)
+			e = NewLabeledEdge(source, target, label)
+			if !visited.Has(NewEdge(e.Both())) {
+				visited.Add(NewEdge(target, source))
 				if f(e) {
 					return
 				}
@@ -401,7 +401,7 @@ func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, label := range g.list[v] {
-		if f(BaseLabeledEdge{BaseEdge{U: v, V: adjacent}, label}) {
+		if f(NewLabeledEdge(v, adjacent, label)) {
 			return
 		}
 	}

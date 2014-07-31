@@ -20,34 +20,34 @@ import (
 var graphFixtures = map[string]GraphSource{
 	// TODO improve naming basis/patterns for these
 	"arctest": EdgeList{
-		BaseEdge{"foo", "bar"},
-		BaseEdge{"bar", "baz"},
-		BaseEdge{"foo", "qux"},
-		BaseEdge{"qux", "bar"},
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
+		NewEdge("foo", "qux"),
+		NewEdge("qux", "bar"),
 	},
 	"pair": EdgeList{
-		BaseEdge{1, 2},
+		NewEdge(1, 2),
 	},
 	"2e3v": EdgeList{
-		BaseEdge{"foo", "bar"},
-		BaseEdge{"bar", "baz"},
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
 	},
 	"3e4v": EdgeList{
-		BaseEdge{"foo", "bar"},
-		BaseEdge{"bar", "baz"},
-		BaseEdge{"foo", "qux"},
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
+		NewEdge("foo", "qux"),
 	},
 	"w-2e3v": WeightedEdgeList{
-		BaseWeightedEdge{BaseEdge{1, 2}, 5.23},
-		BaseWeightedEdge{BaseEdge{2, 3}, 5.821},
+		NewWeightedEdge(1, 2, 5.23),
+		NewWeightedEdge(2, 3, 5.821),
 	},
 	"l-2e3v": LabeledEdgeList{
-		BaseLabeledEdge{BaseEdge{1, 2}, "foo"},
-		BaseLabeledEdge{BaseEdge{2, 3}, "bar"},
+		NewLabeledEdge(1, 2, "foo"),
+		NewLabeledEdge(2, 3, "bar"),
 	},
 	"d-2e3v": DataEdgeList{
-		BaseDataEdge{BaseEdge{1, 2}, "foo"},
-		BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}},
+		NewDataEdge(1, 2, "foo"),
+		NewDataEdge(2, 3, struct{ a int }{a: 2}),
 	},
 }
 
@@ -73,7 +73,7 @@ func TestHookup(t *testing.T) { TestingT(t) }
 
 // swap method is useful for some testing shorthand
 func (e BaseEdge) swap() Edge {
-	return BaseEdge{e.V, e.U}
+	return NewEdge(e.V, e.U)
 }
 
 func gdebug(g Graph, args ...interface{}) {
@@ -165,7 +165,7 @@ func (s *GraphSuite) TestHasVertex(c *C) {
 func (s *GraphSuite) TestHasEdge(c *C) {
 	g := s.Factory(graphFixtures["2e3v"])
 	c.Assert(g.HasEdge(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)
+	c.Assert(g.HasEdge(NewEdge("qux", "quark")), Equals, false)
 }
 
 func (s *GraphSuite) TestEachVertex(c *C) {
@@ -263,7 +263,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		eset.Add(NewEdge(e.Source(), e.Target()))
 		return
 	})
 
@@ -281,7 +281,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		eset.Add(NewEdge(e.Source(), e.Target()))
 		return
 	})
 
@@ -436,7 +436,7 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 
 	g.EachArcTo("bar", func(e Edge) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		eset.Add(NewEdge(e.Source(), e.Target()))
 		hit++
 		return
 	})
@@ -444,7 +444,7 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 	c.Assert(hit, Equals, 2)
 	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
 	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
-	c.Assert(eset.Has(BaseEdge{"qux", "bar"}), Equals, true)
+	c.Assert(eset.Has(NewEdge("qux", "bar")), Equals, true)
 }
 
 func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
@@ -472,7 +472,7 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(BaseEdge{U: e.Source(), V: e.Target()})
+		eset.Add(NewEdge(e.Source(), e.Target()))
 		hit++
 		return
 	})
@@ -480,7 +480,7 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 	c.Assert(hit, Equals, 2)
 	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
 	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
-	c.Assert(eset.Has(BaseEdge{"foo", "qux"}), Equals, true)
+	c.Assert(eset.Has(NewEdge("foo", "qux")), Equals, true)
 }
 
 func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
@@ -587,40 +587,40 @@ func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableGraph)
-	g.AddEdges(&BaseEdge{1, 2})
+	g.AddEdges(NewEdge(1, 2))
 
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
 
 	// Now test removal
-	g.RemoveEdges(&BaseEdge{1, 2})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, false)
+	g.RemoveEdges(NewEdge(1, 2))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, false)
 }
 
 func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableGraph)
 
-	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
+	g.AddEdges(NewEdge(1, 2), NewEdge(2, 3))
 
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
-	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed)
 
 	// Now test removal
-	g.RemoveEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+	g.RemoveEdges(NewEdge(1, 2), NewEdge(2, 3))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
 // Checks to ensure that removal works for both in-edges and out-edges.
 func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 	g := s.Factory(NullGraph).(MutableGraph)
 
-	g.AddEdges(&BaseEdge{1, 2}, &BaseEdge{2, 3}, &BaseEdge{4, 1})
+	g.AddEdges(NewEdge(1, 2), NewEdge(2, 3), NewEdge(4, 1))
 	g.RemoveVertex(1)
 
 	c.Assert(g.Size(), Equals, 1)
@@ -654,7 +654,7 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasWeightedEdge(graphFixtures["w-2e3v"].(WeightedEdgeList)[0]), Equals, true)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 1)), Equals, false) // wrong weight
 }
 
 /* MutableWeightedGraphSuite - tests for mutable weighted graphs */
@@ -720,50 +720,50 @@ func (s *MutableWeightedGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutableWeightedGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableWeightedGraph)
-	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5.23})
+	g.AddEdges(NewWeightedEdge(1, 2, 5.23))
 
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
 
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5.23}), Equals, true)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 3}), Equals, false)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5.23}), Equals, !s.Directed)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, -3.22771}), Equals, false)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 3)), Equals, false)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, -3.22771)), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5.23})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5.23}), Equals, false)
+	g.RemoveEdges(NewWeightedEdge(1, 2, 5.23))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, false)
 }
 
 func (s *MutableWeightedGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableWeightedGraph)
-	g.AddEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
+	g.AddEdges(NewWeightedEdge(1, 2, 5), NewWeightedEdge(2, 3, -5))
 
 	// Basic edge tests first
 	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
 	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed) // only if undirected
-	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed) // only if undirected
 
 	// Now weighted edge tests
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, true)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 3}), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 5}), Equals, !s.Directed)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 1}, 3}), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, true)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, 1}), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{3, 2}, -5}), Equals, !s.Directed)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{3, 2}, 1}), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5)), Equals, true)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 3)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5)), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 3)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, -5)), Equals, true)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, 1)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(3, 2, -5)), Equals, !s.Directed)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(3, 2, 1)), Equals, false) // wrong weight
 
 	// Now test removal
-	g.RemoveEdges(BaseWeightedEdge{BaseEdge{1, 2}, 5}, BaseWeightedEdge{BaseEdge{2, 3}, -5})
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 5}), Equals, false)
-	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{2, 3}, -5}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+	g.RemoveEdges(NewWeightedEdge(1, 2, 5), NewWeightedEdge(2, 3, -5))
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5)), Equals, false)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, -5)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
 /* LabeledGraphSuite - tests for labeled graphs */
@@ -794,7 +794,7 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasLabeledEdge(graphFixtures["l-2e3v"].(LabeledEdgeList)[0]), Equals, true)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
 /* MutableLabeledGraphSuite - tests for mutable labeled graphs */
@@ -860,50 +860,50 @@ func (s *MutableLabeledGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutableLabeledGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableLabeledGraph)
-	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"})
+	g.AddEdges(NewLabeledEdge(1, 2, "foo"))
 
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
 
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "baz"}), Equals, false)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "quark"}), Equals, false)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "baz")), Equals, false)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "quark")), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+	g.RemoveEdges(NewLabeledEdge(1, 2, "foo"))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, false)
 }
 
 func (s *MutableLabeledGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableLabeledGraph)
-	g.AddEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
+	g.AddEdges(NewLabeledEdge(1, 2, "foo"), NewLabeledEdge(2, 3, "bar"))
 
 	// Basic edge tests first
 	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
 	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed) // only if undirected
-	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed) // only if undirected
 
 	// Now labeled edge tests
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 1}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, true)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "qux"}), Equals, false) // wrong label
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{3, 2}, "bar"}), Equals, !s.Directed)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{3, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "baz")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "baz")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "bar")), Equals, true)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "qux")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(3, 2, "bar")), Equals, !s.Directed)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(3, 2, "qux")), Equals, false) // wrong label
 
 	// Now test removal
-	g.RemoveEdges(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}, BaseLabeledEdge{BaseEdge{2, 3}, "bar"})
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
-	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{2, 3}, "bar"}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+	g.RemoveEdges(NewLabeledEdge(1, 2, "foo"), NewLabeledEdge(2, 3, "bar"))
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, false)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "bar")), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
 /* DataGraphSuite - tests for labeled graphs */
@@ -934,7 +934,7 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
 	c.Assert(g.HasDataEdge(graphFixtures["d-2e3v"].(DataEdgeList)[1]), Equals, true)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
 /* MutableDataGraphSuite - tests for mutable labeled graphs */
@@ -1000,48 +1000,48 @@ func (s *MutableDataGraphSuite) TestMultiRemoveVertex(c *C) {
 
 func (s *MutableDataGraphSuite) TestAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableDataGraph)
-	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"})
+	g.AddEdges(NewDataEdge(1, 2, "foo"))
 
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
 
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "baz"}), Equals, false)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 1}, "quark"}), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, !s.Directed)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "quark")), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"})
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
+	g.RemoveEdges(NewDataEdge(1, 2, "foo"))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
 }
 
 func (s *MutableDataGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	g := s.Factory(NullGraph).(MutableDataGraph)
-	g.AddEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"}, BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
+	g.AddEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, struct{ a int }{a: 2}))
 
 	// Basic edge tests first
 	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
 	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, true)
-	c.Assert(g.HasEdge(BaseEdge{2, 1}), Equals, !s.Directed) // only if undirected
-	c.Assert(g.HasEdge(BaseEdge{3, 2}), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed) // only if undirected
 
 	// Now labeled edge tests
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, true)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 1}, "foo"}), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 1}, "baz"}), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, true)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 3}, "qux"}), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{3, 2}, struct{ a int }{a: 2}}), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{3, 2}, "qux"}), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, !s.Directed)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "baz")), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, struct{ a int }{a: 2})), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "qux")), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, struct{ a int }{a: 2})), Equals, !s.Directed)
+	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "qux")), Equals, false) // wrong label
 
 	// Now test removal
-	g.RemoveEdges(BaseDataEdge{BaseEdge{1, 2}, "foo"}, BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}})
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "foo"}), Equals, false)
-	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{1, 2}), Equals, false)
-	c.Assert(g.HasEdge(BaseEdge{2, 3}), Equals, false)
+	g.RemoveEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, struct{ a int }{a: 2}))
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, struct{ a int }{a: 2})), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }

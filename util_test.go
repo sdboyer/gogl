@@ -51,9 +51,9 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(BaseEdge{"foo", "bar"}), Equals, true)
-	c.Assert(set.Has(BaseEdge{"bar", "baz"}), Equals, true)
-	c.Assert(set.Has(BaseEdge{"foo", "qux"}), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set.Has(NewEdge("bar", "baz")), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "qux")), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
@@ -66,8 +66,8 @@ func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(BaseEdge{"foo", "bar"}), Equals, true)
-	c.Assert(set.Has(BaseEdge{"foo", "qux"}), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "qux")), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
@@ -81,8 +81,8 @@ func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(BaseEdge{"foo", "qux"}), Equals, true)
-	c.Assert(set.Has(BaseEdge{"foo", "bar"}), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "qux")), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
@@ -96,6 +96,6 @@ func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(BaseEdge{"foo", "bar"}), Equals, true)
-	c.Assert(set.Has(BaseEdge{"qux", "bar"}), Equals, true)
+	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set.Has(NewEdge("qux", "bar")), Equals, true)
 }

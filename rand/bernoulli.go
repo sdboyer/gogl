@@ -87,10 +87,10 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
 			bernoulliEdgeCreator(ff, int(g.order), g.ρ, g.trial)
 		}
 	} else {
-		var e gogl.BaseEdge
+		var e gogl.Edge
 		for u, adj := range g.list {
 			for v, _ := range adj {
-				e.U, e.V = u, v
+				e = gogl.NewEdge(u, v)
 				if f(e) {
 					return
 				}
@@ -132,13 +132,13 @@ func (g unstableBernoulliGraph) Order() int {
 }
 
 var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp bTrial) {
-	var e gogl.BaseEdge
+	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
 		// we only evaluate each unique edge pair once, as gogl's implicit contract requires.
 		for v := u + 1; v < order; v++ {
 			if cmp(ρ) {
-				e.U, e.V = u, v
+				e = gogl.NewEdge(u, v)
 				if el(e) {
 					return
 				}
@@ -148,11 +148,11 @@ var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp b
 }
 
 var bernoulliArcCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp bTrial) {
-	var e gogl.BaseEdge
+	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {
 			if u != v && cmp(ρ) {
-				e.U, e.V = u, v
+				e = gogl.NewEdge(u, v)
 				if el(e) {
 					return
 				}

@@ -62,7 +62,7 @@ func (g *mutableDirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			if f(BaseEdge{U: source, V: target}) {
+			if f(NewEdge(source, target)) {
 				return
 			}
 		}
@@ -101,7 +101,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(BaseEdge{U: v, V: adjacent}) {
+		if f(NewEdge(v, adjacent)) {
 			return
 		}
 	}
@@ -119,7 +119,7 @@ func (g *mutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(BaseEdge{U: candidate, V: target}) {
+				if f(NewEdge(candidate, target)) {
 					return
 				}
 			}
@@ -285,7 +285,7 @@ func NewImmutableDirected(g DirectedGraph) DirectedGraph {
 func (g *immutableDirected) EachEdge(f EdgeLambda) {
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			if f(BaseEdge{U: source, V: target}) {
+			if f(NewEdge(source, target)) {
 				return
 			}
 		}
@@ -316,7 +316,7 @@ func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(BaseEdge{U: v, V: adjacent}) {
+		if f(NewEdge(v, adjacent)) {
 			return
 		}
 	}
@@ -331,7 +331,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(BaseEdge{U: candidate, V: target}) {
+				if f(NewEdge(candidate, target)) {
 					return
 				}
 			}

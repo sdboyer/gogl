@@ -405,7 +405,7 @@ func (w *walker) dfutraverse(v gogl.Vertex) {
 		w.vis.OnStartVertex(v)
 
 		w.g.EachAdjacentTo(v, func(to gogl.Vertex) (terminate bool) {
-			w.vis.OnExamineEdge(gogl.BaseEdge{v, to})
+			w.vis.OnExamineEdge(gogl.NewEdge(v, to))
 			w.dfutraverse(to)
 			return
 		})

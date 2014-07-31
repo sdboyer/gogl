@@ -45,7 +45,7 @@ func CopyGraph(from Graph, to interface{}) interface{} {
 				g.AddEdges(ee)
 			} else {
 				// TODO should this case panic?
-				g.AddEdges(BaseWeightedEdge{BaseEdge{U: e.Source(), V: e.Target()}, 0})
+				g.AddEdges(NewWeightedEdge(e.Source(), e.Target(), 0))
 			}
 			return
 		}
@@ -55,7 +55,7 @@ func CopyGraph(from Graph, to interface{}) interface{} {
 				g.AddEdges(ee)
 			} else {
 				// TODO should this case panic?
-				g.AddEdges(BaseLabeledEdge{BaseEdge{U: e.Source(), V: e.Target()}, ""})
+				g.AddEdges(NewLabeledEdge(e.Source(), e.Target(), ""))
 			}
 			return
 		}
@@ -65,7 +65,7 @@ func CopyGraph(from Graph, to interface{}) interface{} {
 				g.AddEdges(ee)
 			} else {
 				// TODO should this case panic?
-				g.AddEdges(BaseDataEdge{BaseEdge{U: e.Source(), V: e.Target()}, struct{}{}})
+				g.AddEdges(NewDataEdge(e.Source(), e.Target(), struct{}{}))
 			}
 			return
 		}

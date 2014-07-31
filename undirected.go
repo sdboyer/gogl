@@ -43,8 +43,8 @@ func (g *mutableUndirected) EachEdge(f EdgeLambda) {
 
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
-			e := BaseEdge{U: source, V: target}
-			if !visited.Has(BaseEdge{U: target, V: source}) {
+			e := NewEdge(source, target)
+			if !visited.Has(NewEdge(target, source)) {
 				visited.Add(e)
 				if f(e) {
 					return
@@ -64,7 +64,7 @@ func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(BaseEdge{U: v, V: adjacent}) {
+		if f(NewEdge(v, adjacent)) {
 			return
 		}
 	}
