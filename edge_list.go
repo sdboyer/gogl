@@ -58,3 +58,66 @@ func (el EdgeList) EachEdge(fn EdgeLambda) {
 		}
 	}
 }
+
+// A WeightedEdgeList is a naive GraphSource implementation that is backed only by an edge slice.
+//
+// This variant is for weighted edges.
+type WeightedEdgeList []WeightedEdge
+
+func (el WeightedEdgeList) EachVertex(fn VertexLambda) {
+	esEachVertex(el, fn)
+}
+
+func (el WeightedEdgeList) Order() int {
+	return esOrder(el)
+}
+
+func (el WeightedEdgeList) EachEdge(fn EdgeLambda) {
+	for _, e := range el {
+		if fn(e) {
+			return
+		}
+	}
+}
+
+// A LabeledEdgeList is a naive GraphSource implementation that is backed only by an edge slice.
+//
+// This variant is for labeled edges.
+type LabeledEdgeList []LabeledEdge
+
+func (el LabeledEdgeList) EachVertex(fn VertexLambda) {
+	esEachVertex(el, fn)
+}
+
+func (el LabeledEdgeList) Order() int {
+	return esOrder(el)
+}
+
+func (el LabeledEdgeList) EachEdge(fn EdgeLambda) {
+	for _, e := range el {
+		if fn(e) {
+			return
+		}
+	}
+}
+
+// A DataEdgeList is a naive GraphSource implementation that is backed only by an edge slice.
+//
+// This variant is for labeled edges.
+type DataEdgeList []DataEdge
+
+func (el DataEdgeList) EachVertex(fn VertexLambda) {
+	esEachVertex(el, fn)
+}
+
+func (el DataEdgeList) Order() int {
+	return esOrder(el)
+}
+
+func (el DataEdgeList) EachEdge(fn EdgeLambda) {
+	for _, e := range el {
+		if fn(e) {
+			return
+		}
+	}
+}
