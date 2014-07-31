@@ -19,7 +19,7 @@ import (
 
 var graphFixtures = make(map[string]Graph)
 
-var edgeSet = []Edge{
+var edgeSet = EdgeList{
 	BaseEdge{"foo", "bar"},
 	BaseEdge{"bar", "baz"},
 }
@@ -43,19 +43,18 @@ func init() {
 	// TODO use hardcoded fixtures, like the NullGraph (...?)
 	// TODO improve naming basis/patterns for these
 	spec := BuildGraph().Mutable().BasicEdges().Directed()
-	base := spec.Create(AdjacencyList).(MutableGraph)
-	base.AddEdges(edgeSet...)
+	base := spec.Using(edgeSet).Create(AdjacencyList).(MutableGraph)
 
 	ispec := BuildGraph().Immutable().BasicEdges().Directed()
-	graphFixtures["2e3v"] = ispec.Using(base).Create(AdjacencyList)
+	graphFixtures["2e3v"] = ispec.Using(edgeSet).Create(AdjacencyList)
 
 	base.AddEdges(BaseEdge{"foo", "qux"})
-	base2 := spec.Using(base).Create(AdjacencyList).(MutableGraph)
-	graphFixtures["3e4v"] = ispec.Using(base).Create(AdjacencyList)
+	graphFixtures["3e4v"] = ispec.Using(edgeSet).Create(AdjacencyList)
 
 	base.EnsureVertex("isolate")
 	graphFixtures["3e5v1i"] = ispec.Using(base).Create(AdjacencyList)
 
+	base2 := spec.Using(edgeSet).Create(AdjacencyList).(MutableGraph)
 	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
 	graphFixtures["arctest"] = ispec.Using(base2).Create(AdjacencyList)
 
