@@ -11,7 +11,7 @@ type CollectionFunctorsSuite struct{}
 var _ = Suite(&CollectionFunctorsSuite{})
 
 func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
-	slice := CollectVertices(graphFixtures["3e5v1i"])
+	slice := CollectVertices(graphFixtures["3e5v1i"].(Graph))
 
 	c.Assert(len(slice), Equals, 5)
 
@@ -28,7 +28,7 @@ func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectAdjacentVertices(c *C) {
-	slice := CollectVerticesAdjacentTo("foo", graphFixtures["3e5v1i"])
+	slice := CollectVerticesAdjacentTo("foo", graphFixtures["3e5v1i"].(Graph))
 
 	c.Assert(len(slice), Equals, 2)
 
@@ -42,7 +42,7 @@ func (s *CollectionFunctorsSuite) TestCollectAdjacentVertices(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
-	slice := CollectEdges(graphFixtures["3e5v1i"])
+	slice := CollectEdges(graphFixtures["3e5v1i"].(Graph))
 
 	c.Assert(len(slice), Equals, 3)
 
@@ -57,7 +57,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
-	slice := CollectEdgesIncidentTo("foo", graphFixtures["3e5v1i"])
+	slice := CollectEdgesIncidentTo("foo", graphFixtures["3e5v1i"].(Graph))
 
 	c.Assert(len(slice), Equals, 2)
 
@@ -71,7 +71,8 @@ func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
-	slice := CollectArcsFrom("foo", graphFixtures["arctest"].(DirectedGraph))
+	digraph := BuildGraph().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
+	slice := CollectArcsFrom("foo", digraph)
 
 	c.Assert(len(slice), Equals, 2)
 
@@ -85,7 +86,8 @@ func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
-	slice := CollectArcsTo("bar", graphFixtures["arctest"].(DirectedGraph))
+	digraph := BuildGraph().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
+	slice := CollectArcsTo("bar", digraph)
 
 	c.Assert(len(slice), Equals, 2)
 

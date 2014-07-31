@@ -17,65 +17,45 @@ import (
 //
 /////////////////////////////////////////////////////////////////////
 
-var graphFixtures = make(map[string]Graph)
-
-var edgeSet = EdgeList{
-	BaseEdge{"foo", "bar"},
-	BaseEdge{"bar", "baz"},
-}
-
-var baseWeightedEdgeSet = []WeightedEdge{
-	BaseWeightedEdge{BaseEdge{1, 2}, 5.23},
-	BaseWeightedEdge{BaseEdge{2, 3}, 5.821},
-}
-
-var baseLabeledEdgeSet = []LabeledEdge{
-	BaseLabeledEdge{BaseEdge{1, 2}, "foo"},
-	BaseLabeledEdge{BaseEdge{2, 3}, "bar"},
-}
-
-var baseDataEdgeSet = []DataEdge{
-	BaseDataEdge{BaseEdge{1, 2}, "foo"},
-	BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}},
+var graphFixtures = map[string]GraphSource{
+	// TODO improve naming basis/patterns for these
+	"arctest": EdgeList{
+		BaseEdge{"foo", "bar"},
+		BaseEdge{"bar", "baz"},
+		BaseEdge{"foo", "qux"},
+		BaseEdge{"qux", "bar"},
+	},
+	"pair": EdgeList{
+		BaseEdge{1, 2},
+	},
+	"2e3v": EdgeList{
+		BaseEdge{"foo", "bar"},
+		BaseEdge{"bar", "baz"},
+	},
+	"3e4v": EdgeList{
+		BaseEdge{"foo", "bar"},
+		BaseEdge{"bar", "baz"},
+		BaseEdge{"foo", "qux"},
+	},
+	"w-2e3v": WeightedEdgeList{
+		BaseWeightedEdge{BaseEdge{1, 2}, 5.23},
+		BaseWeightedEdge{BaseEdge{2, 3}, 5.821},
+	},
+	"l-2e3v": LabeledEdgeList{
+		BaseLabeledEdge{BaseEdge{1, 2}, "foo"},
+		BaseLabeledEdge{BaseEdge{2, 3}, "bar"},
+	},
+	"d-2e3v": DataEdgeList{
+		BaseDataEdge{BaseEdge{1, 2}, "foo"},
+		BaseDataEdge{BaseEdge{2, 3}, struct{ a int }{a: 2}},
+	},
 }
 
 func init() {
-	// TODO use hardcoded fixtures, like the NullGraph (...?)
-	// TODO improve naming basis/patterns for these
-	spec := BuildGraph().Mutable().BasicEdges().Directed()
-	base := spec.Using(edgeSet).Create(AdjacencyList).(MutableGraph)
-
-	ispec := BuildGraph().Immutable().BasicEdges().Directed()
-	graphFixtures["2e3v"] = ispec.Using(edgeSet).Create(AdjacencyList)
-
-	base.AddEdges(BaseEdge{"foo", "qux"})
-	graphFixtures["3e4v"] = ispec.Using(edgeSet).Create(AdjacencyList)
-
-	base.EnsureVertex("isolate")
-	graphFixtures["3e5v1i"] = ispec.Using(base).Create(AdjacencyList)
-
-	base2 := spec.Using(edgeSet).Create(AdjacencyList).(MutableGraph)
-	base2.AddEdges(BaseEdge{"foo", "qux"}, BaseEdge{"qux", "bar"})
-	graphFixtures["arctest"] = ispec.Using(base2).Create(AdjacencyList)
-
-	pair := spec.Using(nil).Create(AdjacencyList).(MutableGraph)
-	pair.AddEdges(BaseEdge{1, 2})
-	graphFixtures["pair"] = ispec.Using(pair).Create(AdjacencyList)
-
-	wb := BuildGraph().Directed().WeightedEdges()
-	weightedbase := wb.Create(AdjacencyList).(MutableWeightedGraph)
-	weightedbase.AddEdges(baseWeightedEdgeSet...)
-	graphFixtures["w-2e3v"] = wb.Using(weightedbase).Create(AdjacencyList)
-
-	lb := BuildGraph().Directed().LabeledEdges()
-	labeledbase := lb.Create(AdjacencyList).(MutableLabeledGraph)
-	labeledbase.AddEdges(baseLabeledEdgeSet...)
-	graphFixtures["l-2e3v"] = lb.Using(labeledbase).Create(AdjacencyList)
-
-	db := BuildGraph().Directed().DataEdges()
-	data_base := db.Create(AdjacencyList).(MutableDataGraph)
-	data_base.AddEdges(baseDataEdgeSet...)
-	graphFixtures["p-2e3v"] = db.Using(data_base).Create(AdjacencyList)
+	// TODO last straggler. make a special, cheaty edge list using a loop edge type to support this.
+	g := BuildGraph().Mutable().BasicEdges().Directed().Using(graphFixtures["3e4v"]).Create(AdjacencyList).(MutableGraph)
+	g.EnsureVertex("isolate")
+	graphFixtures["3e5v1i"] = g
 
 	for gp, _ := range alCreators {
 		SetUpTestsFromSpec(gp, AdjacencyList)
@@ -184,7 +164,7 @@ func (s *GraphSuite) TestHasVertex(c *C) {
 
 func (s *GraphSuite) TestHasEdge(c *C) {
 	g := s.Factory(graphFixtures["2e3v"])
-	c.Assert(g.HasEdge(edgeSet[0]), Equals, true)
+	c.Assert(g.HasEdge(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
 	c.Assert(g.HasEdge(BaseEdge{"qux", "quark"}), Equals, false)
 }
 
@@ -274,8 +254,8 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Factory(graphFixtures["2e3v"])
 
 	flipset := []Edge{
-		edgeSet[0].(BaseEdge).swap(),
-		edgeSet[1].(BaseEdge).swap(),
+		graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge).swap(),
+		graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge).swap(),
 	}
 
 	eset := set.NewNonTS()
@@ -289,12 +269,12 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 
 	c.Assert(hit, Equals, 1)
 	if s.Directed {
-		c.Assert(eset.Has(edgeSet[0]), Equals, true)
-		c.Assert(eset.Has(edgeSet[1]), Equals, false)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
 	} else {
-		c.Assert(eset.Has(edgeSet[0]) != eset.Has(flipset[0]), Equals, true)
-		c.Assert(eset.Has(edgeSet[1]) != eset.Has(flipset[1]), Equals, false)
-		c.Assert(eset.Has(edgeSet[1]), Equals, false)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]) != eset.Has(flipset[1]), Equals, false)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
 	}
 
 	eset = set.NewNonTS()
@@ -307,11 +287,11 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 
 	c.Assert(hit, Equals, 3)
 	if s.Directed {
-		c.Assert(eset.Has(edgeSet[0]), Equals, true)
-		c.Assert(eset.Has(edgeSet[1]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, true)
 	} else {
-		c.Assert(eset.Has(edgeSet[0]) != eset.Has(flipset[0]), Equals, true)
-		c.Assert(eset.Has(edgeSet[1]) != eset.Has(flipset[1]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]) != eset.Has(flipset[1]), Equals, true)
 	}
 }
 
@@ -380,11 +360,11 @@ func (s *DirectedGraphSuite) TestTranspose(c *C) {
 
 	g2 := g.Transpose()
 
-	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge).swap()), Equals, true)
-	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge).swap()), Equals, true)
 
-	c.Assert(g2.HasEdge(edgeSet[0].(BaseEdge)), Equals, false)
-	c.Assert(g2.HasEdge(edgeSet[1].(BaseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge)), Equals, false)
 }
 
 func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
@@ -462,8 +442,8 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 	})
 
 	c.Assert(hit, Equals, 2)
-	c.Assert(eset.Has(edgeSet[0]), Equals, true)
-	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
+	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
 	c.Assert(eset.Has(BaseEdge{"qux", "bar"}), Equals, true)
 }
 
@@ -498,8 +478,8 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 	})
 
 	c.Assert(hit, Equals, 2)
-	c.Assert(eset.Has(edgeSet[0]), Equals, true)
-	c.Assert(eset.Has(edgeSet[1]), Equals, false)
+	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
+	c.Assert(eset.Has(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
 	c.Assert(eset.Has(BaseEdge{"foo", "qux"}), Equals, true)
 }
 
@@ -673,7 +653,7 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Factory(graphFixtures["w-2e3v"]).(WeightedGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasWeightedEdge(baseWeightedEdgeSet[0]), Equals, true)
+	c.Assert(g.HasWeightedEdge(graphFixtures["w-2e3v"].(WeightedEdgeList)[0]), Equals, true)
 	c.Assert(g.HasWeightedEdge(BaseWeightedEdge{BaseEdge{1, 2}, 1}), Equals, false) // wrong weight
 }
 
@@ -813,7 +793,7 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 	g := s.Factory(graphFixtures["l-2e3v"]).(LabeledGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasLabeledEdge(baseLabeledEdgeSet[0]), Equals, true)
+	c.Assert(g.HasLabeledEdge(graphFixtures["l-2e3v"].(LabeledEdgeList)[0]), Equals, true)
 	c.Assert(g.HasLabeledEdge(BaseLabeledEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
 }
 
@@ -940,7 +920,7 @@ func (s *DataGraphSuite) SuiteLabel() string {
 func (s *DataGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement DataEdge.
-	g := s.Factory(graphFixtures["p-2e3v"]).(DataGraph)
+	g := s.Factory(graphFixtures["d-2e3v"]).(DataGraph)
 
 	var we DataEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -950,10 +930,10 @@ func (s *DataGraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *DataGraphSuite) TestHasDataEdge(c *C) {
-	g := s.Factory(graphFixtures["p-2e3v"]).(DataGraph)
+	g := s.Factory(graphFixtures["d-2e3v"]).(DataGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasDataEdge(baseDataEdgeSet[1]), Equals, true)
+	c.Assert(g.HasDataEdge(graphFixtures["d-2e3v"].(DataEdgeList)[1]), Equals, true)
 	c.Assert(g.HasDataEdge(BaseDataEdge{BaseEdge{1, 2}, "qux"}), Equals, false) // wrong label
 }
 
