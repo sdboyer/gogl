@@ -53,7 +53,7 @@ var graphFixtures = map[string]GraphSource{
 
 func init() {
 	// TODO last straggler. make a special, cheaty edge list using a loop edge type to support this.
-	g := BuildGraph().Mutable().BasicEdges().Directed().Using(graphFixtures["3e4v"]).Create(AdjacencyList).(MutableGraph)
+	g := BuildGraph().Mutable().Basic().Directed().Using(graphFixtures["3e4v"]).Create(AdjacencyList).(MutableGraph)
 	g.EnsureVertex("isolate")
 	graphFixtures["3e5v1i"] = g
 

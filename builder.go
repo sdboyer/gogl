@@ -21,13 +21,23 @@ const (
 	// Multiplicity. Simple (no loops or multiple edges) is the implied zero-value.
 	G_SIMPLE
 	G_LOOPS
-	G_MULTI
+	G_PARALLEL
 
 	// Mutability. Immutable is the implied zero-value.
 	G_IMMUTABLE
 	G_MUTABLE
 	G_PERSISTENT = 1<<iota | G_MUTABLE // Persistent graphs are, kinda weirdly, both.
 )
+
+/*
+TODO go back to using zero vals; see if the following can be made to work
+const (
+	G_UNDIRECTED = ^G_DIRECTED
+	G_BASIC = ^(G_LABELED | G_WEIGHTED | G_DATA)
+	G_SIMPLE = ^(G_LOOPS | G_PARALLEL)
+	G_IMMUTABLE = ^G_MUTABLE
+)
+*/
 
 type GraphSpec struct {
 	Props  GraphProperties
@@ -65,21 +75,21 @@ func (b GraphSpec) Directed() GraphSpec {
 }
 
 // Specify that the edges should be "basic" - no weights, labels, or data.
-func (b GraphSpec) BasicEdges() GraphSpec {
+func (b GraphSpec) Basic() GraphSpec {
 	b.Props &^= G_LABELED | G_WEIGHTED | G_DATA
 	b.Props |= G_BASIC
 	return b
 }
 
 // Specify that the edges should be labeled. See LabeledEdge
-func (b GraphSpec) LabeledEdges() GraphSpec {
+func (b GraphSpec) Labeled() GraphSpec {
 	b.Props &^= G_BASIC
 	b.Props |= G_LABELED
 	return b
 }
 
 // Specify that the edges should be weighted. See WeightedEdge
-func (b GraphSpec) WeightedEdges() GraphSpec {
+func (b GraphSpec) Weighted() GraphSpec {
 	b.Props &^= G_BASIC
 	b.Props |= G_WEIGHTED
 	return b
@@ -94,20 +104,34 @@ func (b GraphSpec) DataEdges() GraphSpec {
 
 // Specify that the graph should be simple - have no loops or multiple edges.
 func (b GraphSpec) SimpleGraph() GraphSpec {
-	b.Props &^= G_LOOPS | G_MULTI
+	b.Props &^= G_LOOPS | G_PARALLEL
 	b.Props |= G_SIMPLE
 	return b
 }
 
-// Specify that the graph is a multigraph - it allows multiple edges.
+// Specify that the graph is a multigraph - allows parallel edges, but no loops.
 func (b GraphSpec) MultiGraph() GraphSpec {
+	b.Props &^= G_SIMPLE | G_LOOPS
+	b.Props |= G_PARALLEL
+	return b
+}
+
+// Specify that the graph is a pseudograph - allows both loops and parallel edges.
+func (b GraphSpec) PseudoGraph() GraphSpec {
 	b.Props &^= G_SIMPLE
-	b.Props |= G_MULTI
+	b.Props |= G_LOOPS | G_PARALLEL
+	return b
+}
+
+// Specify that the graph allows parallel edges.
+func (b GraphSpec) Parallel() GraphSpec {
+	b.Props &^= G_SIMPLE
+	b.Props |= G_PARALLEL
 	return b
 }
 
 // Specify that the graph allows loops - edges connecting a vertex to itself.
-func (b GraphSpec) LoopingGraph() GraphSpec {
+func (b GraphSpec) Loop() GraphSpec {
 	b.Props &^= G_SIMPLE
 	b.Props |= G_LOOPS
 	return b
