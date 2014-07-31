@@ -62,6 +62,11 @@ func (e BaseEdge) Both() (Vertex, Vertex) {
 	return e.U, e.V
 }
 
+// Create a new basic edge.
+func NewEdge(u, v Vertex) Edge {
+	return BaseEdge{U: u, V: v}
+}
+
 // BaseWeightedEdge extends BaseEdge with weight data.
 type BaseWeightedEdge struct {
 	BaseEdge
@@ -70,6 +75,11 @@ type BaseWeightedEdge struct {
 
 func (e BaseWeightedEdge) Weight() float64 {
 	return e.W
+}
+
+// Create a new weighted edge.
+func NewWeightedEdge(u, v Vertex, weight float64) WeightedEdge {
+	return BaseWeightedEdge{BaseEdge{U: u, V: v}, weight}
 }
 
 // BaseLabeledEdge extends BaseEdge with label data.
@@ -82,12 +92,22 @@ func (e BaseLabeledEdge) Label() string {
 	return e.L
 }
 
+// Create a new labeled edge.
+func NewLabeledEdge(u, v Vertex, label string) LabeledEdge {
+	return BaseLabeledEdge{BaseEdge{U: u, V: v}, label}
+}
+
 // BaseDataEdge extends BaseEdge with arbitrary data.
 type BaseDataEdge struct {
 	BaseEdge
-	P interface{}
+	D interface{}
 }
 
 func (e BaseDataEdge) Data() interface{} {
-	return e.P
+	return e.D
+}
+
+// Create a new "data" edge - an edge with arbitrary embedded data.
+func NewDataEdge(u, v Vertex, data interface{}) DataEdge {
+	return BaseDataEdge{BaseEdge{U: u, V: v}, data}
 }
