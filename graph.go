@@ -59,7 +59,7 @@ type MutableGraph interface {
 	EdgeSetMutator
 }
 
-// A simple graph is in opposition to a multigraph: it disallows loops and
+// A simple graph is in opposition to a multigraph or pseudograph: it disallows loops and
 // parallel edges.
 type SimpleGraph interface {
 	Graph
