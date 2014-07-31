@@ -45,69 +45,69 @@ type DataEdge interface {
 // BaseEdge is a struct used to represent edges and meet the Edge interface
 // requirements. It uses the standard graph notation, (U,V), for its
 // contained vertex pair.
-type BaseEdge struct {
-	U Vertex
-	V Vertex
+type baseEdge struct {
+	u Vertex
+	v Vertex
 }
 
-func (e BaseEdge) Source() Vertex {
-	return e.U
+func (e baseEdge) Source() Vertex {
+	return e.u
 }
 
-func (e BaseEdge) Target() Vertex {
-	return e.V
+func (e baseEdge) Target() Vertex {
+	return e.v
 }
 
-func (e BaseEdge) Both() (Vertex, Vertex) {
-	return e.U, e.V
+func (e baseEdge) Both() (Vertex, Vertex) {
+	return e.u, e.v
 }
 
 // Create a new basic edge.
 func NewEdge(u, v Vertex) Edge {
-	return BaseEdge{U: u, V: v}
+	return baseEdge{u: u, v: v}
 }
 
 // BaseWeightedEdge extends BaseEdge with weight data.
-type BaseWeightedEdge struct {
-	BaseEdge
-	W float64
+type baseWeightedEdge struct {
+	baseEdge
+	w float64
 }
 
-func (e BaseWeightedEdge) Weight() float64 {
-	return e.W
+func (e baseWeightedEdge) Weight() float64 {
+	return e.w
 }
 
 // Create a new weighted edge.
 func NewWeightedEdge(u, v Vertex, weight float64) WeightedEdge {
-	return BaseWeightedEdge{BaseEdge{U: u, V: v}, weight}
+	return baseWeightedEdge{baseEdge{u: u, v: v}, weight}
 }
 
 // BaseLabeledEdge extends BaseEdge with label data.
-type BaseLabeledEdge struct {
-	BaseEdge
-	L string
+type baseLabeledEdge struct {
+	baseEdge
+	l string
 }
 
-func (e BaseLabeledEdge) Label() string {
-	return e.L
+func (e baseLabeledEdge) Label() string {
+	return e.l
 }
 
 // Create a new labeled edge.
 func NewLabeledEdge(u, v Vertex, label string) LabeledEdge {
-	return BaseLabeledEdge{BaseEdge{U: u, V: v}, label}
+	return baseLabeledEdge{baseEdge{u: u, v: v}, label}
 }
 
 // BaseDataEdge extends BaseEdge with arbitrary data.
-type BaseDataEdge struct {
-	BaseEdge
-	D interface{}
+type baseDataEdge struct {
+	baseEdge
+	d interface{}
 }
 
-func (e BaseDataEdge) Data() interface{} {
-	return e.D
+func (e baseDataEdge) Data() interface{} {
+	return e.d
 }
 
 // Create a new "data" edge - an edge with arbitrary embedded data.
 func NewDataEdge(u, v Vertex, data interface{}) DataEdge {
-	return BaseDataEdge{BaseEdge{U: u, V: v}, data}
+	return baseDataEdge{baseEdge{u: u, v: v}, data}
 }

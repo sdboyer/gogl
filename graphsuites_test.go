@@ -72,8 +72,8 @@ func init() {
 func TestHookup(t *testing.T) { TestingT(t) }
 
 // swap method is useful for some testing shorthand
-func (e BaseEdge) swap() Edge {
-	return NewEdge(e.V, e.U)
+func (e baseEdge) swap() Edge {
+	return NewEdge(e.v, e.u)
 }
 
 func gdebug(g Graph, args ...interface{}) {
@@ -254,8 +254,8 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Factory(graphFixtures["2e3v"])
 
 	flipset := []Edge{
-		graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge).swap(),
-		graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge).swap(),
+		graphFixtures["2e3v"].(EdgeList)[0].(baseEdge).swap(),
+		graphFixtures["2e3v"].(EdgeList)[1].(baseEdge).swap(),
 	}
 
 	eset := set.NewNonTS()
@@ -360,11 +360,11 @@ func (s *DirectedGraphSuite) TestTranspose(c *C) {
 
 	g2 := g.Transpose()
 
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge).swap()), Equals, true)
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(baseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(baseEdge).swap()), Equals, true)
 
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(BaseEdge)), Equals, false)
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(BaseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(baseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(baseEdge)), Equals, false)
 }
 
 func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
