@@ -4,6 +4,34 @@ import (
 	"gopkg.in/fatih/set.v0"
 )
 
+// Shared helper function for edge lists to enumerate vertices.
+func esEachVertex(el interface{}, fn VertexLambda) {
+	set := set.NewNonTS()
+
+	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
+		set.Add(e.Both())
+		return
+	})
+
+	for _, v := range set.List() {
+		if fn(v) {
+			return
+		}
+	}
+}
+
+// Shared helper function for edge lists to report vertex count.
+func esOrder(el interface{}) int {
+	set := set.NewNonTS()
+
+	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
+		set.Add(e.Both())
+		return
+	})
+
+	return set.Size()
+}
+
 // An EdgeList is a naive GraphSource implementation that is backed only by an edge slice.
 //
 // EdgeLists are primarily intended for use as fixtures.
@@ -16,11 +44,11 @@ import (
 type EdgeList []Edge
 
 func (el EdgeList) EachVertex(fn VertexLambda) {
-	for _, v := range CollectVertices(el) {
-		if fn(v) {
-			return
-		}
-	}
+	esEachVertex(el, fn)
+}
+
+func (el EdgeList) Order() int {
+	return esOrder(el)
 }
 
 func (el EdgeList) EachEdge(fn EdgeLambda) {
@@ -30,15 +58,3 @@ func (el EdgeList) EachEdge(fn EdgeLambda) {
 		}
 	}
 }
-
-func (el EdgeList) Order() int {
-	set := set.NewNonTS()
-
-	el.EachEdge(func(e Edge) (terminate bool) {
-		set.Add(e.Both())
-		return
-	})
-
-	return set.Size()
-}
-
