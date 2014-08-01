@@ -38,15 +38,15 @@ import (
 func main() {
 	// gogl uses a builder to specify the kind of graph you want.
 	graph := gogl.BuildGraph().
-		// Make the graph mutable. default is immutable.
+		// The graph should be mutable. Default is immutable.
 		Mutable().
-		// The graph should have directed edges (arcs). default is undirected.
+		// The graph should have directed edges (arcs). Default is undirected.
 		Directed().
-		// The graph's edges are plain - no labels, weights, etc. this is the default.
+		// The graph's edges are plain - no labels, weights, etc. This is the default.
 		Basic().
-		// No loops or parallel edges. this is the default.
+		// No loops or parallel edges. This is the default.
 		SimpleGraph().
-		// gogl.AdjacencyList takes the spec selects an adjacency list-based implementation and returns it.
+		// gogl.AdjacencyList picks and returns an adjacency list-based graph, based on the spec.
 		Create(gogl.AdjacencyList).
 		// The builder always returns a Graph; type assert to get access to add/remove methods.
 		(gogl.MutableGraph)
@@ -54,15 +54,16 @@ func main() {
 	// Adds two basic edges. Of course, this adds the vertices, too.
 	graph.AddEdges(gogl.NewEdge("foo", "bar"), gogl.NewEdge("bar", "baz"))
 
-	// gogl's core iteration concept is built on injected functions (VertexLambda or EdgeLambda).
-	// Here, a VertexLambda is called once per vertex in the graph; returning 'true' would terminate traversal.
+	// gogl's core iteration concept is built on injected functions (VertexLambda or
+	// EdgeLambda). Here, a VertexLambda is called once per vertex in the graph;
+	// the return value determines whether traversal continues.
 	graph.EachVertex(func(v gogl.Vertex) (terminate bool) {
 		fmt.Println(v) // Probably "foo\nbar\nbaz", but ordering is not guaranteed.
 		return // returns false, so iteration continues
 	})
 
-	// gogl specifies four methods like this on undirected graphs, plus two more on directed graphs.
-	// These methods are generally referred to as enumerators; more on them later.
+	// gogl refers to these sorts of iterating methods as enumerators. There are four
+	// such methods on undirected graphs, and two more on directed graphs.
 
 	// If you know you need the full result set, gogl provides functors to collect enumerations
 	// into slices. This makes ranging easy.
@@ -71,13 +72,13 @@ func main() {
 		fmt.Println(v) // same as with EachVertex().
 	}
 
-	// The pattern is the same with edge enumeration.
+	// The pattern is the same with edge enumeration. These two have the same output:
 	graph.EachEdge(func(e gogl.Edge) (terminate bool) {
 		fmt.Println(e) // Probably "{foo bar}\n{bar baz}". Again, ordering is not guaranteed.
 		return
 	})
 	for _, e := range gogl.CollectEdges(graph) {
-		fmt.Println(e) // same as with EachEdge().
+		fmt.Println(e)
 	}
 
 	// gogl's algorithms all rely on these enumerators to do their work. Here, we use
@@ -93,3 +94,5 @@ func main() {
 ## Enumerators
 
 TODO - add diagrams indicating what relationship each enumerator touches.
+
+## Gotchas
