@@ -37,7 +37,7 @@ import (
 
 func main() {
 	// gogl uses a builder to specify the kind of graph you want.
-	graph := gogl.BuildGraph().
+	graph := gogl.G().
 		// The graph should be mutable. Default is immutable.
 		Mutable().
 		// The graph should have directed edges (arcs). Default is undirected.
