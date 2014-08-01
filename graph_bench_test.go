@@ -163,7 +163,7 @@ func benchHasVertex(g Graph, c *C) {
 	}
 }
 
-var bgraph = BuildGraph().Directed().Using(bernoulliDistributionGenerator(1000, 50, nil)).Create(AdjacencyList)
+var bgraph = G().Directed().Using(bernoulliDistributionGenerator(1000, 50, nil)).Create(AdjacencyList)
 
 func BenchmarkHasVertex(b *testing.B) {
 	for i := 0; i < b.N; i++ {

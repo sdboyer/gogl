@@ -26,7 +26,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	// extra edge demonstrates non-productive search paths are not included
 	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
 	// directed
-	g := gogl.BuildGraph().Directed().Using(extraSet).
+	g := gogl.G().Directed().Using(extraSet).
 		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
 	path, err := Search(g, "qux", "bar")
@@ -43,7 +43,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
-	g := gogl.BuildGraph().Mutable().Directed().
+	g := gogl.G().Mutable().Directed().
 		Create(gogl.AdjacencyList).(gogl.MutableGraph)
 	g.EnsureVertex("foo")
 
@@ -54,7 +54,7 @@ func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
-	g := gogl.BuildGraph().Directed().
+	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
 		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
@@ -75,7 +75,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
-	g := gogl.BuildGraph().Directed().
+	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
 		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
@@ -89,7 +89,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
 	// undirected
-	ug := gogl.BuildGraph().Using(dfEdgeSet).Create(gogl.AdjacencyList)
+	ug := gogl.G().Using(dfEdgeSet).Create(gogl.AdjacencyList)
 
 	_, err = Toposort(ug)
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
@@ -142,7 +142,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 		gogl.NewEdge("bar", "quark"),
 		gogl.NewEdge("baz", "qux"),
 	}
-	g := gogl.BuildGraph().Directed().
+	g := gogl.G().Directed().
 		Mutable().Using(el).
 		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 

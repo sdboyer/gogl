@@ -71,7 +71,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
-	digraph := BuildGraph().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
+	digraph := G().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
 	slice := CollectArcsFrom("foo", digraph)
 
 	c.Assert(len(slice), Equals, 2)
@@ -86,7 +86,7 @@ func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
-	digraph := BuildGraph().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
+	digraph := G().Directed().Using(graphFixtures["arctest"]).Create(AdjacencyList).(DirectedGraph)
 	slice := CollectArcsTo("bar", digraph)
 
 	c.Assert(len(slice), Equals, 2)
