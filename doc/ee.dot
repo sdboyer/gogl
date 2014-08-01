@@ -1,0 +1,10 @@
+digraph G {
+  node [color="grey",fontcolor="grey"]
+  edge [style=bold,color="grey"]
+	a -> b [color="#23A7C0"];
+  b -> c [color="#23A7C0"];
+	a -> c [color="#23A7C0"];
+	d -> a [color="#23A7C0"];
+	d -> e [color="#23A7C0"];
+  f;
+}

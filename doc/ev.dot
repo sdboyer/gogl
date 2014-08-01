@@ -1,0 +1,14 @@
+digraph G {
+  node [color="grey"]
+  edge [color="grey"]
+  a -> b -> c;
+  a -> c;
+  d -> a;
+  d -> e;
+  a [style=filled,color="#23A7C0"];
+  b [style=filled,color="#23A7C0"];
+  c [style=filled,color="#23A7C0"];
+  d [style=filled,color="#23A7C0"];
+  e [style=filled,color="#23A7C0"];
+  f [style=filled,color="#23A7C0"];
+}

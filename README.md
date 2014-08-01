@@ -93,6 +93,34 @@ func main() {
 
 ## Enumerators
 
-TODO - add diagrams indicating what relationship each enumerator touches.
+Enumerators are the primary means by which gogl graphs are expressed. As shown in the Quickstart section, they are methods on graph datastructures that receive a 'lambda', and call that lambda once per element (Vertex or Edge) that is found as the method traverses the graph. There are four enumerators for gogl's undirected graphs, and two additional ones for directed graphs.
+
+Given the following graph:
+![Base graph](doc/base.dot.png)
+
+Which could be created as follows:
+```go
+func main() {
+	graph := gogl.G().Mutable().Directed().Create(gogl.AdjacencyList)
+
+	graph.AddEdges([]gogl.Edge{
+		NewEdge("a", "b"),
+		NewEdge("b", "c"),
+		NewEdge("a", "c"),
+		NewEdge("a", "c"),
+		NewEdge("d", "a"),
+		NewEdge("d", "e"),
+	})
+
+	// 'f' is a vertex isolate.
+	graph.EnsureVertex("f")
+}
+```
+
+Calling `EachVertex()` on this graph will call the injected lambda six times, once for each of the contained vertices (marked in blue). It's important to remember that gogl makes no guarantees as to the order of the elements.
+![EachVertex()](doc/ev.dot.png)
+
+Calling `EachEdge()` will call the injected lambda six times, once for each of the contained edges:
+![EachEdge()](doc/ee.dot.png)
 
 ## Gotchas

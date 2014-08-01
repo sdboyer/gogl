@@ -1,0 +1,13 @@
+digraph G {
+  node [color="grey",fontcolor="grey"]
+  edge [color="grey"]
+	a -> b;
+  b -> c;
+	a -> c;
+	d -> a [style=bold,color="#23A7C0"];
+	d -> e;
+  a [fontcolor="black",style=filled,color="#F38630"];
+  f;
+}
+
+
