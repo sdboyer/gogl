@@ -88,21 +88,6 @@ type labeledDirected struct {
 	baseLabeled
 }
 
-func NewLabeledDirected() MutableLabeledGraph {
-	list := &labeledDirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]string)
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ DirectedGraph = list
-	var _ LabeledGraph = list
-	var _ MutableLabeledGraph = list
-
-	return list
-}
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *labeledDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
@@ -341,20 +326,6 @@ func (g *labeledDirected) Transpose() DirectedGraph {
 
 type labeledUndirected struct {
 	baseLabeled
-}
-
-func NewLabeledUndirected() MutableLabeledGraph {
-	g := &labeledUndirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	g.list = make(map[Vertex]map[Vertex]string)
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = g
-	var _ SimpleGraph = g
-	var _ LabeledGraph = g
-	var _ MutableLabeledGraph = g
-
-	return g
 }
 
 // Returns the degree of the provided vertex. If the vertex is not present in the

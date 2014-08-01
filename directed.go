@@ -4,21 +4,6 @@ type mutableDirected struct {
 	al_basic_mut
 }
 
-// Creates a new mutable, directed graph.
-func NewDirected() MutableGraph {
-	list := &mutableDirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]struct{})
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ MutableGraph = list
-	var _ DirectedGraph = list
-
-	return list
-}
-
 /* mutableDirected additions */
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
@@ -252,32 +237,6 @@ func (g *mutableDirected) Transpose() DirectedGraph {
 
 type immutableDirected struct {
 	al_basic_immut
-}
-
-// Creates a new mutable, directed graph.
-func NewImmutableDirected(g DirectedGraph) DirectedGraph {
-	list := &immutableDirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]struct{})
-
-	g.EachEdge(func(edge Edge) (terminate bool) {
-		list.addEdges(edge)
-		return
-	})
-
-	if list.Order() != g.Order() {
-		g.EachVertex(func(vertex Vertex) (terminate bool) {
-			list.ensureVertex(vertex)
-			return
-		})
-	}
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ DirectedGraph = list
-
-	return list
 }
 
 // Traverses the set of edges in the graph, passing each edge to the

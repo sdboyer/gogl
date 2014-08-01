@@ -88,21 +88,6 @@ type dataDirected struct {
 	baseData
 }
 
-func NewDataDirected() MutableDataGraph {
-	list := &dataDirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]interface{})
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ DirectedGraph = list
-	var _ DataGraph = list
-	var _ MutableDataGraph = list
-
-	return list
-}
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *dataDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
@@ -341,20 +326,6 @@ func (g *dataDirected) Transpose() DirectedGraph {
 
 type dataUndirected struct {
 	baseData
-}
-
-func NewDataUndirected() MutableDataGraph {
-	g := &dataUndirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	g.list = make(map[Vertex]map[Vertex]interface{})
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = g
-	var _ SimpleGraph = g
-	var _ DataGraph = g
-	var _ MutableDataGraph = g
-
-	return g
 }
 
 // Returns the degree of the provided vertex. If the vertex is not present in the

@@ -88,21 +88,6 @@ type weightedDirected struct {
 	baseWeighted
 }
 
-func NewWeightedDirected() MutableWeightedGraph {
-	list := &weightedDirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]float64)
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ DirectedGraph = list
-	var _ WeightedGraph = list
-	var _ MutableWeightedGraph = list
-
-	return list
-}
-
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *weightedDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
@@ -341,20 +326,6 @@ func (g *weightedDirected) Transpose() DirectedGraph {
 
 type weightedUndirected struct {
 	baseWeighted
-}
-
-func NewWeightedUndirected() MutableWeightedGraph {
-	g := &weightedUndirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	g.list = make(map[Vertex]map[Vertex]float64)
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = g
-	var _ SimpleGraph = g
-	var _ WeightedGraph = g
-	var _ MutableWeightedGraph = g
-
-	return g
 }
 
 // Returns the degree of the provided vertex. If the vertex is not present in the

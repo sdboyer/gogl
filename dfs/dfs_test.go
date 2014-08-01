@@ -11,7 +11,7 @@ import (
 // Hook gocheck into the go test runner
 func Test(t *testing.T) { TestingT(t) }
 
-var dfEdgeSet = []gogl.Edge{
+var dfEdgeSet = gogl.EdgeList{
 	gogl.NewEdge("foo", "bar"),
 	gogl.NewEdge("bar", "baz"),
 	gogl.NewEdge("baz", "qux"),
@@ -23,54 +23,48 @@ var _ = Suite(&DepthFirstSearchSuite{})
 
 // Basic test of outermost search functionality.
 func (s *DepthFirstSearchSuite) TestSearch(c *C) {
+	// extra edge demonstrates non-productive search paths are not included
+	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
 	// directed
-	g := gogl.NewDirected()
-
-	// must demonstrate that non-productive search paths are not included
-	edgeset := []gogl.Edge{
-		gogl.NewEdge("foo", "bar"),
-		gogl.NewEdge("bar", "baz"),
-		gogl.NewEdge("bar", "quark"),
-		gogl.NewEdge("baz", "qux"),
-	}
-
-	g.AddEdges(edgeset...)
+	g := gogl.BuildGraph().Directed().Using(extraSet).
+		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
 	path, err := Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
 	c.Assert(err, IsNil)
 
 	// undirected
-	ug := gogl.NewUndirected()
-	ug.AddEdges(edgeset...)
+	//ug := gogl.BuildGraph().Using(extraSet).Create(gogl.AdjacencyList)
 
+	// TODO accidentally passed wrong graph - fix!
 	path, err = Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
 	c.Assert(err, IsNil)
 }
 
 func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
-	g := gogl.NewDirected()
+	g := gogl.BuildGraph().Mutable().Directed().
+		Create(gogl.AdjacencyList).(gogl.MutableGraph)
 	g.EnsureVertex("foo")
 
-	_, err := Search(g, "foo", "bar")
+	_, err := Search(g.(gogl.DirectedGraph), "foo", "bar")
 	c.Assert(err, ErrorMatches, "Start vertex.*")
-	_, err = Search(g, "bar", "foo")
+	_, err = Search(g.(gogl.DirectedGraph), "bar", "foo")
 	c.Assert(err, ErrorMatches, "Target vertex.*")
 }
 
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
-	g := gogl.NewDirected()
-	g.AddEdges(dfEdgeSet...)
+	g := gogl.BuildGraph().Directed().
+		Mutable().Using(dfEdgeSet).
+		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
-	dg, _ := g.(gogl.DirectedGraph)
-	sources, err := FindSources(dg)
+	sources, err := FindSources(g)
 	c.Assert(fmt.Sprint(sources), Equals, fmt.Sprint([]gogl.Vertex{"foo"}))
 	c.Assert(err, IsNil)
 
 	// Ensure it finds multiple, as well
-	g.AddEdges(gogl.NewEdge("quark", "baz"))
-	sources, err = FindSources(dg)
+	g.(gogl.MutableGraph).AddEdges(gogl.NewEdge("quark", "baz"))
+	sources, err = FindSources(g)
 
 	possibles := [][]gogl.Vertex{
 		[]gogl.Vertex{"foo", "quark"},
@@ -81,22 +75,21 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
-	// directed
-	g := gogl.NewDirected()
-	g.AddEdges(dfEdgeSet...)
+	g := gogl.BuildGraph().Directed().
+		Mutable().Using(dfEdgeSet).
+		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
 	tsl, err := Toposort(g, "foo")
 	c.Assert(err, IsNil)
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 
 	// add a cycle, ensure error comes back
-	g.AddEdges(gogl.NewEdge("bar", "foo"))
+	g.(gogl.MutableGraph).AddEdges(gogl.NewEdge("bar", "foo"))
 	tsl, err = Toposort(g, "foo")
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
 	// undirected
-	ug := gogl.NewUndirected()
-	ug.AddEdges(dfEdgeSet...)
+	ug := gogl.BuildGraph().Using(dfEdgeSet).Create(gogl.AdjacencyList)
 
 	_, err = Toposort(ug)
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
@@ -105,11 +98,6 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	// no such thing as a 'cycle' (of that kind) in undirected graphs
 	c.Assert(err, IsNil)
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
-}
-
-func (s *DepthFirstSearchSuite) TestTraverse(c *C) {
-	g := gogl.NewDirected()
-	g.AddEdges(dfEdgeSet...)
 }
 
 // This is a bit wackyhacky, but works well enough
@@ -146,16 +134,17 @@ func (v *TestVisitor) OnFinishVertex(vertex gogl.Vertex) {
 
 func (v *TestVisitor) TestTraverse(c *C) {
 	v.c = c
-	g := gogl.NewDirected()
 
-	edgeset := []gogl.Edge{
+	el := gogl.EdgeList{
 		gogl.NewEdge("foo", "bar"),
 		gogl.NewEdge("bar", "baz"),
 		gogl.NewEdge("bar", "foo"),
 		gogl.NewEdge("bar", "quark"),
 		gogl.NewEdge("baz", "qux"),
 	}
-	g.AddEdges(edgeset...)
+	g := gogl.BuildGraph().Directed().
+		Mutable().Using(el).
+		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
 
 	v.vertices = []string{"foo", "bar", "baz", "qux", "quark"}
 
@@ -173,10 +162,10 @@ func (v *TestVisitor) TestTraverse(c *C) {
 		c.Assert(color, Equals, black)
 	}
 
-	for _, e := range edgeset {
+	for _, e := range el {
 		c.Assert(v.found_edges, Contains, e)
 	}
-	c.Assert(len(v.found_edges), Equals, len(edgeset))
+	c.Assert(len(v.found_edges), Equals, len(el))
 }
 
 type LinkedListSuite struct{}
