@@ -1,8 +1,8 @@
 package gogl
 
 import (
-	. "github.com/sdboyer/gocheck"
 	"math"
+	. "github.com/sdboyer/gocheck"
 )
 
 type NullGraphSuite bool
