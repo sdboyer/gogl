@@ -5,13 +5,25 @@ import "fmt"
 // for great justice
 var fml = fmt.Println
 
+/*
+gogl's commonly used, high-level interfaces are composites of many smaller,
+more atomic interfaces. Because there are so many atomic interfaces, we
+start with the high-level composites. If you're new to gogl, you'll probably
+want to read through the composite interfaces, jumping back and forth down
+to the atomic interfaces as they appear in the composites. Patterns should
+emerge quickly.
+
+Note that not all atomic interfaces are used directly in the composites, so
+make sure to review the atomics on their own, too.
+*/
+
 /* Composite graph interfaces */
 
 // Graph is gogl's most basic interface: it contains only the methods that
 // *every* type of graph implements.
 //
 // Graph is intentionally underspecified: both directed and undirected graphs
-// implement it; simple graphs, multigraphs, weighted, labeled, or any
+// implement it; simple, multi, and pseudographs; weighted, labeled, or any
 // combination thereof.
 //
 // The semantics of some of these methods vary slightly from one graph type
@@ -32,7 +44,7 @@ type Graph interface {
 	Size() int              // Reports total number of edges in the graph
 }
 
-// GraphSource is a subinterface of Graph, describing the minimal set of methods
+// GraphSource is a subset of Graph, describing the minimal set of methods
 // necessary to accomplish a naive full graph traversal and copy.
 type GraphSource interface {
 	VertexEnumerator
@@ -162,36 +174,52 @@ type EdgeLambda func(Edge) (terminate bool)
 // If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type VertexLambda func(Vertex) (terminate bool)
 
-// A VertexEnumerator iteratively enumerates vertices, and can indicate the number of vertices present.
+// A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {
+	// Calls the provided lambda once with each vertex in the graph. Type
+	// assert as appropriate in client code.
 	EachVertex(VertexLambda)
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
 type EdgeEnumerator interface {
+	// Calls the provided lambda once with each edge in the graph. If a
+	// specialized edge type (e.g., weighted) is known to be used by the
+	// graph, it is the calling code's responsibility to type assert.
 	EachEdge(EdgeLambda)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
+	// Calls the provided lambda once with each edge incident to the
+	// provided vertex. In a directed graph, this must include both
+	// inbound and outbound edges.
 	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
 // One enumerator provides inbound edges, the other outbound edges.
 type IncidentArcEnumerator interface {
+	// Calls the provided lambda once with each arc outbound from the
+	// provided vertex.
 	EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)
+	// Calls the provided lambda once with each arc outbound from the
+	// provided vertex.
 	EachArcTo(v Vertex, inEdgeLambda EdgeLambda)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
+	// Calls the provided lambda once with each vertex adjacent to the
+	// the provided vertex. In a digraph, this includes both successor
+	// and predecessor vertices.
 	EachAdjacentTo(start Vertex, adjacentVertexLambda VertexLambda)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.
 type VertexMembershipChecker interface {
-	HasVertex(Vertex) bool // Whether or not the vertex is present in the set
+	// Indicates whether or not the vertex is present in the graph.
+	HasVertex(Vertex) bool
 }
 
 // A DegreeChecker reports the number of edges incident to a given vertex.
@@ -212,7 +240,9 @@ type EdgeMembershipChecker interface {
 
 // A VertexSetMutator allows the addition and removal of vertices from a set.
 type VertexSetMutator interface {
+	// Ensures the provided vertices are present in the graph.
 	EnsureVertex(...Vertex)
+	// Removes the provided vertices from the graph, if present.
 	RemoveVertex(...Vertex)
 }
 
