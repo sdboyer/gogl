@@ -96,9 +96,9 @@ func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
 		return fn(GraphSpec{Props: gp, Source: gs})
 	}
 
-	if _, ok := g.(DirectedGraph); ok {
+	if _, ok := g.(Digraph); ok {
 		directed = true
-		Suite(&DirectedGraphSuite{Factory: fact})
+		Suite(&DigraphSuite{Factory: fact})
 	}
 
 	// Set up the basic Graph suite unconditionally
@@ -345,18 +345,18 @@ func (s *GraphSuite) TestOrder(c *C) {
 	c.Assert(s.Factory(graphFixtures["2e3v"]).Order(), Equals, 3)
 }
 
-/* DirectedGraphSuite - tests for directed graph methods */
+/* DigraphSuite - tests for directed graph methods */
 
-type DirectedGraphSuite struct {
+type DigraphSuite struct {
 	Factory func(GraphSource) Graph
 }
 
-func (s *DirectedGraphSuite) SuiteLabel() string {
+func (s *DigraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
-func (s *DirectedGraphSuite) TestTranspose(c *C) {
-	g := s.Factory(graphFixtures["2e3v"]).(DirectedGraph)
+func (s *DigraphSuite) TestTranspose(c *C) {
+	g := s.Factory(graphFixtures["2e3v"]).(Digraph)
 
 	g2 := g.Transpose()
 
@@ -367,8 +367,8 @@ func (s *DirectedGraphSuite) TestTranspose(c *C) {
 	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(baseEdge)), Equals, false)
 }
 
-func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
-	g := s.Factory(graphFixtures["3e5v1i"]).(DirectedGraph)
+func (s *DigraphSuite) TestOutDegreeOf(c *C) {
+	g := s.Factory(graphFixtures["3e5v1i"]).(Digraph)
 
 	count, exists := g.OutDegreeOf("foo")
 	c.Assert(exists, Equals, true)
@@ -395,8 +395,8 @@ func (s *DirectedGraphSuite) TestOutDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
-func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
-	g := s.Factory(graphFixtures["3e5v1i"]).(DirectedGraph)
+func (s *DigraphSuite) TestInDegreeOf(c *C) {
+	g := s.Factory(graphFixtures["3e5v1i"]).(Digraph)
 
 	count, exists := g.InDegreeOf("foo")
 	c.Assert(exists, Equals, true)
@@ -423,8 +423,8 @@ func (s *DirectedGraphSuite) TestInDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
-func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
-	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
+func (s *DigraphSuite) TestEachArcTo(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
 
 	eset := set.NewNonTS()
 	var hit int
@@ -447,8 +447,8 @@ func (s *DirectedGraphSuite) TestEachArcTo(c *C) {
 	c.Assert(eset.Has(NewEdge("qux", "bar")), Equals, true)
 }
 
-func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
-	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
+func (s *DigraphSuite) TestEachArcToTermination(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
 
 	var hit int
 	g.EachArcTo("baz", func(e Edge) (terminate bool) {
@@ -459,8 +459,8 @@ func (s *DirectedGraphSuite) TestEachArcToTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
-	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
+func (s *DigraphSuite) TestEachArcFrom(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
 
 	eset := set.NewNonTS()
 	var hit int
@@ -483,8 +483,8 @@ func (s *DirectedGraphSuite) TestEachArcFrom(c *C) {
 	c.Assert(eset.Has(NewEdge("foo", "qux")), Equals, true)
 }
 
-func (s *DirectedGraphSuite) TestEachArcFromTermination(c *C) {
-	g := s.Factory(graphFixtures["arctest"]).(DirectedGraph)
+func (s *DigraphSuite) TestEachArcFromTermination(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
 
 	var hit int
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {

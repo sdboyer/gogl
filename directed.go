@@ -208,7 +208,7 @@ func (g *mutableDirected) RemoveEdges(edges ...Edge) {
 //
 // This implementation returns a new graph object (doubling memory use),
 // but not all implementations do so.
-func (g *mutableDirected) Transpose() DirectedGraph {
+func (g *mutableDirected) Transpose() Digraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -350,7 +350,7 @@ func (g *immutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 //
 // This implementation returns a new graph object (doubling memory use),
 // but not all implementations do so.
-func (g *immutableDirected) Transpose() DirectedGraph {
+func (g *immutableDirected) Transpose() Digraph {
 	g2 := &immutableDirected{}
 	g2.list = make(map[Vertex]map[Vertex]struct{})
 

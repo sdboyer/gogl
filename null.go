@@ -12,7 +12,7 @@ const NullGraph = nullGraph(false)
 type nullGraph bool
 
 var _ Graph = nullGraph(false)
-var _ DirectedGraph = nullGraph(false)
+var _ Digraph = nullGraph(false)
 var _ SimpleGraph = nullGraph(false)
 var _ WeightedGraph = nullGraph(false)
 var _ LabeledGraph = nullGraph(false)
@@ -69,6 +69,6 @@ func (g nullGraph) Density() float64 {
 	return math.NaN()
 }
 
-func (g nullGraph) Transpose() DirectedGraph {
+func (g nullGraph) Transpose() Digraph {
 	return g
 }

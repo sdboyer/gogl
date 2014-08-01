@@ -36,7 +36,7 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 		target: target,
 	}
 
-	if dg, ok := g.(gogl.DirectedGraph); ok {
+	if dg, ok := g.(gogl.Digraph); ok {
 		w.dg = dg
 	}
 
@@ -51,7 +51,7 @@ func Search(g gogl.Graph, target gogl.Vertex, start gogl.Vertex) (path []gogl.Ve
 // The resulting path is then sent back through the channel.
 //
 // If no starting vertices are provided, then a list of source vertices is built via FindSources(),
-// and that set is used as the starting point. Because FindSources() requires a DirectedGraph,
+// and that set is used as the starting point. Because FindSources() requires a Digraph,
 // an error will be returned if a non-directed graph is provided without any start vertices.
 //
 // TODO unexported until this is actually implemented. keeping it here as a note for now :)
@@ -76,7 +76,7 @@ type searchPath struct {
 // in the final sorted output.
 //
 // If no starting vertices are provided, then a list of source vertices is built via FindSources(),
-// and that set is used as the starting point. Because FindSources() requires a DirectedGraph,
+// and that set is used as the starting point. Because FindSources() requires a Digraph,
 // an error will be returned if a non-directed graph is provided without any start vertices.
 func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 	start, err := buildStartQueue(g, start...)
@@ -103,7 +103,7 @@ func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 	}
 
 	var traverser func(*walker, gogl.Vertex)
-	if dg, ok := g.(gogl.DirectedGraph); ok {
+	if dg, ok := g.(gogl.Digraph); ok {
 		w.dg = dg
 		traverser = (*walker).dftraverse
 	} else {
@@ -140,7 +140,7 @@ func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, err
 		colors: make(map[gogl.Vertex]uint),
 	}
 
-	if dg, ok := g.(gogl.DirectedGraph); ok {
+	if dg, ok := g.(gogl.Digraph); ok {
 		w.dg = dg
 	}
 
@@ -156,7 +156,7 @@ func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, err
 }
 
 // Finds all source vertices (vertices with no incoming edges) in the given directed graph.
-func FindSources(g gogl.DirectedGraph) (sources []gogl.Vertex, err error) {
+func FindSources(g gogl.Digraph) (sources []gogl.Vertex, err error) {
 	// TODO hardly the most efficient way to keep track, i'm sure
 	incomings := set.NewNonTS()
 
@@ -178,7 +178,7 @@ func FindSources(g gogl.DirectedGraph) (sources []gogl.Vertex, err error) {
 // Simple helper for shared traversal entry-point logic.
 func buildStartQueue(g gogl.Graph, v ...gogl.Vertex) (start []gogl.Vertex, err error) {
 	if len(v) == 0 {
-		if dg, ok := g.(gogl.DirectedGraph); ok {
+		if dg, ok := g.(gogl.Digraph); ok {
 			start, err = FindSources(dg)
 		} else {
 			return nil, errors.New("Undirected graphs do not have sources, a start point for traversal must be provided.")
@@ -332,7 +332,7 @@ func (vis *TslVisitor) GetTsl() ([]gogl.Vertex, error) {
 type walker struct {
 	vis      Visitor
 	g        gogl.Graph
-	dg       gogl.DirectedGraph
+	dg       gogl.Digraph
 	complete bool
 	target   gogl.Vertex
 	// TODO is there ANY way to do this more efficiently without mutating/coloring the vertex objects directly? this means lots of hashtable lookups

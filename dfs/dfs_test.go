@@ -27,7 +27,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
 	// directed
 	g := gogl.G().Directed().Using(extraSet).
-		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
+		Create(gogl.AdjacencyList).(gogl.Digraph)
 
 	path, err := Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
@@ -47,16 +47,16 @@ func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 		Create(gogl.AdjacencyList).(gogl.MutableGraph)
 	g.EnsureVertex("foo")
 
-	_, err := Search(g.(gogl.DirectedGraph), "foo", "bar")
+	_, err := Search(g.(gogl.Digraph), "foo", "bar")
 	c.Assert(err, ErrorMatches, "Start vertex.*")
-	_, err = Search(g.(gogl.DirectedGraph), "bar", "foo")
+	_, err = Search(g.(gogl.Digraph), "bar", "foo")
 	c.Assert(err, ErrorMatches, "Target vertex.*")
 }
 
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
-		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
+		Create(gogl.AdjacencyList).(gogl.Digraph)
 
 	sources, err := FindSources(g)
 	c.Assert(fmt.Sprint(sources), Equals, fmt.Sprint([]gogl.Vertex{"foo"}))
@@ -77,7 +77,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
-		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
+		Create(gogl.AdjacencyList).(gogl.Digraph)
 
 	tsl, err := Toposort(g, "foo")
 	c.Assert(err, IsNil)
@@ -144,7 +144,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 	}
 	g := gogl.G().Directed().
 		Mutable().Using(el).
-		Create(gogl.AdjacencyList).(gogl.DirectedGraph)
+		Create(gogl.AdjacencyList).(gogl.Digraph)
 
 	v.vertices = []string{"foo", "bar", "baz", "qux", "quark"}
 

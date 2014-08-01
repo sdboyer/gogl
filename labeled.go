@@ -296,7 +296,7 @@ func (g *labeledDirected) RemoveEdges(edges ...LabeledEdge) {
 	}
 }
 
-func (g *labeledDirected) Transpose() DirectedGraph {
+func (g *labeledDirected) Transpose() Digraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

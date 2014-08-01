@@ -40,15 +40,15 @@ type GraphSource interface {
 	Order() int
 }
 
-// DirectedGraph describes a Graph all of whose edges are directed.
+// Digraph (directed graph) describes a Graph where all the edges are directed.
 //
 // gogl treats edge directionality as a property of the graph, not the edge itself.
 // Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
-type DirectedGraph interface {
+type Digraph interface {
 	Graph
 	IncidentArcEnumerator // Enumerates a vertex's incident in- and out-arcs to an injected lambda
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
-	Transposer            // DirectedGraphs can produce a transpose of themselves
+	Transposer            // Digraphs can produce a transpose of themselves
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
@@ -240,7 +240,7 @@ type DataEdgeSetMutator interface {
 	RemoveEdges(edges ...DataEdge)
 }
 
-// A Transposer produces a transposed version of a DirectedGraph.
+// A Transposer produces a transposed version of a Digraph.
 type Transposer interface {
-	Transpose() DirectedGraph
+	Transpose() Digraph
 }
