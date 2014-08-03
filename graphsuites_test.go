@@ -17,6 +17,52 @@ import (
 //
 /////////////////////////////////////////////////////////////////////
 
+type loopEdge struct {
+	v Vertex
+}
+
+func (e loopEdge) Both() (Vertex, Vertex) {
+	return e.v, e.v
+}
+
+func (e loopEdge) Source() Vertex {
+	return e.v
+}
+
+func (e loopEdge) Target() Vertex {
+	return e.v
+}
+
+type loopEdgeList []Edge
+
+func (el loopEdgeList) EachVertex(fn VertexStep) {
+	set := set.NewNonTS()
+
+	for _, e := range el {
+		if _, ok := e.(loopEdge); ok {
+			set.Add(e.Source())
+		} else {
+			set.Add(e.Both())
+		}
+	}
+
+	for _, v := range set.List() {
+		if fn(v) {
+			return
+		}
+	}
+}
+
+func (el loopEdgeList) EachEdge(fn EdgeStep) {
+	for _, e := range el {
+		if _, ok := e.(loopEdge); !ok {
+			if fn(e) {
+				return
+			}
+		}
+	}
+}
+
 var graphFixtures = map[string]GraphSource{
 	// TODO improve naming basis/patterns for these
 	"arctest": EdgeList{
@@ -37,6 +83,12 @@ var graphFixtures = map[string]GraphSource{
 		NewEdge("bar", "baz"),
 		NewEdge("foo", "qux"),
 	},
+	"3e5v1i": loopEdgeList{
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
+		NewEdge("foo", "qux"),
+		loopEdge{"isolate"},
+	},
 	"w-2e3v": WeightedEdgeList{
 		NewWeightedEdge(1, 2, 5.23),
 		NewWeightedEdge(2, 3, 5.821),
@@ -52,11 +104,6 @@ var graphFixtures = map[string]GraphSource{
 }
 
 func init() {
-	// TODO last straggler. make a special, cheaty edge list using a loop edge type to support this.
-	g := G().Mutable().Basic().Directed().Using(graphFixtures["3e4v"]).Create(AdjacencyList).(MutableGraph)
-	g.EnsureVertex("isolate")
-	graphFixtures["3e5v1i"] = g
-
 	for gp, _ := range alCreators {
 		SetUpTestsFromSpec(gp, AdjacencyList)
 	}
