@@ -20,18 +20,6 @@ func esEachVertex(el interface{}, fn VertexStep) {
 	}
 }
 
-// Shared helper function for edge lists to report vertex count.
-func esOrder(el interface{}) int {
-	set := set.NewNonTS()
-
-	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
-		set.Add(e.Both())
-		return
-	})
-
-	return set.Size()
-}
-
 // An EdgeList is a naive GraphSource implementation that is backed only by an edge slice.
 //
 // EdgeLists are primarily intended for use as fixtures.
@@ -45,10 +33,6 @@ type EdgeList []Edge
 
 func (el EdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
-}
-
-func (el EdgeList) Order() int {
-	return esOrder(el)
 }
 
 func (el EdgeList) EachEdge(fn EdgeStep) {
@@ -68,10 +52,6 @@ func (el WeightedEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
-func (el WeightedEdgeList) Order() int {
-	return esOrder(el)
-}
-
 func (el WeightedEdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
@@ -89,10 +69,6 @@ func (el LabeledEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
-func (el LabeledEdgeList) Order() int {
-	return esOrder(el)
-}
-
 func (el LabeledEdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
@@ -108,10 +84,6 @@ type DataEdgeList []DataEdge
 
 func (el DataEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
-}
-
-func (el DataEdgeList) Order() int {
-	return esOrder(el)
 }
 
 func (el DataEdgeList) EachEdge(fn EdgeStep) {
