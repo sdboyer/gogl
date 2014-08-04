@@ -146,7 +146,7 @@ And `EachArcTo()` enumerates all the edges/arcs inbound to the given vertex:
 
 ![EachArcTo("a")](doc/eat.dot.png)
 
-These six enumerators are gogl's most important building blocks. They fully describe the basic structure of a graph-based model, and can be combined to ask most any basic graph questions. 
+These six enumerators are gogl's most important building blocks. They fully describe the basic structure of a graph-based model, and can be combined to ask most any basic graph questions.
 
 There are some additional enumerators for graph subtypes - e.g., `EachLabeledEdgeIncidentTo()` (not yet implemented) is an "optional optimization" enumerator that labeled graphs can implement if, say, they maintain indices that allow them to more efficiently locate and return the subset of incident edges with a particular label than would a naive traversal of the entire incident edge set with direct string comparisons.
 

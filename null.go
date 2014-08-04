@@ -57,14 +57,6 @@ func (g nullGraph) HasDataEdge(e DataEdge) bool {
 	return false
 }
 
-func (g nullGraph) Size() int {
-	return 0
-}
-
-func (g nullGraph) Order() int {
-	return 0
-}
-
 func (g nullGraph) Density() float64 {
 	return math.NaN()
 }

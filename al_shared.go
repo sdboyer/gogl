@@ -41,7 +41,7 @@ type al_pea interface {
 // different graph edge types.
 func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 	vf := func(from GraphSource, to al_graph) {
-		if to.Order() != from.Order() {
+		if Order(to) != Order(from) {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return

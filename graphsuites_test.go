@@ -335,16 +335,6 @@ func (s *GraphSuite) TestDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
-func (s *GraphSuite) TestSize(c *C) {
-	c.Assert(s.Factory(NullGraph).Size(), Equals, 0)
-	c.Assert(s.Factory(graphFixtures["2e3v"]).Size(), Equals, 2)
-}
-
-func (s *GraphSuite) TestOrder(c *C) {
-	c.Assert(s.Factory(NullGraph).Order(), Equals, 0)
-	c.Assert(s.Factory(graphFixtures["2e3v"]).Order(), Equals, 3)
-}
-
 /* DigraphSuite - tests for directed graph methods */
 
 type DigraphSuite struct {
@@ -539,18 +529,18 @@ func (s *MutableGraphSuite) TestGracefulEmptyVariadics(c *C) {
 	g := s.Factory(NullGraph).(MutableGraph)
 
 	g.EnsureVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.RemoveVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.AddEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 
 	g.RemoveEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 }
 
 func (s *MutableGraphSuite) TestEnsureVertex(c *C) {
@@ -623,7 +613,7 @@ func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
 	g.AddEdges(NewEdge(1, 2), NewEdge(2, 3), NewEdge(4, 1))
 	g.RemoveVertex(1)
 
-	c.Assert(g.Size(), Equals, 1)
+	c.Assert(Size(g), Equals, 1)
 }
 
 /* WeightedGraphSuite - tests for weighted graphs */
@@ -672,18 +662,18 @@ func (s *MutableWeightedGraphSuite) TestGracefulEmptyVariadics(c *C) {
 	g := s.Factory(NullGraph).(MutableWeightedGraph)
 
 	g.EnsureVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.RemoveVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.AddEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 
 	g.RemoveEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 }
 
 func (s *MutableWeightedGraphSuite) TestEnsureVertex(c *C) {
@@ -812,18 +802,18 @@ func (s *MutableLabeledGraphSuite) TestGracefulEmptyVariadics(c *C) {
 	g := s.Factory(NullGraph).(MutableLabeledGraph)
 
 	g.EnsureVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.RemoveVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.AddEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 
 	g.RemoveEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 }
 
 func (s *MutableLabeledGraphSuite) TestEnsureVertex(c *C) {
@@ -952,18 +942,18 @@ func (s *MutableDataGraphSuite) TestGracefulEmptyVariadics(c *C) {
 	g := s.Factory(NullGraph).(MutableDataGraph)
 
 	g.EnsureVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.RemoveVertex()
-	c.Assert(g.Order(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
 
 	g.AddEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 
 	g.RemoveEdges()
-	c.Assert(g.Order(), Equals, 0)
-	c.Assert(g.Size(), Equals, 0)
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
 }
 
 func (s *MutableDataGraphSuite) TestEnsureVertex(c *C) {
@@ -1044,4 +1034,34 @@ func (s *MutableDataGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
 	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, struct{ a int }{a: 2})), Equals, false)
 	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
 	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+}
+
+/* Counting suites - tests for Size() and Order() */
+
+type OrderSuite struct {
+	Factory  func(GraphSource) Graph
+	Directed bool
+}
+
+func (s *OrderSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
+}
+
+func (s *OrderSuite) TestOrder(c *C) {
+	c.Assert(s.Factory(NullGraph).(VertexCounter).Order(), Equals, 0)
+	c.Assert(s.Factory(graphFixtures["2e3v"]).(VertexCounter).Order(), Equals, 3)
+}
+
+type SizeSuite struct {
+	Factory  func(GraphSource) Graph
+	Directed bool
+}
+
+func (s *SizeSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
+}
+
+func (s *SizeSuite) TestSize(c *C) {
+	c.Assert(s.Factory(NullGraph).(EdgeCounter).Size(), Equals, 0)
+	c.Assert(s.Factory(graphFixtures["2e3v"]).(EdgeCounter).Size(), Equals, 2)
 }

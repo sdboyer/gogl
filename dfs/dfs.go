@@ -94,7 +94,14 @@ func Toposort(g gogl.Graph, start ...gogl.Vertex) ([]gogl.Vertex, error) {
 	}
 
 	// Set the tsl capacity to the order of the graph. May be bigger than we need, but def not smaller
-	visitor := &TslVisitor{tsl: make([]gogl.Vertex, 0, g.Order())}
+	var capacity int
+	if c, ok := g.(gogl.VertexCounter); ok {
+		capacity = c.Order()
+	} else {
+		capacity = 32
+	}
+
+	visitor := &TslVisitor{tsl: make([]gogl.Vertex, 0, capacity)}
 
 	w := &walker{
 		vis:    visitor,

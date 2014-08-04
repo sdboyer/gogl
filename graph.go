@@ -40,8 +40,6 @@ type Graph interface {
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
 	DegreeChecker           // Reports degree of vertices
-	Order() int             // Reports total number of vertices in the graph
-	Size() int              // Reports total number of edges in the graph
 }
 
 // GraphSource is a subset of Graph, describing the minimal set of methods
@@ -49,7 +47,6 @@ type Graph interface {
 type GraphSource interface {
 	VertexEnumerator
 	EdgeEnumerator
-	Order() int
 }
 
 // Digraph (directed graph) describes a Graph where all the edges are directed.
@@ -268,6 +265,32 @@ type LabeledEdgeSetMutator interface {
 type DataEdgeSetMutator interface {
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
+}
+
+/* Optional optimization interfaces
+
+These interfaces describe behaviors and information about a graph which can be
+naively calculated/performed using the enumeration methods, but where a particular
+implementation may be able to perform that operation more efficiently using tricks
+specific to the underling graph implementation.
+
+In other words, graph structures SHOULD implement any method in this set that they
+can perform more efficiently than a full linear traversal.
+
+gogl's general goal is to provide one or more standalone functors for each of the
+capabilities described here. These functors are aware of the optional optimization
+interfaces, and wlil automatically use them if available. Client code is expected
+and encouraged to take care of these functors where possible.
+*/
+
+// A VertexCounter provides a numeric count of the number of unique vertices in a graph.
+type VertexCounter interface {
+	Order() int
+}
+
+// An EdgeCounter provides a numeric count of the number of unique edges in a graph.
+type EdgeCounter interface {
+	Size() int
 }
 
 // A Transposer produces a transposed version of a Digraph.

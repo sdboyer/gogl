@@ -31,10 +31,10 @@ func (s *BernoulliTest) SetUpSuite(c *C) {
 }
 
 func (s *BernoulliTest) TestLengthChecks(c *C) {
-	c.Assert(s.graphs["dir_stable"].Order(), Equals, 10)
-	c.Assert(s.graphs["und_stable"].Order(), Equals, 10)
-	c.Assert(s.graphs["dir_unstable"].Order(), Equals, 10)
-	c.Assert(s.graphs["und_unstable"].Order(), Equals, 10)
+	c.Assert(gogl.Order(s.graphs["dir_stable"]), Equals, 10)
+	c.Assert(gogl.Order(s.graphs["und_stable"]), Equals, 10)
+	c.Assert(gogl.Order(s.graphs["dir_unstable"]), Equals, 10)
+	c.Assert(gogl.Order(s.graphs["und_unstable"]), Equals, 10)
 }
 
 func (s BernoulliTest) TestEachVertex(c *C) {

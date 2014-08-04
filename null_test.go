@@ -64,8 +64,6 @@ func (s NullGraphSuite) TestDegree(c *C) {
 }
 
 func (s NullGraphSuite) TestSizingOps(c *C) {
-	c.Assert(NullGraph.Size(), Equals, 0)
-	c.Assert(NullGraph.Order(), Equals, 0)
 	c.Assert(math.IsNaN(NullGraph.Density()), Equals, true)
 }
 

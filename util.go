@@ -1,22 +1,50 @@
 package gogl
 
+// Returns the number of vertices in a graph.
+//
+// If available, this function will take advantage of the optional optimization Order() method.
+// Otherwise, it will iterate through all vertices in the graph. Thus, if your use case involves
+// iterating through all the graph's vertices, it is better to simply check for the VertexCounter
+// interface yourself.
+func Order(g VertexEnumerator) int {
+	if c, ok := g.(VertexCounter); ok {
+		return c.Order()
+	} else {
+		var order int
+		g.EachVertex(func(v Vertex) (terminate bool) {
+			order++
+			return
+		})
+		return order
+	}
+}
+
+// Returns the number of edges in a graph.
+//
+// If available, this function will take advantage of the optional optimization Size() method.
+// Otherwise, it will iterate through all edges in the graph. Thus, if your use case involves
+// iterating through all the graph's edges, it is better to simply check for the EdgeCounter
+// interface yourself.
+func Size(g EdgeEnumerator) int {
+	if c, ok := g.(EdgeCounter); ok {
+		return c.Size()
+	} else {
+		var size int
+		g.EachEdge(func(e Edge) (terminate bool) {
+			size++
+			return
+		})
+		return size
+	}
+}
+
 /* Enumerator to slice/collection functors */
-
-// Internal interface used for granular checks on whether a graphish can report vertex count.
-type vertex_counter interface {
-	Order() int
-}
-
-// Internal interface used for granular checks on whether a graphish can report edge count.
-type edge_counter interface {
-	Size() int
-}
 
 // Collects all of a graph's vertices into a vertex slice, for easy range-ing.
 //
 // This is a convenience function. Avoid it on very large graphs or in performance critical sections.
 func CollectVertices(g VertexEnumerator) (vertices []Vertex) {
-	if c, ok := g.(vertex_counter); ok {
+	if c, ok := g.(VertexCounter); ok {
 		// If possible, size the slice based on the number of vertices the graph reports it has
 		vertices = make([]Vertex, 0, c.Order())
 	} else {
@@ -57,7 +85,7 @@ func CollectVerticesAdjacentTo(v Vertex, g AdjacencyEnumerator) (vertices []Vert
 //
 // This is a convenience function. Avoid it on very large graphs or in performance critical sections.
 func CollectEdges(g EdgeEnumerator) (edges []Edge) {
-	if c, ok := g.(edge_counter); ok {
+	if c, ok := g.(EdgeCounter); ok {
 		// If possible, size the slice based on the number of edges the graph reports it has
 		edges = make([]Edge, 0, c.Size())
 	} else {
