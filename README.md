@@ -130,7 +130,7 @@ Calling `EachEdge()` will call the injected step six times, once for each of the
 
 These are the simplest of the enumerators; all others take a vertex as a start point (marked in orange) and work outwards from there.
 
-`EachAdjacentTo()` traverses "adjacent" vertices, which are defined as vertices adjoined together directly by a single edge. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected step:
+`EachAdjacentTo()` traverses "adjacent" vertices, which are defined as vertices that share an edge. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected step:
 
 ![EachAdjacentTo("a")](doc/av.dot.png)
 
