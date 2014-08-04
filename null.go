@@ -18,12 +18,12 @@ var _ WeightedGraph = nullGraph(false)
 var _ LabeledGraph = nullGraph(false)
 var _ DataGraph = nullGraph(false)
 
-func (g nullGraph) EachVertex(f VertexLambda)                   {}
-func (g nullGraph) EachEdge(f EdgeLambda)                       {}
-func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeLambda)       {}
-func (g nullGraph) EachArcFrom(Vertex, EdgeLambda)              {}
-func (g nullGraph) EachArcTo(Vertex, EdgeLambda)                {}
-func (g nullGraph) EachAdjacentTo(start Vertex, f VertexLambda) {}
+func (g nullGraph) EachVertex(f VertexStep)                   {}
+func (g nullGraph) EachEdge(f EdgeStep)                       {}
+func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeStep)       {}
+func (g nullGraph) EachArcFrom(Vertex, EdgeStep)              {}
+func (g nullGraph) EachArcTo(Vertex, EdgeStep)                {}
+func (g nullGraph) EachAdjacentTo(start Vertex, f VertexStep) {}
 
 func (g nullGraph) HasVertex(v Vertex) bool {
 	return false

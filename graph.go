@@ -161,21 +161,21 @@ type MutableDataGraph interface {
 
 /* Atomic graph interfaces */
 
-// EdgeLambdas are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
+// EdgeSteps are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
 //
 // If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
-type EdgeLambda func(Edge) (terminate bool)
+type EdgeStep func(Edge) (terminate bool)
 
-// VertexLambdas are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
+// VertexSteps are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
 //
 // If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
-type VertexLambda func(Vertex) (terminate bool)
+type VertexStep func(Vertex) (terminate bool)
 
 // A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {
 	// Calls the provided lambda once with each vertex in the graph. Type
 	// assert as appropriate in client code.
-	EachVertex(VertexLambda)
+	EachVertex(VertexStep)
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
@@ -183,7 +183,7 @@ type EdgeEnumerator interface {
 	// Calls the provided lambda once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
-	EachEdge(EdgeLambda)
+	EachEdge(EdgeStep)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
@@ -191,7 +191,7 @@ type IncidentEdgeEnumerator interface {
 	// Calls the provided lambda once with each edge incident to the
 	// provided vertex. In a directed graph, this must include both
 	// inbound and outbound edges.
-	EachEdgeIncidentTo(v Vertex, incidentEdgeLambda EdgeLambda)
+	EachEdgeIncidentTo(v Vertex, incidentEdgeStep EdgeStep)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
@@ -199,10 +199,10 @@ type IncidentEdgeEnumerator interface {
 type IncidentArcEnumerator interface {
 	// Calls the provided lambda once with each arc outbound from the
 	// provided vertex.
-	EachArcFrom(v Vertex, outEdgeLambda EdgeLambda)
+	EachArcFrom(v Vertex, outEdgeStep EdgeStep)
 	// Calls the provided lambda once with each arc outbound from the
 	// provided vertex.
-	EachArcTo(v Vertex, inEdgeLambda EdgeLambda)
+	EachArcTo(v Vertex, inEdgeStep EdgeStep)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
@@ -210,7 +210,7 @@ type AdjacencyEnumerator interface {
 	// Calls the provided lambda once with each vertex adjacent to the
 	// the provided vertex. In a digraph, this includes both successor
 	// and predecessor vertices.
-	EachAdjacentTo(start Vertex, adjacentVertexLambda VertexLambda)
+	EachAdjacentTo(start Vertex, adjacentVertexStep VertexStep)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.

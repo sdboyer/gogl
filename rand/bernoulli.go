@@ -58,7 +58,7 @@ type stableBernoulliGraph struct {
 	list     [][]struct{}
 }
 
-func (g *stableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
+func (g *stableBernoulliGraph) EachVertex(f gogl.VertexStep) {
 	o := int(g.order)
 	for i := 0; i < o; i++ {
 		if f(i) {
@@ -67,7 +67,7 @@ func (g *stableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
 	}
 }
 
-func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
+func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 	if g.list == nil {
 		g.list = make([][]struct{}, g.order, g.order)
 
@@ -110,7 +110,7 @@ type unstableBernoulliGraph struct {
 	directed bool
 }
 
-func (g unstableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
+func (g unstableBernoulliGraph) EachVertex(f gogl.VertexStep) {
 	o := int(g.order)
 	for i := 0; i < o; i++ {
 		if f(i) {
@@ -119,7 +119,7 @@ func (g unstableBernoulliGraph) EachVertex(f gogl.VertexLambda) {
 	}
 }
 
-func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeLambda) {
+func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 	if g.directed {
 		bernoulliArcCreator(f, int(g.order), g.ρ, g.trial)
 	} else {
@@ -131,7 +131,7 @@ func (g unstableBernoulliGraph) Order() int {
 	return int(g.order)
 }
 
-var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp bTrial) {
+var bernoulliEdgeCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
@@ -147,7 +147,7 @@ var bernoulliEdgeCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp b
 	}
 }
 
-var bernoulliArcCreator = func(el gogl.EdgeLambda, order int, ρ float64, cmp bTrial) {
+var bernoulliArcCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {

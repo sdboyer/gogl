@@ -92,7 +92,7 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 	return to.(Graph)
 }
 
-func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexLambda) {
+func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
 	switch l := list.(type) {
 	case map[Vertex]map[Vertex]struct{}:
 		if _, exists := l[vertex]; exists {
@@ -143,7 +143,7 @@ func inDegreeOf(g al_graph, v Vertex) (degree int, exists bool) {
 	return
 }
 
-func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeLambda) {
+func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeStep) {
 	if !g.hasVertex(v) {
 		return
 	}

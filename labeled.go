@@ -17,7 +17,7 @@ type baseLabeled struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseLabeled) EachVertex(f VertexLambda) {
+func (g *baseLabeled) EachVertex(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -123,7 +123,7 @@ func (g *labeledDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *labeledDirected) EachEdge(f EdgeLambda) {
+func (g *labeledDirected) EachEdge(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -137,14 +137,14 @@ func (g *labeledDirected) EachEdge(f EdgeLambda) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
+func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -159,7 +159,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -175,7 +175,7 @@ func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *labeledDirected) EachArcTo(v Vertex, f EdgeLambda) {
+func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -342,7 +342,7 @@ func (g *labeledUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *labeledUndirected) EachEdge(f EdgeLambda) {
+func (g *labeledUndirected) EachEdge(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -363,7 +363,7 @@ func (g *labeledUndirected) EachEdge(f EdgeLambda) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -379,7 +379,7 @@ func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledUndirected) EachAdjacentTo(vertex Vertex, f VertexLambda) {
+func (g *labeledUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

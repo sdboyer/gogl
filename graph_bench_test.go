@@ -100,7 +100,7 @@ type benchGraph struct {
 	size          int
 }
 
-func (g *benchGraph) EachVertex(f VertexLambda) {
+func (g *benchGraph) EachVertex(f VertexStep) {
 	for v, _ := range g.list {
 		if f(v) {
 			return
@@ -108,7 +108,7 @@ func (g *benchGraph) EachVertex(f VertexLambda) {
 	}
 }
 
-func (g *benchGraph) EachEdge(f EdgeLambda) {
+func (g *benchGraph) EachEdge(f EdgeStep) {
 	for _, adj := range g.list {
 		for _, e := range adj {
 			if f(e) {

@@ -5,7 +5,7 @@ import (
 )
 
 // Shared helper function for edge lists to enumerate vertices.
-func esEachVertex(el interface{}, fn VertexLambda) {
+func esEachVertex(el interface{}, fn VertexStep) {
 	set := set.NewNonTS()
 
 	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
@@ -43,7 +43,7 @@ func esOrder(el interface{}) int {
 // and multigraphs), they *should* be interpreted as vertex isolates.
 type EdgeList []Edge
 
-func (el EdgeList) EachVertex(fn VertexLambda) {
+func (el EdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
@@ -51,7 +51,7 @@ func (el EdgeList) Order() int {
 	return esOrder(el)
 }
 
-func (el EdgeList) EachEdge(fn EdgeLambda) {
+func (el EdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -64,7 +64,7 @@ func (el EdgeList) EachEdge(fn EdgeLambda) {
 // This variant is for weighted edges.
 type WeightedEdgeList []WeightedEdge
 
-func (el WeightedEdgeList) EachVertex(fn VertexLambda) {
+func (el WeightedEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
@@ -72,7 +72,7 @@ func (el WeightedEdgeList) Order() int {
 	return esOrder(el)
 }
 
-func (el WeightedEdgeList) EachEdge(fn EdgeLambda) {
+func (el WeightedEdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -85,7 +85,7 @@ func (el WeightedEdgeList) EachEdge(fn EdgeLambda) {
 // This variant is for labeled edges.
 type LabeledEdgeList []LabeledEdge
 
-func (el LabeledEdgeList) EachVertex(fn VertexLambda) {
+func (el LabeledEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
@@ -93,7 +93,7 @@ func (el LabeledEdgeList) Order() int {
 	return esOrder(el)
 }
 
-func (el LabeledEdgeList) EachEdge(fn EdgeLambda) {
+func (el LabeledEdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -106,7 +106,7 @@ func (el LabeledEdgeList) EachEdge(fn EdgeLambda) {
 // This variant is for labeled edges.
 type DataEdgeList []DataEdge
 
-func (el DataEdgeList) EachVertex(fn VertexLambda) {
+func (el DataEdgeList) EachVertex(fn VertexStep) {
 	esEachVertex(el, fn)
 }
 
@@ -114,7 +114,7 @@ func (el DataEdgeList) Order() int {
 	return esOrder(el)
 }
 
-func (el DataEdgeList) EachEdge(fn EdgeLambda) {
+func (el DataEdgeList) EachEdge(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return

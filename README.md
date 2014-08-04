@@ -54,8 +54,8 @@ func main() {
 	// Adds two basic edges. Of course, this adds the vertices, too.
 	graph.AddEdges(gogl.NewEdge("foo", "bar"), gogl.NewEdge("bar", "baz"))
 
-	// gogl's core iteration concept is built on injected functions (VertexLambda or
-	// EdgeLambda). Here, a VertexLambda is called once per vertex in the graph;
+	// gogl's core iteration concept is built on injected functions (VertexStep or
+	// EdgeStep). Here, a VertexStep is called once per vertex in the graph;
 	// the return value determines whether traversal continues.
 	graph.EachVertex(func(v gogl.Vertex) (terminate bool) {
 		fmt.Println(v) // Probably "foo\nbar\nbaz", but ordering is not guaranteed.
@@ -93,9 +93,9 @@ func main() {
 
 ## Enumerators
 
-Enumerators are the primary means by which gogl graphs are expressed. As shown in the Quickstart section, they are methods on graph datastructures that receive a 'lambda', and call that lambda once per datum (Vertex or Edge) that is found as the method traverses the graph. There are four enumerators for gogl's undirected graphs, and two additional ones for directed graphs.
+Enumerators are the primary means by which gogl graphs are expressed. As shown in the Quickstart section, they are methods on graph datastructures that receive a 'step' function, and call that function once per datum (Vertex or Edge) that is found as the method traverses the graph. There are four enumerators for gogl's undirected graphs, and two additional ones for directed graphs.
 
-An important guarantee of enumerators not necessarily implied by the interface is that they call the lambda *exactly* once for each relevant datum. Client code should never have to deduplicate data.
+An important guarantee of enumerators not necessarily implied by the interface is that they call the step function *exactly* once for each relevant datum. Client code should never have to deduplicate data.
 
 Given the following graph:
 
@@ -120,17 +120,17 @@ func main() {
 }
 ```
 
-Calling `EachVertex()` would result in six calls to the injected lambda, one for each of the contained vertices (marked in blue). It's important to remember that gogl makes no guarantees as to the order of these calls.
+Calling `EachVertex()` would result in six calls to the injected step function, one for each of the contained vertices (marked in blue). It's important to remember that gogl makes no guarantees as to the order of these calls.
 
 ![EachVertex()](doc/ev.dot.png)
 
-Calling `EachEdge()` will call the injected lambda six times, once for each of the contained edges:
+Calling `EachEdge()` will call the injected step six times, once for each of the contained edges:
 
 ![EachEdge()](doc/ee.dot.png)
 
 These are the simplest of the enumerators; all others take a vertex as a start point (marked in orange) and work outwards from there.
 
-`EachAdjacentTo()` traverses "adjacent" vertices, which are defined as vertices adjoined together directly by a single edge. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected lambda:
+`EachAdjacentTo()` traverses "adjacent" vertices, which are defined as vertices adjoined together directly by a single edge. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected step:
 
 ![EachAdjacentTo("a")](doc/av.dot.png)
 
@@ -153,5 +153,7 @@ There are some additional enumerators for graph subtypes - e.g., `EachLabeledEdg
 Where possible, such optional optimizations are automatically selected and utilized by gogl's assorted functors.
 
 ## Functors, Counters, and bears, oh my!
+
+@TODO
 
 ## Gotchas

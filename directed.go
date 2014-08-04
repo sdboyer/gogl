@@ -41,7 +41,7 @@ func (g *mutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableDirected) EachEdge(f EdgeLambda) {
+func (g *mutableDirected) EachEdge(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -55,14 +55,14 @@ func (g *mutableDirected) EachEdge(f EdgeLambda) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *mutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+func (g *mutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
+func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -77,7 +77,7 @@ func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -93,7 +93,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *mutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
+func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -241,7 +241,7 @@ type immutableDirected struct {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *immutableDirected) EachEdge(f EdgeLambda) {
+func (g *immutableDirected) EachEdge(f EdgeStep) {
 	for source, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if f(NewEdge(source, target)) {
@@ -252,12 +252,12 @@ func (g *immutableDirected) EachEdge(f EdgeLambda) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *immutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeLambda) {
+func (g *immutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
+func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.EachEdgeIncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
@@ -269,7 +269,7 @@ func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexLambda) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
+func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	if !g.hasVertex(v) {
 		return
 	}
@@ -282,7 +282,7 @@ func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeLambda) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *immutableDirected) EachArcTo(v Vertex, f EdgeLambda) {
+func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	if !g.hasVertex(v) {
 		return
 	}
