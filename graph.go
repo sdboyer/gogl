@@ -33,10 +33,10 @@ make sure to review the atomics on their own, too.
 // Graph is a purely read oriented interface; the various Mutable*Graph
 // interfaces contain the methods for writing.
 type Graph interface {
-	VertexEnumerator        // Enumerates vertices to an injected lambda
-	EdgeEnumerator          // Enumerates edges to an injected lambda
-	AdjacencyEnumerator     // Enumerates a vertex's adjacent vertices to an injected lambda
-	IncidentEdgeEnumerator  // Enumerates a vertex's incident edges to an injected lambda
+	VertexEnumerator        // Enumerates vertices to an injected step function
+	EdgeEnumerator          // Enumerates edges to an injected step function
+	AdjacencyEnumerator     // Enumerates a vertex's adjacent vertices to an injected step function
+	IncidentEdgeEnumerator  // Enumerates a vertex's incident edges to an injected step function
 	VertexMembershipChecker // Allows inspection of contained vertices
 	EdgeMembershipChecker   // Allows inspection of contained edges
 	DegreeChecker           // Reports degree of vertices
@@ -55,7 +55,7 @@ type GraphSource interface {
 // Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
 type Digraph interface {
 	Graph
-	IncidentArcEnumerator // Enumerates a vertex's incident in- and out-arcs to an injected lambda
+	IncidentArcEnumerator // Enumerates a vertex's incident in- and out-arcs to an injected step function
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	Transposer            // Digraphs can produce a transpose of themselves
 }
@@ -163,24 +163,24 @@ type MutableDataGraph interface {
 
 // EdgeSteps are used as arguments to various enumerators. They are called once for each edge produced by the enumerator.
 //
-// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+// If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type EdgeStep func(Edge) (terminate bool)
 
 // VertexSteps are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
 //
-// If the lambda returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+// If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type VertexStep func(Vertex) (terminate bool)
 
 // A VertexEnumerator iteratively enumerates vertices.
 type VertexEnumerator interface {
-	// Calls the provided lambda once with each vertex in the graph. Type
+	// Calls the provided step function once with each vertex in the graph. Type
 	// assert as appropriate in client code.
 	EachVertex(VertexStep)
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
 type EdgeEnumerator interface {
-	// Calls the provided lambda once with each edge in the graph. If a
+	// Calls the provided step function once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
 	EachEdge(EdgeStep)
@@ -188,7 +188,7 @@ type EdgeEnumerator interface {
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
-	// Calls the provided lambda once with each edge incident to the
+	// Calls the provided step function once with each edge incident to the
 	// provided vertex. In a directed graph, this must include both
 	// inbound and outbound edges.
 	EachEdgeIncidentTo(v Vertex, incidentEdgeStep EdgeStep)
@@ -197,17 +197,17 @@ type IncidentEdgeEnumerator interface {
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
 // One enumerator provides inbound edges, the other outbound edges.
 type IncidentArcEnumerator interface {
-	// Calls the provided lambda once with each arc outbound from the
+	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
 	EachArcFrom(v Vertex, outEdgeStep EdgeStep)
-	// Calls the provided lambda once with each arc outbound from the
+	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
 	EachArcTo(v Vertex, inEdgeStep EdgeStep)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
 type AdjacencyEnumerator interface {
-	// Calls the provided lambda once with each vertex adjacent to the
+	// Calls the provided step function once with each vertex adjacent to the
 	// the provided vertex. In a digraph, this includes both successor
 	// and predecessor vertices.
 	EachAdjacentTo(start Vertex, adjacentVertexStep VertexStep)

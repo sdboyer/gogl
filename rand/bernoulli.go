@@ -71,7 +71,7 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 	if g.list == nil {
 		g.list = make([][]struct{}, g.order, g.order)
 
-		// Wrapping edge lambda; records edges into the adjacency list, then passes edge along
+		// Wrapping edge step function; records edges into the adjacency list, then passes edge along
 		ff := func(e gogl.Edge) bool {
 			if g.list[e.Source().(int)] == nil {
 				g.list[e.Source().(int)] = make([]struct{}, g.order)
