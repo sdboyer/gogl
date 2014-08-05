@@ -21,7 +21,7 @@ import (
 // allocations, but is still CPU intensive for successive runs (and produces a different edge set). Given these
 // characteristics, unstable graphs should always be used for single-use random graphs.
 //
-// Binomial trials require a rand source. If none is provided, the builtin math lib's global rand source is used.
+// Binomial trials require a rand source. If none is provided, the stdlib math's global rand source is used.
 func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src stdrand.Source) gogl.GraphSource {
 	if ρ < 0.0 || ρ >= 1.0 {
 		panic("ρ must be in the range [0.0,1.0).")
