@@ -27,7 +27,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	// extra edge demonstrates non-productive search paths are not included
 	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
 	// directed
-	g := gogl.G().Directed().Using(extraSet).
+	g := gogl.Spec().Directed().Using(extraSet).
 		Create(al.G).(gogl.Digraph)
 
 	path, err := Search(g, "qux", "bar")
@@ -44,7 +44,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
-	g := gogl.G().Mutable().Directed().
+	g := gogl.Spec().Mutable().Directed().
 		Create(al.G).(gogl.MutableGraph)
 	g.EnsureVertex("foo")
 
@@ -55,7 +55,7 @@ func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
-	g := gogl.G().Directed().
+	g := gogl.Spec().Directed().
 		Mutable().Using(dfEdgeSet).
 		Create(al.G).(gogl.Digraph)
 
@@ -76,7 +76,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 }
 
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
-	g := gogl.G().Directed().
+	g := gogl.Spec().Directed().
 		Mutable().Using(dfEdgeSet).
 		Create(al.G).(gogl.Digraph)
 
@@ -90,7 +90,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
 	// undirected
-	ug := gogl.G().Using(dfEdgeSet).Create(al.G)
+	ug := gogl.Spec().Using(dfEdgeSet).Create(al.G)
 
 	_, err = Toposort(ug)
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
@@ -143,7 +143,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 		gogl.NewEdge("bar", "quark"),
 		gogl.NewEdge("baz", "qux"),
 	}
-	g := gogl.G().Directed().
+	g := gogl.Spec().Directed().
 		Mutable().Using(el).
 		Create(al.G).(gogl.Digraph)
 

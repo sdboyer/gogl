@@ -12,6 +12,6 @@ func TestHookup(t *testing.T) { gocheck.TestingT(t) }
 
 func init() {
 	for gp, _ := range alCreators {
-		spec.SetUpTestsFromSpec(gp, AdjacencyList)
+		spec.SetUpTestsFromSpec(gp, G)
 	}
 }
