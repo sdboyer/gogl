@@ -90,7 +90,7 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 		var e gogl.Edge
 		for u, adj := range g.list {
 			for v, exists := range adj {
-				if (exists) {
+				if exists {
 					e = gogl.NewEdge(u, v)
 					if f(e) {
 						return
@@ -137,7 +137,7 @@ func (g unstableBernoulliGraph) Order() int {
 	return int(g.order)
 }
 
-func bernoulliEdgeCreator (el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
+func bernoulliEdgeCreator(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
@@ -153,7 +153,7 @@ func bernoulliEdgeCreator (el gogl.EdgeStep, order int, ρ float64, cmp bTrial) 
 	}
 }
 
-func bernoulliArcCreator (el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
+func bernoulliArcCreator(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {

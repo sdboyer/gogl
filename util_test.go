@@ -3,9 +3,9 @@ package gogl_test
 import (
 	"testing"
 
-	"github.com/sdboyer/gogl/spec"
-	. "github.com/sdboyer/gogl"
 	. "github.com/sdboyer/gocheck"
+	. "github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl/spec"
 	"gopkg.in/fatih/set.v0"
 )
 

@@ -280,4 +280,3 @@ func (g GraphLiteralFixture) Size() int {
 func (g GraphLiteralFixture) Order() int {
 	return 4
 }
-
