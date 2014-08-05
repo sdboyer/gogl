@@ -55,8 +55,9 @@ type GraphSource interface {
 // Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
 type Digraph interface {
 	Graph
-	IncidentArcEnumerator // Enumerates a vertex's incident in- and out-arcs to an injected step function
+	IncidentArcEnumerator // Enumerates a vertex's incident in- or out-arcs to an injected step function
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
+	ProcessionEnumerator  // Enumerates a vertex's predecessor or successor vertices to a step function
 	Transposer            // Digraphs can produce a transpose of themselves
 }
 
@@ -203,6 +204,13 @@ type IncidentArcEnumerator interface {
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
 	EachArcTo(v Vertex, inEdgeStep EdgeStep)
+}
+
+// A ProcessionEnumerator iteratively enumerates a vertex's predecessors or successors
+// into an injected step function.
+type ProcessionEnumerator interface { // TODO ProcessionEnumerator? really?
+	EachSuccessorOf(v Vertex, successorStep VertexStep)
+	EachPredecessorOf(v Vertex, predecessorStep VertexStep)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.

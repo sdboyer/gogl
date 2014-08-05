@@ -92,6 +92,13 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 }
 
+func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	eachVertexInAdjacencyList(g.list, v, f)
+}
+
 // Enumerates the set of in-edges for the provided vertex.
 func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
@@ -105,6 +112,25 @@ func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 		for target, _ := range adjacent {
 			if target == v {
 				if f(NewEdge(candidate, target)) {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (g *mutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for candidate, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if target == v {
+				if f(candidate) {
 					return
 				}
 			}
@@ -281,6 +307,10 @@ func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 }
 
+func (g *immutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+	eachVertexInAdjacencyList(g.list, v, f)
+}
+
 // Enumerates the set of in-edges for the provided vertex.
 func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	if !g.hasVertex(v) {
@@ -291,6 +321,22 @@ func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 		for target, _ := range adjacent {
 			if target == v {
 				if f(NewEdge(candidate, target)) {
+					return
+				}
+			}
+		}
+	}
+}
+
+func (g *immutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+	if !g.hasVertex(v) {
+		return
+	}
+
+	for candidate, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if target == v {
+				if f(candidate) {
 					return
 				}
 			}

@@ -449,6 +449,39 @@ func (s *DigraphSuite) TestEachArcToTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
+func (s *DigraphSuite) TestEachPredecessorOf(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
+
+	eset := set.NewNonTS()
+	g.EachPredecessorOf("foo", func(v Vertex) (terminate bool) {
+		c.Error("Vertex 'foo' should have no predecessors")
+		c.FailNow()
+		return
+	})
+
+	g.EachPredecessorOf("bar", func(v Vertex) (terminate bool) {
+		eset.Add(v)
+		return
+	})
+
+	c.Assert(eset.Size(), Equals, 2)
+	c.Assert(eset.Has("foo"), Equals, true)
+	c.Assert(eset.Has("qux"), Equals, true)
+
+}
+
+func (s *DigraphSuite) TestEachPredecessorOfTermination(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
+
+	var hit int
+	g.EachPredecessorOf("baz", func(v Vertex) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
 func (s *DigraphSuite) TestEachArcFrom(c *C) {
 	g := s.Factory(graphFixtures["arctest"]).(Digraph)
 
@@ -478,6 +511,39 @@ func (s *DigraphSuite) TestEachArcFromTermination(c *C) {
 
 	var hit int
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+}
+
+func (s *DigraphSuite) TestEachSuccessorOf(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
+
+	eset := set.NewNonTS()
+	g.EachSuccessorOf("baz", func(v Vertex) (terminate bool) {
+		c.Error("Vertex 'foo' should have no successors")
+		c.FailNow()
+		return
+	})
+
+	g.EachSuccessorOf("foo", func(v Vertex) (terminate bool) {
+		eset.Add(v)
+		return
+	})
+
+	c.Assert(eset.Size(), Equals, 2)
+	c.Assert(eset.Has("qux"), Equals, true)
+	c.Assert(eset.Has("bar"), Equals, true)
+
+}
+
+func (s *DigraphSuite) TestEachSuccessorOfTermination(c *C) {
+	g := s.Factory(graphFixtures["arctest"]).(Digraph)
+
+	var hit int
+	g.EachSuccessorOf("foo", func(v Vertex) (terminate bool) {
 		hit++
 		return true
 	})

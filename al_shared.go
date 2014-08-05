@@ -92,12 +92,12 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 	return to.(Graph)
 }
 
-func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
+func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
 	switch l := list.(type) {
 	case map[Vertex]map[Vertex]struct{}:
 		if _, exists := l[vertex]; exists {
 			for adjacent, _ := range l[vertex] {
-				if vl(adjacent) {
+				if vs(adjacent) {
 					return
 				}
 			}
@@ -105,7 +105,7 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
 	case map[Vertex]map[Vertex]float64:
 		if _, exists := l[vertex]; exists {
 			for adjacent, _ := range l[vertex] {
-				if vl(adjacent) {
+				if vs(adjacent) {
 					return
 				}
 			}
@@ -113,7 +113,7 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
 	case map[Vertex]map[Vertex]string:
 		if _, exists := l[vertex]; exists {
 			for adjacent, _ := range l[vertex] {
-				if vl(adjacent) {
+				if vs(adjacent) {
 					return
 				}
 			}
@@ -121,7 +121,7 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
 	case map[Vertex]map[Vertex]interface{}:
 		if _, exists := l[vertex]; exists {
 			for adjacent, _ := range l[vertex] {
-				if vl(adjacent) {
+				if vs(adjacent) {
 					return
 				}
 			}
@@ -129,6 +129,62 @@ func eachAdjacentToUndirected(list interface{}, vertex Vertex, vl VertexStep) {
 	default:
 		panic("Unrecognized adjacency list map type.")
 	}
+}
+
+func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
+	switch l := list.(type) {
+	case map[Vertex]map[Vertex]struct{}:
+		if _, exists := l[vertex]; exists {
+			for candidate, adjacent := range l {
+				for target, _ := range adjacent {
+					if target == vertex {
+						if vs(candidate) {
+							return
+						}
+					}
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]float64:
+		if _, exists := l[vertex]; exists {
+			for candidate, adjacent := range l {
+				for target, _ := range adjacent {
+					if target == vertex {
+						if vs(candidate) {
+							return
+						}
+					}
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]string:
+		if _, exists := l[vertex]; exists {
+			for candidate, adjacent := range l {
+				for target, _ := range adjacent {
+					if target == vertex {
+						if vs(candidate) {
+							return
+						}
+					}
+				}
+			}
+		}
+	case map[Vertex]map[Vertex]interface{}:
+		if _, exists := l[vertex]; exists {
+			for candidate, adjacent := range l {
+				for target, _ := range adjacent {
+					if target == vertex {
+						if vs(candidate) {
+							return
+						}
+					}
+				}
+			}
+		}
+	default:
+		panic("Unrecognized adjacency list map type.")
+	}
+
 }
 
 func inDegreeOf(g al_graph, v Vertex) (degree int, exists bool) {

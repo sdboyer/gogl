@@ -159,6 +159,13 @@ func (g *weightedDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 }
 
+func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	eachVertexInAdjacencyList(g.list, v, f)
+}
+
 // Enumerates the set of in-edges for the provided vertex.
 func (g *weightedDirected) EachArcTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
@@ -177,6 +184,13 @@ func (g *weightedDirected) EachArcTo(v Vertex, f EdgeStep) {
 			}
 		}
 	}
+}
+
+func (g *weightedDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	eachPredecessorOf(g.list, v, f)
 }
 
 // Traverses the set of edges in the graph, passing each edge to the
@@ -383,7 +397,7 @@ func (g *weightedUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	eachAdjacentToUndirected(g.list, vertex, f)
+	eachVertexInAdjacencyList(g.list, vertex, f)
 }
 
 // Indicates whether or not the given edge is present in the graph. It matches
@@ -439,7 +453,7 @@ func (g *weightedUndirected) RemoveVertex(vertices ...Vertex) {
 
 	for _, vertex := range vertices {
 		if g.hasVertex(vertex) {
-			eachAdjacentToUndirected(g.list, vertex, func(adjacent Vertex) (terminate bool) {
+			eachVertexInAdjacencyList(g.list, vertex, func(adjacent Vertex) (terminate bool) {
 				delete(g.list[adjacent], vertex)
 				return
 			})
