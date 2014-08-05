@@ -111,32 +111,59 @@ func (s *BernoulliTest) TestEachEdgeStability(c *C) {
 	setu := set.NewNonTS()
 	var hitu, hitd int
 
-	s.graphs["dir_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+	dg := BernoulliDistribution(10, 0.5, true, true, nil)
+	dg.EachEdge(func (e gogl.Edge) (terminate bool) {
 		setd.Add(e)
 		return
 	})
 
-	s.graphs["dir_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+	dg.EachEdge(func (e gogl.Edge) (terminate bool) {
 		c.Assert(setd.Has(e), Equals, true)
 		hitd++
 		return
 	})
 
 	c.Assert(setd.Size(), Equals, hitd)
-	c.Assert(s.graphs["dir_stable"].(gogl.EdgeCounter).Size(), Equals, hitd)
+	c.Assert(dg.(gogl.EdgeCounter).Size(), Equals, hitd)
 
-	s.graphs["und_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+	ug := BernoulliDistribution(10, 0.5, false, true, nil)
+	ug.EachEdge(func (e gogl.Edge) (terminate bool) {
 		setu.Add(e)
 		return
 	})
 
-	s.graphs["und_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+	ug.EachEdge(func (e gogl.Edge) (terminate bool) {
 		c.Assert(setu.Has(e), Equals, true)
 		hitu++
 		return
 	})
 
 	c.Assert(setu.Size(), Equals, hitu)
-	c.Assert(s.graphs["und_stable"].(gogl.EdgeCounter).Size(), Equals, hitu)
+	c.Assert(ug.(gogl.EdgeCounter).Size(), Equals, hitu)
 
+}
+
+func (s *BernoulliTest) TestEachEdgeTermination(c *C) {
+	var hit int
+	s.graphs["dir_unstable"].EachEdge(func (e gogl.Edge) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 1)
+
+	s.graphs["und_unstable"].EachEdge(func (e gogl.Edge) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 2)
+
+	gogl.CollectEdges(s.graphs["und_stable"]) // To populate the cache
+	s.graphs["und_stable"].EachEdge(func (e gogl.Edge) bool {
+		hit++
+		return true
+	})
+
+	c.Assert(hit, Equals, 3)
 }

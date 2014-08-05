@@ -137,7 +137,7 @@ func (g unstableBernoulliGraph) Order() int {
 	return int(g.order)
 }
 
-var bernoulliEdgeCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
+func bernoulliEdgeCreator (el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
@@ -153,7 +153,7 @@ var bernoulliEdgeCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTr
 	}
 }
 
-var bernoulliArcCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
+func bernoulliArcCreator (el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	var e gogl.Edge
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {
