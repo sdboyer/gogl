@@ -123,19 +123,7 @@ func (g *mutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if !g.hasVertex(v) {
-		return
-	}
-
-	for candidate, adjacent := range g.list {
-		for target, _ := range adjacent {
-			if target == v {
-				if f(candidate) {
-					return
-				}
-			}
-		}
-	}
+	eachPredecessorOf(g.list, v, f)
 }
 
 // Indicates whether or not the given edge is present in the graph.
@@ -329,19 +317,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 }
 
 func (g *immutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
-	if !g.hasVertex(v) {
-		return
-	}
-
-	for candidate, adjacent := range g.list {
-		for target, _ := range adjacent {
-			if target == v {
-				if f(candidate) {
-					return
-				}
-			}
-		}
-	}
+	eachPredecessorOf(g.list, v, f)
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
