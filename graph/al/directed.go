@@ -1,4 +1,8 @@
-package gogl
+package al
+
+import (
+	. "github.com/sdboyer/gogl"
+)
 
 type mutableDirected struct {
 	al_basic_mut

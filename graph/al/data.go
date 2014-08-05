@@ -1,23 +1,24 @@
-package gogl
+package al
 
 import (
 	"sync"
 
 	"gopkg.in/fatih/set.v0"
+	. "github.com/sdboyer/gogl"
 )
 
 // This is implemented as an adjacency list, because those are simple.
-type baseLabeled struct {
-	list map[Vertex]map[Vertex]string
+type baseData struct {
+	list map[Vertex]map[Vertex]interface{}
 	size int
 	mu   sync.RWMutex
 }
 
-/* baseLabeled shared methods */
+/* baseData shared methods */
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseLabeled) EachVertex(f VertexStep) {
+func (g *baseData) EachVertex(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -29,7 +30,7 @@ func (g *baseLabeled) EachVertex(f VertexStep) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseLabeled) HasVertex(vertex Vertex) (exists bool) {
+func (g *baseData) HasVertex(vertex Vertex) (exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -38,13 +39,13 @@ func (g *baseLabeled) HasVertex(vertex Vertex) (exists bool) {
 }
 
 // Indicates whether or not the given vertex is present in the graph.
-func (g *baseLabeled) hasVertex(vertex Vertex) (exists bool) {
+func (g *baseData) hasVertex(vertex Vertex) (exists bool) {
 	_, exists = g.list[vertex]
 	return
 }
 
 // Returns the order (number of vertices) in the graph.
-func (g *baseLabeled) Order() int {
+func (g *baseData) Order() int {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -52,13 +53,13 @@ func (g *baseLabeled) Order() int {
 }
 
 // Returns the size (number of edges) in the graph.
-func (g *baseLabeled) Size() int {
+func (g *baseData) Size() int {
 	return g.size
 }
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseLabeled) EnsureVertex(vertices ...Vertex) {
+func (g *baseData) EnsureVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -71,26 +72,26 @@ func (g *baseLabeled) EnsureVertex(vertices ...Vertex) {
 
 // Adds the provided vertices to the graph. If a provided vertex is
 // already present in the graph, it is a no-op (for that vertex only).
-func (g *baseLabeled) ensureVertex(vertices ...Vertex) {
+func (g *baseData) ensureVertex(vertices ...Vertex) {
 	for _, vertex := range vertices {
 		if !g.hasVertex(vertex) {
 			// TODO experiment with different lengths...possibly by analyzing existing density?
-			g.list[vertex] = make(map[Vertex]string, 10)
+			g.list[vertex] = make(map[Vertex]interface{}, 10)
 		}
 	}
 
 	return
 }
 
-/* DirectedLabeled implementation */
+/* DirectedData implementation */
 
-type labeledDirected struct {
-	baseLabeled
+type dataDirected struct {
+	baseData
 }
 
 // Returns the outdegree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *labeledDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
+func (g *dataDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -105,14 +106,14 @@ func (g *labeledDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool) {
 //
 // Note that getting indegree is inefficient for directed adjacency lists; it requires
 // a full scan of the graph's edge set.
-func (g *labeledDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
+func (g *dataDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	return inDegreeOf(g, vertex)
 }
 
 // Returns the degree of the provided vertex, counting both in and out-edges.
-func (g *labeledDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
+func (g *dataDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -121,30 +122,15 @@ func (g *labeledDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	return indegree + outdegree, exists
 }
 
-// Traverses the set of edges in the graph, passing each edge to the
-// provided closure.
-func (g *labeledDirected) EachEdge(f EdgeStep) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	for source, adjacent := range g.list {
-		for target, label := range adjacent {
-			if f(NewLabeledEdge(source, target, label)) {
-				return
-			}
-		}
-	}
-}
-
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *dataDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -159,7 +145,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -167,14 +153,14 @@ func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
 		return
 	}
 
-	for adjacent, label := range g.list[v] {
-		if f(NewLabeledEdge(v, adjacent, label)) {
+	for adjacent, data := range g.list[v] {
+		if f(NewDataEdge(v, adjacent, data)) {
 			return
 		}
 	}
 }
 
-func (g *labeledDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *dataDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -182,7 +168,7 @@ func (g *labeledDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -191,9 +177,9 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
 	}
 
 	for candidate, adjacent := range g.list {
-		for target, label := range adjacent {
+		for target, data := range adjacent {
 			if target == v {
-				if f(NewLabeledEdge(candidate, target, label)) {
+				if f(NewDataEdge(candidate, target, data)) {
 					return
 				}
 			}
@@ -201,16 +187,31 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
 	}
 }
 
-func (g *labeledDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *dataDirected) EachPredecessorOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	eachPredecessorOf(g.list, v, f)
 }
 
+// Traverses the set of edges in the graph, passing each edge to the
+// provided closure.
+func (g *dataDirected) EachEdge(f EdgeStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target, data := range adjacent {
+			if f(NewDataEdge(source, target, data)) {
+				return
+			}
+		}
+	}
+}
+
 // Indicates whether or not the given edge is present in the graph. It matches
-// based solely on the presence of an edge, disregarding edge label.
-func (g *labeledDirected) HasEdge(edge Edge) bool {
+// based solely on the presence of an edge, disregarding edge property.
+func (g *dataDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -218,22 +219,22 @@ func (g *labeledDirected) HasEdge(edge Edge) bool {
 	return exists
 }
 
-// Indicates whether or not the given labeled edge is present in the graph.
-// It will only match if the provided LabeledEdge has the same label as
+// Indicates whether or not the given property edge is present in the graph.
+// It will only match if the provided DataEdge has the same property as
 // the edge contained in the graph.
-func (g *labeledDirected) HasLabeledEdge(edge LabeledEdge) bool {
+func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if label, exists := g.list[edge.Source()][edge.Target()]; exists {
-		return label == edge.Label()
+	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return data == edge.Data()
 	}
 	return false
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *labeledDirected) Density() float64 {
+func (g *dataDirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -243,7 +244,7 @@ func (g *labeledDirected) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *labeledDirected) RemoveVertex(vertices ...Vertex) {
+func (g *dataDirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -268,7 +269,7 @@ func (g *labeledDirected) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *labeledDirected) AddEdges(edges ...LabeledEdge) {
+func (g *dataDirected) AddEdges(edges ...DataEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -280,12 +281,12 @@ func (g *labeledDirected) AddEdges(edges ...LabeledEdge) {
 }
 
 // Adds a new edge to the graph.
-func (g *labeledDirected) addEdges(edges ...LabeledEdge) {
+func (g *dataDirected) addEdges(edges ...DataEdge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Label()
+			g.list[edge.Source()][edge.Target()] = edge.Data()
 			g.size++
 		}
 	}
@@ -293,7 +294,7 @@ func (g *labeledDirected) addEdges(edges ...LabeledEdge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *labeledDirected) RemoveEdges(edges ...LabeledEdge) {
+func (g *dataDirected) RemoveEdges(edges ...DataEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -310,41 +311,41 @@ func (g *labeledDirected) RemoveEdges(edges ...LabeledEdge) {
 	}
 }
 
-func (g *labeledDirected) Transpose() Digraph {
+func (g *dataDirected) Transpose() Digraph {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g2 := &labeledDirected{}
-	g2.list = make(map[Vertex]map[Vertex]string)
+	g2 := &dataDirected{}
+	g2.list = make(map[Vertex]map[Vertex]interface{})
 
 	// Guess at average indegree by looking at ratio of edges to vertices, use that to initially size the adjacency maps
 	startcap := int(g.Size() / g.Order())
 
 	for source, adjacent := range g.list {
 		if !g2.hasVertex(source) {
-			g2.list[source] = make(map[Vertex]string, startcap+1)
+			g2.list[source] = make(map[Vertex]interface{}, startcap+1)
 		}
 
-		for target, label := range adjacent {
+		for target, data := range adjacent {
 			if !g2.hasVertex(target) {
-				g2.list[target] = make(map[Vertex]string, startcap+1)
+				g2.list[target] = make(map[Vertex]interface{}, startcap+1)
 			}
-			g2.list[target][source] = label
+			g2.list[target][source] = data
 		}
 	}
 
 	return g2
 }
 
-/* UndirectedLabeled implementation */
+/* UndirectedData implementation */
 
-type labeledUndirected struct {
-	baseLabeled
+type dataUndirected struct {
+	baseData
 }
 
 // Returns the degree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
-func (g *labeledUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
+func (g *dataUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -356,16 +357,16 @@ func (g *labeledUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *labeledUndirected) EachEdge(f EdgeStep) {
+func (g *dataUndirected) EachEdge(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	visited := set.NewNonTS()
 
-	var e LabeledEdge
+	var e DataEdge
 	for source, adjacent := range g.list {
-		for target, label := range adjacent {
-			e = NewLabeledEdge(source, target, label)
+		for target, data := range adjacent {
+			e = NewDataEdge(source, target, data)
 			if !visited.Has(NewEdge(e.Both())) {
 				visited.Add(NewEdge(target, source))
 				if f(e) {
@@ -377,7 +378,7 @@ func (g *labeledUndirected) EachEdge(f EdgeStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *dataUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -385,15 +386,15 @@ func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 		return
 	}
 
-	for adjacent, label := range g.list[v] {
-		if f(NewLabeledEdge(v, adjacent, label)) {
+	for adjacent, data := range g.list[v] {
+		if f(NewDataEdge(v, adjacent, data)) {
 			return
 		}
 	}
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
+func (g *dataUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -401,8 +402,8 @@ func (g *labeledUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
 }
 
 // Indicates whether or not the given edge is present in the graph. It matches
-// based solely on the presence of an edge, disregarding edge label.
-func (g *labeledUndirected) HasEdge(edge Edge) bool {
+// based solely on the presence of an edge, disregarding edge property.
+func (g *dataUndirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -415,25 +416,25 @@ func (g *labeledUndirected) HasEdge(edge Edge) bool {
 	return false
 }
 
-// Indicates whether or not the given labeled edge is present in the graph.
-// It will only match if the provided LabeledEdge has the same label as
+// Indicates whether or not the given property edge is present in the graph.
+// It will only match if the provided DataEdge has the same property as
 // the edge contained in the graph.
-func (g *labeledUndirected) HasLabeledEdge(edge LabeledEdge) bool {
+func (g *dataUndirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if label, exists := g.list[edge.Source()][edge.Target()]; exists {
-		return edge.Label() == label
-	} else if label, exists := g.list[edge.Target()][edge.Source()]; exists {
-		return edge.Label() == label
+	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+		return edge.Data() == data
+	} else if data, exists := g.list[edge.Target()][edge.Source()]; exists {
+		return edge.Data() == data
 	}
 	return false
 }
 
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
-func (g *labeledUndirected) Density() float64 {
+func (g *dataUndirected) Density() float64 {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -443,7 +444,7 @@ func (g *labeledUndirected) Density() float64 {
 
 // Removes a vertex from the graph. Also removes any edges of which that
 // vertex is a member.
-func (g *labeledUndirected) RemoveVertex(vertices ...Vertex) {
+func (g *dataUndirected) RemoveVertex(vertices ...Vertex) {
 	if len(vertices) == 0 {
 		return
 	}
@@ -465,7 +466,7 @@ func (g *labeledUndirected) RemoveVertex(vertices ...Vertex) {
 }
 
 // Adds edges to the graph.
-func (g *labeledUndirected) AddEdges(edges ...LabeledEdge) {
+func (g *dataUndirected) AddEdges(edges ...DataEdge) {
 	if len(edges) == 0 {
 		return
 	}
@@ -477,14 +478,14 @@ func (g *labeledUndirected) AddEdges(edges ...LabeledEdge) {
 }
 
 // Adds a new edge to the graph.
-func (g *labeledUndirected) addEdges(edges ...LabeledEdge) {
+func (g *dataUndirected) addEdges(edges ...DataEdge) {
 	for _, edge := range edges {
 		g.ensureVertex(edge.Source(), edge.Target())
 
 		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			l := edge.Label()
-			g.list[edge.Source()][edge.Target()] = l
-			g.list[edge.Target()][edge.Source()] = l
+			d := edge.Data()
+			g.list[edge.Source()][edge.Target()] = d
+			g.list[edge.Target()][edge.Source()] = d
 			g.size++
 		}
 	}
@@ -492,7 +493,7 @@ func (g *labeledUndirected) addEdges(edges ...LabeledEdge) {
 
 // Removes edges from the graph. This does NOT remove vertex members of the
 // removed edges.
-func (g *labeledUndirected) RemoveEdges(edges ...LabeledEdge) {
+func (g *dataUndirected) RemoveEdges(edges ...DataEdge) {
 	if len(edges) == 0 {
 		return
 	}

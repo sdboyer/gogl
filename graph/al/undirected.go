@@ -1,7 +1,8 @@
-package gogl
+package al
 
 import (
 	"gopkg.in/fatih/set.v0"
+	. "github.com/sdboyer/gogl"
 )
 
 type mutableUndirected struct {

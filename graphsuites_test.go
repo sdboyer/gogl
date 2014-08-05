@@ -103,12 +103,6 @@ var graphFixtures = map[string]GraphSource{
 	},
 }
 
-func init() {
-	for gp, _ := range alCreators {
-		SetUpTestsFromSpec(gp, AdjacencyList)
-	}
-}
-
 /////////////////////////////////////////////////////////////////////
 //
 // HELPERS

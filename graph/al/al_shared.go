@@ -1,4 +1,8 @@
-package gogl
+package al
+
+import (
+	. "github.com/sdboyer/gogl"
+)
 
 // Contains behaviors shared across adjacency list implementations.
 

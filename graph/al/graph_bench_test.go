@@ -1,4 +1,4 @@
-package gogl
+package al
 
 import (
 	"math/rand"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	. "github.com/sdboyer/gocheck"
+	. "github.com/sdboyer/gogl"
 )
 
 // TODO reimplement with specs
