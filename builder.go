@@ -46,7 +46,7 @@ type GraphSpec struct {
 
 // Create a graph spec, which allows specification and creation of a graph through
 // a fluent builder-style interface.
-func G() GraphSpec {
+func Spec() GraphSpec {
 	b := GraphSpec{Props: G_UNDIRECTED | G_SIMPLE | G_BASIC | G_MUTABLE}
 	return b
 }

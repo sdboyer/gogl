@@ -3,8 +3,8 @@ package al
 import (
 	"sync"
 
-	"gopkg.in/fatih/set.v0"
 	. "github.com/sdboyer/gogl"
+	"gopkg.in/fatih/set.v0"
 )
 
 // This is implemented as an adjacency list, because those are simple.

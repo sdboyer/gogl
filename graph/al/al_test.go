@@ -3,8 +3,8 @@ package al
 import (
 	"testing"
 
-	"github.com/sdboyer/gogl/spec"
 	"github.com/sdboyer/gocheck"
+	"github.com/sdboyer/gogl/spec"
 )
 
 // Hook gocheck into the go test runner
@@ -15,4 +15,3 @@ func init() {
 		spec.SetUpTestsFromSpec(gp, AdjacencyList)
 	}
 }
-

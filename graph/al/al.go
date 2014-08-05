@@ -53,7 +53,7 @@ var alCreators = map[GraphProperties]func() Graph{
 // If the GraphSpec contains a GraphSource, it will be imported into the provided graph.
 // If the GraphSpec indicates a graph type that is not currently implemented, this function
 // will panic.
-func AdjacencyList(gs GraphSpec) Graph {
+func G(gs GraphSpec) Graph {
 	for gp, gf := range alCreators {
 		flipped := gp &^ gs.Props
 
