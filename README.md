@@ -11,7 +11,7 @@ There's still a lot to do - gogl is still firming up significant aspects of how 
 
 ## Principles
 
-Graph systems are often big, complicated affairs. gogl tries to be not that. These are the operant principles:
+Graph systems are often big, complicated affairs. Some of it comes with the territory - graphs are not a simple datastructure. But gogl tries to be not that, mostly by focusing on getting the basics right. These are gogl's operant principles:
 
 1. Simplicity: fully and correctly modeling graph theoretic concepts in idiomatic Go.
 1. Performance: be as fast as design constraints and known-best algorithms allow.
