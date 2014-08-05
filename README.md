@@ -161,7 +161,7 @@ The other four enumerators apply only to directed graphs, as they are cognizant 
 
 ### Digraphs: Inbounds and Predecessors
 
-The final pair, `EachPredecessor()` and `EachArcTo()`, should be easy enough to guess at. `EachPredecessor()` enumerates all of a vertex's predecessors.
+The final pair, `EachPredecessorOf()` and `EachArcTo()`, should be easy enough to guess at. `EachPredecessorOf()` enumerates all of a vertex's predecessors.
 
 ![EachPredecessorOf("a")](doc/each_predecessor.dot.png)
 
