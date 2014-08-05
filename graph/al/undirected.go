@@ -9,19 +9,6 @@ type mutableUndirected struct {
 	al_basic_mut
 }
 
-func NewUndirected() MutableGraph {
-	list := &mutableUndirected{}
-	// Cannot assign to promoted fields in a composite literals.
-	list.list = make(map[Vertex]map[Vertex]struct{})
-
-	// Type assertions to ensure interfaces are met
-	var _ Graph = list
-	var _ SimpleGraph = list
-	var _ MutableGraph = list
-
-	return list
-}
-
 // Returns the degree of the provided vertex. If the vertex is not present in the
 // graph, the second return value will be false.
 func (g *mutableUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
