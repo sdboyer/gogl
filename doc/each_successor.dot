@@ -8,7 +8,7 @@ digraph G {
   a [fontcolor="black",style=filled,color="#F38630"];
   b [fontcolor="black",style=filled,color="#23A7C0"];
   c [fontcolor="black",style=filled,color="#23A7C0"];
-  d [fontcolor="black",style=filled,color="#23A7C0"];
+  d;
   f;
-  label="EachAdjacentTo(\"a\")"
+  label="EachSuccessorOf(\"a\")"
 }

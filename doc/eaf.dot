@@ -8,6 +8,7 @@ digraph G {
 	d -> e;
   a [fontcolor="black",style=filled,color="#F38630"];
   f;
+  label="EachArcFrom(\"a\")"
 }
 
 

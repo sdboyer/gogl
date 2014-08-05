@@ -6,9 +6,9 @@ digraph G {
 	d -> a;
 	d -> e;
   a [fontcolor="black",style=filled,color="#F38630"];
-  b [fontcolor="black",style=filled,color="#23A7C0"];
-  c [fontcolor="black",style=filled,color="#23A7C0"];
+  b;
+  c;
   d [fontcolor="black",style=filled,color="#23A7C0"];
   f;
-  label="EachAdjacentTo(\"a\")"
+  label="EachPredecessorOf(\"a\")"
 }

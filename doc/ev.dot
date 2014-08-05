@@ -11,4 +11,5 @@ digraph G {
   d [style=filled,color="#23A7C0"];
   e [style=filled,color="#23A7C0"];
   f [style=filled,color="#23A7C0"];
+  label="EachVertex()"
 }

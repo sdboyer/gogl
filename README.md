@@ -93,15 +93,10 @@ func main() {
 
 ## Enumerators
 
-Enumerators are the primary means by which gogl graphs are expressed. As shown in the Quickstart section, they are methods on graph datastructures that receive a 'step' function, and call that function once per datum (Vertex or Edge) that is found as the method traverses the graph. There are four enumerators for gogl's undirected graphs, and two additional ones for directed graphs.
+Enumerators are the primary means by which gogl graphs are expressed. As shown in the Quickstart section, they are methods on graph datastructures that receive a 'step' function, and call that function once per datum (Vertex or Edge) that is found as the method traverses the graph. There are four enumerators for gogl's undirected graphs, and four additional ones for directed graphs.
 
-An important guarantee of enumerators not necessarily implied by the interface is that they call the step function *exactly* once for each relevant datum. Client code should never have to deduplicate data.
+We need an example in order to demonstrate the behavior of the enumerators, so, here's the code to create a graph:
 
-Given the following graph:
-
-![Base graph](doc/base.dot.png)
-
-Which could be created as follows:
 ```go
 func main() {
 	graph := gogl.G().Mutable().Directed().Create(gogl.AdjacencyList)
@@ -120,7 +115,15 @@ func main() {
 }
 ```
 
-Calling `EachVertex()` would result in six calls to the injected step function, one for each of the contained vertices (marked in blue). It's important to remember that gogl makes no guarantees as to the order of these calls.
+And here's a visual representation of that same graph:
+
+![Base graph](doc/base.dot.png)
+
+Enumerators mostly come in pairs - for each type of relationship or listing, you can receive either the vertex or the edge.
+
+### All the things
+
+The first two enumerators, `EachVertex()` and `EachEdge()`, traverse the entire graph. Calling `EachVertex()` would result in six calls to the injected step function, one for each of the contained vertices (marked in blue).
 
 ![EachVertex()](doc/ev.dot.png)
 
@@ -128,32 +131,52 @@ Calling `EachEdge()` will call the injected step six times, once for each of the
 
 ![EachEdge()](doc/ee.dot.png)
 
-These are the simplest of the enumerators; all others take a vertex as a start point (marked in orange) and work outwards from there.
+An important guarantee of enumerators not necessarily implied by the interface is that they call the step function *exactly* once for each relevant datum. Client code should never have to deduplicate data.
 
-`EachAdjacentTo()` traverses "adjacent" vertices, which are defined as vertices that share an edge. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected step:
+Also, remember that while implementations must enumerate all the elements exactly once, gogl has no requirement as to ordering. Graph implementations are free to sort the results, or not, as they choose.
+
+### Adjacency and Incidence
+
+The next pair, `EachAdjacentTo()` and `EachEdgeIncidentTo()`, are used to visit a given vertex's immediate neighbors.
+
+`EachAdjacentTo()` traverses a vertex's "adjacent" vertices, which are defined as vertices that share an edge with the given vertex. Edge directionality, if any, is irrelevant. In our sample graph, calling `EachAdjacentTo("a")` will result in three calls to the injected step.
 
 ![EachAdjacentTo("a")](doc/av.dot.png)
 
-The edge-iterating counterpart to `EachAdjacentTo()` is `EachEdgeIncidentTo()`. Any edge that has a vertex as one of its two endpoints is considered incident to that vertex. Edge directionality, if any, is irrelevant. Here's `EachEdgeIncidentTo("a")`:
+`EachEdgeIncidentTo()` enumerates all edges incident to the provided vertex. An edge is incident to a vertex if that vertex is either one of the edge's two connected endpoints; this is just an edge-oriented way of looking at that same adjacency relationship. Edge directionality, if any, is once again irrelevant.
 
 ![EachEdgeIncidentTo("a")](doc/eeit.dot.png)
 
-The other two enumerators apply only to directed graphs, as they are sensitive to edge directionality. `EachArcFrom()` enumerates all the outbound edges/arcs from the given vertex:
+### Digraphs: Outbounds and Successors
+
+The other four enumerators apply only to directed graphs, as they are cognizant of edge directionality. The first pair, `EachSuccessorOf()` and `EachArcFrom()`, deal with outbound edges from a given vertex.
+
+`EachSuccessorOf()` enumerates all of a given vertex's "successors" - vertices which are the target, or head, of a directed edge where the given vertex is the tail, or source.
+
+![EachSuccessorOf("a")](doc/each_successor.dot.png)
+
+`EachArcFrom()` enumerates all the outbound arcs ("arc" simply indicates an edge is directed) from the given vertex:
 
 ![EachArcFrom("a")](doc/eaf.dot.png)
 
-And `EachArcTo()` enumerates all the edges/arcs inbound to the given vertex:
+### Digraphs: Inbounds and Predecessors
+
+The final pair, `EachPredecessor()` and `EachArcTo()`, should be easy enough to guess at. `EachPredecessor()` enumerates all of a vertex's predecessors.
+
+![EachPredecessorOf("a")](doc/each_predecessor.dot.png)
+
+And `EachArcTo()` enumerates all the arcs inbound to the given vertex:
 
 ![EachArcTo("a")](doc/eat.dot.png)
 
-These six enumerators are gogl's most important building blocks. They fully describe the basic structure of a graph-based model, and can be combined to ask most any basic graph questions.
+`EachPredecessorOf()` and `EachSuccessorOf()` are the logical complements; calling both is equivalent to calling `EachAdjacentTo()`. The same is true of the arc methods and `EachEdgeIncidentTo()`.
+
+These eight enumerators are gogl's most important building blocks. They fully describe the basic structure of a graph-based model, and can be combined to formulate essentially any basic graph visitation pattern.
 
 There are some additional enumerators for graph subtypes - e.g., `EachLabeledEdgeIncidentTo()` (not yet implemented) is an "optional optimization" enumerator that labeled graphs can implement if, say, they maintain indices that allow them to more efficiently locate and return the subset of incident edges with a particular label than would a naive traversal of the entire incident edge set with direct string comparisons.
 
-Where possible, such optional optimizations are automatically selected and utilized by gogl's assorted functors.
+Where possible, such optional optimizations are automatically selected and utilized by gogl's various functors.
 
-## Functors, Counters, and bears, oh my!
+## License
 
-@TODO
-
-## Gotchas
+MIT

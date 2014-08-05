@@ -7,4 +7,5 @@ digraph G {
 	d -> a [color="#23A7C0"];
 	d -> e [color="#23A7C0"];
   f;
+  label="EachEdge()"
 }
