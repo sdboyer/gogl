@@ -7,7 +7,6 @@ import (
 	. "github.com/sdboyer/gogl"
 	. "github.com/sdboyer/gocheck"
 	"gopkg.in/fatih/set.v0"
-
 )
 
 // Hook gocheck into the go test runner
@@ -23,15 +22,28 @@ func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
 
 	c.Assert(len(slice), Equals, 4)
 
-	set := set.NewNonTS()
+	set1 := set.NewNonTS()
 	for _, v := range slice {
-		set.Add(v)
+		set1.Add(v)
 	}
 
-	c.Assert(set.Has("foo"), Equals, true)
-	c.Assert(set.Has("bar"), Equals, true)
-	c.Assert(set.Has("baz"), Equals, true)
-	c.Assert(set.Has("isolate"), Equals, true)
+	c.Assert(set1.Has("foo"), Equals, true)
+	c.Assert(set1.Has("bar"), Equals, true)
+	c.Assert(set1.Has("baz"), Equals, true)
+	c.Assert(set1.Has("isolate"), Equals, true)
+
+	slice2 := CollectVertices(spec.GraphFixtures["2e3v"])
+
+	c.Assert(len(slice2), Equals, 3)
+
+	set2 := set.NewNonTS()
+	for _, v := range slice2 {
+		set2.Add(v)
+	}
+
+	c.Assert(set2.Has("foo"), Equals, true)
+	c.Assert(set2.Has("bar"), Equals, true)
+	c.Assert(set2.Has("baz"), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectAdjacentVertices(c *C) {
@@ -53,13 +65,25 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 
 	c.Assert(len(slice), Equals, 2)
 
-	set := set.NewNonTS()
+	set1 := set.NewNonTS()
 	for _, e := range slice {
-		set.Add(e)
+		set1.Add(e)
 	}
 
-	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
-	c.Assert(set.Has(NewEdge("bar", "baz")), Equals, true)
+	c.Assert(set1.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set1.Has(NewEdge("bar", "baz")), Equals, true)
+
+	slice2 := CollectEdges(spec.GraphFixtures["2e3v"])
+
+	c.Assert(len(slice2), Equals, 2)
+
+	set2 := set.NewNonTS()
+	for _, e := range slice2 {
+		set2.Add(e)
+	}
+
+	c.Assert(set2.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set2.Has(NewEdge("bar", "baz")), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
