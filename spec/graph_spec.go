@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/sdboyer/gogl"
 	"github.com/kr/pretty"
 	. "github.com/sdboyer/gocheck"
+	. "github.com/sdboyer/gogl"
 	"gopkg.in/fatih/set.v0"
 )
 
@@ -113,13 +113,8 @@ var graphFixtures = map[string]GraphSource{
 // Hook gocheck into the go test runner
 func TestHookup(t *testing.T) { TestingT(t) }
 
-// swap method is useful for some testing shorthand
-func (e baseEdge) swap() Edge {
-	return NewEdge(e.v, e.u)
-}
-
 // Returns an arc with the directionality swapped.
-func VSwap(e Edge) Edge {
+func Swap(e Edge) Edge {
 	return NewEdge(e.Target(), e.Source())
 }
 
@@ -301,8 +296,8 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Factory(graphFixtures["2e3v"])
 
 	flipset := []Edge{
-		graphFixtures["2e3v"].(EdgeList)[0].(baseEdge).swap(),
-		graphFixtures["2e3v"].(EdgeList)[1].(baseEdge).swap(),
+		Swap(graphFixtures["2e3v"].(EdgeList)[0]),
+		Swap(graphFixtures["2e3v"].(EdgeList)[1]),
 	}
 
 	eset := set.NewNonTS()
@@ -397,11 +392,11 @@ func (s *DigraphSuite) TestTranspose(c *C) {
 
 	g2 := g.Transpose()
 
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(baseEdge).swap()), Equals, true)
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(baseEdge).swap()), Equals, true)
+	c.Assert(g2.HasEdge(Swap(graphFixtures["2e3v"].(EdgeList)[0])), Equals, true)
+	c.Assert(g2.HasEdge(Swap(graphFixtures["2e3v"].(EdgeList)[1])), Equals, true)
 
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0].(baseEdge)), Equals, false)
-	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1].(baseEdge)), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[0]), Equals, false)
+	c.Assert(g2.HasEdge(graphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
 }
 
 func (s *DigraphSuite) TestOutDegreeOf(c *C) {
