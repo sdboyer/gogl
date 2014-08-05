@@ -32,12 +32,13 @@ package main
 import (
 	"fmt"
 	"github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl/graph/al"
 	"github.com/sdboyer/gogl/dfs"
 )
 
 func main() {
 	// gogl uses a builder to specify the kind of graph you want.
-	graph := gogl.G().
+	graph := gogl.Spec().
 		// The graph should be mutable. Default is immutable.
 		Mutable().
 		// The graph should have directed edges (arcs). Default is undirected.
@@ -46,8 +47,8 @@ func main() {
 		Basic().
 		// No loops or parallel edges. This is the default.
 		SimpleGraph().
-		// gogl.AdjacencyList picks and returns an adjacency list-based graph, based on the spec.
-		Create(gogl.AdjacencyList).
+		// al.G picks and returns an adjacency list-based graph, based on the spec.
+		Create(al.G).
 		// The builder always returns a Graph; type assert to get access to add/remove methods.
 		(gogl.MutableGraph)
 
@@ -63,7 +64,7 @@ func main() {
 	})
 
 	// gogl refers to these sorts of iterating methods as enumerators. There are four
-	// such methods on undirected graphs, and two more on directed graphs.
+	// such methods on undirected graphs, and four more on directed graphs.
 
 	// If you know you need the full result set, gogl provides functors to collect enumerations
 	// into slices. This makes ranging easy.
