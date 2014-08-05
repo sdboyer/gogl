@@ -55,7 +55,7 @@ type stableBernoulliGraph struct {
 	trial    bTrial
 	size     int
 	directed bool
-	list     [][]struct{}
+	list     [][]bool
 }
 
 func (g *stableBernoulliGraph) EachVertex(f gogl.VertexStep) {
@@ -69,14 +69,14 @@ func (g *stableBernoulliGraph) EachVertex(f gogl.VertexStep) {
 
 func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 	if g.list == nil {
-		g.list = make([][]struct{}, g.order, g.order)
+		g.list = make([][]bool, g.order, g.order)
 
 		// Wrapping edge step function; records edges into the adjacency list, then passes edge along
 		ff := func(e gogl.Edge) bool {
 			if g.list[e.Source().(int)] == nil {
-				g.list[e.Source().(int)] = make([]struct{}, g.order)
+				g.list[e.Source().(int)] = make([]bool, g.order, g.order)
 			}
-			g.list[e.Source().(int)][e.Target().(int)] = struct{}{}
+			g.list[e.Source().(int)][e.Target().(int)] = true
 			g.size++
 			return f(e)
 		}
@@ -89,10 +89,12 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 	} else {
 		var e gogl.Edge
 		for u, adj := range g.list {
-			for v, _ := range adj {
-				e = gogl.NewEdge(u, v)
-				if f(e) {
-					return
+			for v, exists := range adj {
+				if (exists) {
+					e = gogl.NewEdge(u, v)
+					if f(e) {
+						return
+					}
 				}
 			}
 		}
@@ -101,6 +103,10 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 
 func (g *stableBernoulliGraph) Order() int {
 	return int(g.order)
+}
+
+func (g *stableBernoulliGraph) Size() int {
+	return g.size
 }
 
 type unstableBernoulliGraph struct {
@@ -136,7 +142,7 @@ var bernoulliEdgeCreator = func(el gogl.EdgeStep, order int, ρ float64, cmp bTr
 	for u := 0; u < order; u++ {
 		// Set target vertex to one more than current source vertex. This guarantees
 		// we only evaluate each unique edge pair once, as gogl's implicit contract requires.
-		for v := u + 1; v < order; v++ {
+		for v := u + 0; v < order; v++ {
 			if cmp(ρ) {
 				e = gogl.NewEdge(u, v)
 				if el(e) {

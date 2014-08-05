@@ -8,6 +8,7 @@ import (
 
 	. "github.com/sdboyer/gocheck"
 	"github.com/sdboyer/gogl"
+	"gopkg.in/fatih/set.v0"
 )
 
 var fml = fmt.Println
@@ -83,4 +84,59 @@ func (s *BernoulliTest) TestEachVertexTermination(c *C) {
 	})
 
 	c.Assert(hit, Equals, 2)
+}
+
+func (s *BernoulliTest) TestEachEdgeCount(c *C) {
+	// Given that this is a rand count, our testing options are curtailed
+	for gn, g := range s.graphs {
+		hit := 0
+		g.EachEdge(func(e gogl.Edge) (terminate bool) {
+			hit++
+			return
+		})
+
+		switch gn {
+		case "dir_stable", "dir_unstable":
+			c.Assert(hit <= 90, Equals, true)
+			c.Assert(hit >= 0, Equals, true)
+		case "und_stable", "und_unstable", "und_unstable_nosrc":
+			c.Assert(hit <= 45, Equals, true)
+			c.Assert(hit >= 0, Equals, true)
+		}
+	}
+}
+
+func (s *BernoulliTest) TestEachEdgeStability(c *C) {
+	setd := set.NewNonTS()
+	setu := set.NewNonTS()
+	var hitu, hitd int
+
+	s.graphs["dir_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+		setd.Add(e)
+		return
+	})
+
+	s.graphs["dir_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+		c.Assert(setd.Has(e), Equals, true)
+		hitd++
+		return
+	})
+
+	c.Assert(setd.Size(), Equals, hitd)
+	c.Assert(s.graphs["dir_stable"].(gogl.EdgeCounter).Size(), Equals, hitd)
+
+	s.graphs["und_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+		setu.Add(e)
+		return
+	})
+
+	s.graphs["und_stable"].EachEdge(func (e gogl.Edge) (terminate bool) {
+		c.Assert(setu.Has(e), Equals, true)
+		hitu++
+		return
+	})
+
+	c.Assert(setu.Size(), Equals, hitu)
+	c.Assert(s.graphs["und_stable"].(gogl.EdgeCounter).Size(), Equals, hitu)
+
 }
