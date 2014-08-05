@@ -99,3 +99,21 @@ func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
 	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
 	c.Assert(set.Has(NewEdge("qux", "bar")), Equals, true)
 }
+
+type CountingFunctorsSuite struct{}
+
+var _ = Suite(&CountingFunctorsSuite{})
+
+func (s *CountingFunctorsSuite) TestOrder(c *C) {
+	// TODO need a way to test both paths here
+	order := Order(graphFixtures["3e5v1i"].(Graph))
+
+	c.Assert(order, Equals, 5)
+}
+
+func (s *CountingFunctorsSuite) TestSize(c *C) {
+	// TODO need a way to test both paths here
+	size := Size(graphFixtures["3e5v1i"].(Graph))
+
+	c.Assert(size, Equals, 3)
+}
