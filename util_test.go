@@ -1,9 +1,14 @@
 package gogl
 
 import (
+	"testing"
+
 	. "github.com/sdboyer/gocheck"
 	"gopkg.in/fatih/set.v0"
 )
+
+// Hook gocheck into the go test runner
+func TestHookup(t *testing.T) { TestingT(t) }
 
 // Define a graph literal fixture for testing here.
 // The literal has two edges and four vertices; one vertex is an isolate.
@@ -375,11 +380,23 @@ type CountingFunctorsSuite struct{}
 var _ = Suite(&CountingFunctorsSuite{})
 
 func (s *CountingFunctorsSuite) TestOrder(c *C) {
-	c.Assert(Order(graphFixtures["3e5v1i"]), Equals, 5)
+	el := EdgeList{
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
+		NewEdge("foo", "qux"),
+		NewEdge("qux", "bar"),
+	}
+	c.Assert(Order(el), Equals, 4)
 	c.Assert(Order(graphLiteralFixture(true)), Equals, 4)
 }
 
 func (s *CountingFunctorsSuite) TestSize(c *C) {
-	c.Assert(Size(graphFixtures["3e5v1i"]), Equals, 3)
+	el := EdgeList{
+		NewEdge("foo", "bar"),
+		NewEdge("bar", "baz"),
+		NewEdge("foo", "qux"),
+		NewEdge("qux", "bar"),
+	}
+	c.Assert(Size(el), Equals, 4)
 	c.Assert(Size(graphLiteralFixture(true)), Equals, 2)
 }

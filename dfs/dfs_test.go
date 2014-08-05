@@ -6,6 +6,7 @@ import (
 
 	. "github.com/sdboyer/gocheck"
 	"github.com/sdboyer/gogl"
+	"github.com/sdboyer/gogl/graph/al"
 )
 
 // Hook gocheck into the go test runner
@@ -27,14 +28,14 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
 	// directed
 	g := gogl.G().Directed().Using(extraSet).
-		Create(gogl.AdjacencyList).(gogl.Digraph)
+		Create(al.AdjacencyList).(gogl.Digraph)
 
 	path, err := Search(g, "qux", "bar")
 	c.Assert(path, DeepEquals, []gogl.Vertex{"qux", "baz", "bar"})
 	c.Assert(err, IsNil)
 
 	// undirected
-	//ug := gogl.BuildGraph().Using(extraSet).Create(gogl.AdjacencyList)
+	//ug := gogl.BuildGraph().Using(extraSet).Create(al.AdjacencyList)
 
 	// TODO accidentally passed wrong graph - fix!
 	path, err = Search(g, "qux", "bar")
@@ -44,7 +45,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 
 func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 	g := gogl.G().Mutable().Directed().
-		Create(gogl.AdjacencyList).(gogl.MutableGraph)
+		Create(al.AdjacencyList).(gogl.MutableGraph)
 	g.EnsureVertex("foo")
 
 	_, err := Search(g.(gogl.Digraph), "foo", "bar")
@@ -56,7 +57,7 @@ func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
-		Create(gogl.AdjacencyList).(gogl.Digraph)
+		Create(al.AdjacencyList).(gogl.Digraph)
 
 	sources, err := FindSources(g)
 	c.Assert(fmt.Sprint(sources), Equals, fmt.Sprint([]gogl.Vertex{"foo"}))
@@ -77,7 +78,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	g := gogl.G().Directed().
 		Mutable().Using(dfEdgeSet).
-		Create(gogl.AdjacencyList).(gogl.Digraph)
+		Create(al.AdjacencyList).(gogl.Digraph)
 
 	tsl, err := Toposort(g, "foo")
 	c.Assert(err, IsNil)
@@ -89,7 +90,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
 	// undirected
-	ug := gogl.G().Using(dfEdgeSet).Create(gogl.AdjacencyList)
+	ug := gogl.G().Using(dfEdgeSet).Create(al.AdjacencyList)
 
 	_, err = Toposort(ug)
 	c.Assert(err, ErrorMatches, ".*do not have sources.*")
@@ -144,7 +145,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 	}
 	g := gogl.G().Directed().
 		Mutable().Using(el).
-		Create(gogl.AdjacencyList).(gogl.Digraph)
+		Create(al.AdjacencyList).(gogl.Digraph)
 
 	v.vertices = []string{"foo", "bar", "baz", "qux", "quark"}
 
