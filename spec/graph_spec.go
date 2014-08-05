@@ -1,4 +1,4 @@
-package gogl
+package spec
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	. "github.com/sdboyer/gogl"
 	"github.com/kr/pretty"
 	. "github.com/sdboyer/gocheck"
 	"gopkg.in/fatih/set.v0"
@@ -115,6 +116,11 @@ func TestHookup(t *testing.T) { TestingT(t) }
 // swap method is useful for some testing shorthand
 func (e baseEdge) swap() Edge {
 	return NewEdge(e.v, e.u)
+}
+
+// Returns an arc with the directionality swapped.
+func VSwap(e Edge) Edge {
+	return NewEdge(e.Target(), e.Source())
 }
 
 func gdebug(g Graph, args ...interface{}) {
