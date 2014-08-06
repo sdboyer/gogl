@@ -502,7 +502,6 @@ func (g *labeledUndirected) addEdges(edges ...LabeledEdge) {
 		u, v := edge.Both()
 		g.ensureVertex(u, v)
 
-
 		if _, exists := g.list[u][v]; !exists {
 			l := edge.Label()
 			g.list[u][v] = l

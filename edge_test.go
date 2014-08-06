@@ -8,6 +8,7 @@ import (
 )
 
 type EdgeListSuite struct{}
+
 var _ = Suite(&EdgeListSuite{})
 
 func (s *EdgeListSuite) TestEachVertex(c *C) {
@@ -79,6 +80,7 @@ func (s *EdgeListSuite) TestEachEdgeTermination(c *C) {
 }
 
 type EdgeSuite struct{}
+
 var _ = Suite(&EdgeSuite{})
 
 func (s *EdgeSuite) TestEdges(c *C) {

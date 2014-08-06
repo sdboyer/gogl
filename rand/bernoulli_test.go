@@ -216,4 +216,3 @@ func (s *BernoulliTest) TestEachArcTermination(c *C) {
 	})
 	c.Assert(hit, Equals, 3)
 }
-

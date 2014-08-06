@@ -60,11 +60,11 @@ func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src s
 type bTrial func(ρ float64) bool
 
 type stableBernoulliGraph struct {
-	order    uint
-	ρ        float64
-	trial    bTrial
-	size     int
-	list     [][]bool
+	order uint
+	ρ     float64
+	trial bTrial
+	size  int
+	list  [][]bool
 }
 
 func (g *stableBernoulliGraph) EachVertex(f gogl.VertexStep) {
@@ -181,9 +181,9 @@ func (g *stableBernoulliDigraph) EachArc(f gogl.ArcStep) {
 }
 
 type unstableBernoulliGraph struct {
-	order    uint
-	ρ        float64
-	trial    bTrial
+	order uint
+	ρ     float64
+	trial bTrial
 }
 
 func (g unstableBernoulliGraph) EachVertex(f gogl.VertexStep) {

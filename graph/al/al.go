@@ -1,8 +1,8 @@
 package al
 
 import (
-	. "github.com/sdboyer/gogl"
 	"sync"
+	. "github.com/sdboyer/gogl"
 )
 
 /*

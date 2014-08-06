@@ -217,6 +217,7 @@ func (g *mutableDirected) addArcs(arcs ...Arc) {
 		}
 	}
 }
+
 // Removes arcs from the graph. This does NOT remove vertex members of the
 // removed arcs.
 func (g *mutableDirected) RemoveArcs(arcs ...Arc) {
