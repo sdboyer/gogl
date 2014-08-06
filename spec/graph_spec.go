@@ -18,25 +18,25 @@ import (
 //
 /////////////////////////////////////////////////////////////////////
 
-type loopEdge struct {
+type loopArc struct {
 	v Vertex
 }
 
-func (e loopEdge) Both() (Vertex, Vertex) {
+func (e loopArc) Both() (Vertex, Vertex) {
 	return e.v, e.v
 }
 
-func (e loopEdge) Source() Vertex {
+func (e loopArc) Source() Vertex {
 	return e.v
 }
 
-func (e loopEdge) Target() Vertex {
+func (e loopArc) Target() Vertex {
 	return e.v
 }
 
-type loopEdgeList []Edge
+type loopArcList []Arc
 
-func (el loopEdgeList) EachVertex(fn VertexStep) {
+func (el loopArcList) EachVertex(fn VertexStep) {
 	set := set.NewNonTS()
 
 	for _, e := range el {
@@ -50,9 +50,19 @@ func (el loopEdgeList) EachVertex(fn VertexStep) {
 	}
 }
 
-func (el loopEdgeList) EachEdge(fn EdgeStep) {
+func (el loopArcList) EachArc(fn ArcStep) {
 	for _, e := range el {
-		if _, ok := e.(loopEdge); !ok {
+		if _, ok := e.(loopArc); !ok {
+			if fn(e) {
+				return
+			}
+		}
+	}
+}
+
+func (el loopArcList) EachEdge(fn EdgeStep) {
+	for _, e := range el {
+		if _, ok := e.(loopArc); !ok {
 			if fn(e) {
 				return
 			}
@@ -62,41 +72,41 @@ func (el loopEdgeList) EachEdge(fn EdgeStep) {
 
 var GraphFixtures = map[string]GraphSource{
 	// TODO improve naming basis/patterns for these
-	"arctest": EdgeList{
-		NewEdge("foo", "bar"),
-		NewEdge("bar", "baz"),
-		NewEdge("foo", "qux"),
-		NewEdge("qux", "bar"),
+	"arctest": ArcList{
+		NewArc("foo", "bar"),
+		NewArc("bar", "baz"),
+		NewArc("foo", "qux"),
+		NewArc("qux", "bar"),
 	},
-	"pair": EdgeList{
-		NewEdge(1, 2),
+	"pair": ArcList{
+		NewArc(1, 2),
 	},
-	"2e3v": EdgeList{
-		NewEdge("foo", "bar"),
-		NewEdge("bar", "baz"),
+	"2e3v": ArcList{
+		NewArc("foo", "bar"),
+		NewArc("bar", "baz"),
 	},
-	"3e4v": EdgeList{
-		NewEdge("foo", "bar"),
-		NewEdge("bar", "baz"),
-		NewEdge("foo", "qux"),
+	"3e4v": ArcList{
+		NewArc("foo", "bar"),
+		NewArc("bar", "baz"),
+		NewArc("foo", "qux"),
 	},
-	"3e5v1i": loopEdgeList{
-		NewEdge("foo", "bar"),
-		NewEdge("bar", "baz"),
-		NewEdge("foo", "qux"),
-		loopEdge{"isolate"},
+	"3e5v1i": loopArcList{
+		NewArc("foo", "bar"),
+		NewArc("bar", "baz"),
+		NewArc("foo", "qux"),
+		loopArc{"isolate"},
 	},
-	"w-2e3v": WeightedEdgeList{
-		NewWeightedEdge(1, 2, 5.23),
-		NewWeightedEdge(2, 3, 5.821),
+	"w-2e3v": WeightedArcList{
+		NewWeightedArc(1, 2, 5.23),
+		NewWeightedArc(2, 3, 5.821),
 	},
-	"l-2e3v": LabeledEdgeList{
-		NewLabeledEdge(1, 2, "foo"),
-		NewLabeledEdge(2, 3, "bar"),
+	"l-2e3v": LabeledArcList{
+		NewLabeledArc(1, 2, "foo"),
+		NewLabeledArc(2, 3, "bar"),
 	},
-	"d-2e3v": DataEdgeList{
-		NewDataEdge(1, 2, "foo"),
-		NewDataEdge(2, 3, struct{ a int }{a: 2}),
+	"d-2e3v": DataArcList{
+		NewDataArc(1, 2, "foo"),
+		NewDataArc(2, 3, struct{ a int }{a: 2}),
 	},
 }
 
