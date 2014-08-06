@@ -457,15 +457,15 @@ func (s *DigraphSuite) TestEachArcTo(c *C) {
 
 	eset := set.NewNonTS()
 	var hit int
-	g.EachArcTo("foo", func(e Edge) (terminate bool) {
+	g.EachArcTo("foo", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'foo' should have no in-edges")
 		c.FailNow()
 		return
 	})
 
-	g.EachArcTo("bar", func(e Edge) (terminate bool) {
+	g.EachArcTo("bar", func(e Arc) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Both()))
+		eset.Add(NewArc(e.Both()))
 		hit++
 		return
 	})
@@ -480,7 +480,7 @@ func (s *DigraphSuite) TestEachArcToTermination(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	var hit int
-	g.EachArcTo("baz", func(e Edge) (terminate bool) {
+	g.EachArcTo("baz", func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})
@@ -526,15 +526,15 @@ func (s *DigraphSuite) TestEachArcFrom(c *C) {
 
 	eset := set.NewNonTS()
 	var hit int
-	g.EachArcFrom("baz", func(e Edge) (terminate bool) {
+	g.EachArcFrom("baz", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'baz' should have no out-edges")
 		c.FailNow()
 		return
 	})
 
-	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+	g.EachArcFrom("foo", func(e Arc) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Both()))
+		eset.Add(NewArc(e.Both()))
 		hit++
 		return
 	})
@@ -549,7 +549,7 @@ func (s *DigraphSuite) TestEachArcFromTermination(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	var hit int
-	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
+	g.EachArcFrom("foo", func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})

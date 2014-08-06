@@ -91,41 +91,41 @@ func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArcFrom(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) EachArcFrom(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "foo":
-			f(NewEdge("foo", "bar"))
+			f(NewArc("foo", "bar"))
 		case "bar":
-			f(NewEdge("bar", "baz"))
+			f(NewArc("bar", "baz"))
 		default:
 		}
 	} else {
 		switch v {
 		case "bar":
-			f(NewEdge("bar", "foo"))
+			f(NewArc("bar", "foo"))
 		case "baz":
-			f(NewEdge("baz", "bar"))
+			f(NewArc("baz", "bar"))
 		default:
 		}
 	}
 }
 
-func (g GraphLiteralFixture) EachArcTo(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) EachArcTo(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "bar":
-			f(NewEdge("foo", "bar"))
+			f(NewArc("foo", "bar"))
 		case "baz":
-			f(NewEdge("bar", "baz"))
+			f(NewArc("bar", "baz"))
 		default:
 		}
 	} else {
 		switch v {
 		case "foo":
-			f(NewEdge("bar", "foo"))
+			f(NewArc("bar", "foo"))
 		case "bar":
-			f(NewEdge("baz", "bar"))
+			f(NewArc("baz", "bar"))
 		default:
 		}
 	}
