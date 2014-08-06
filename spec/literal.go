@@ -40,6 +40,27 @@ func (g GraphLiteralFixture) EachEdge(f EdgeStep) {
 	}
 }
 
+func (g GraphLiteralFixture) EachArc(f ArcStep) {
+	var al []Arc
+	if g {
+		al = []Arc{
+			NewArc("foo", "bar"),
+			NewArc("bar", "baz"),
+		}
+	} else {
+		al = []Arc{
+			NewArc("bar", "foo"),
+			NewArc("baz", "bar"),
+		}
+	}
+
+	for _, e := range al {
+		if f(e) {
+			return
+		}
+	}
+}
+
 func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	if g {
 		switch v {
