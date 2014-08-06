@@ -175,7 +175,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *labeledDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -184,7 +184,7 @@ func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, label := range g.list[v] {
-		if f(NewLabeledEdge(v, adjacent, label)) {
+		if f(NewLabeledArc(v, adjacent, label)) {
 			return
 		}
 	}
@@ -198,7 +198,7 @@ func (g *labeledDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *labeledDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -209,7 +209,7 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, label := range adjacent {
 			if target == v {
-				if f(NewLabeledEdge(candidate, target, label)) {
+				if f(NewLabeledArc(candidate, target, label)) {
 					return
 				}
 			}

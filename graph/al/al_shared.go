@@ -294,7 +294,7 @@ func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeStep) {
 	}
 
 	var terminate bool
-	interloper := func(e Edge) bool {
+	interloper := func(e Arc) bool {
 		terminate = terminate || f(e)
 		return terminate
 	}

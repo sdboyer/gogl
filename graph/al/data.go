@@ -145,7 +145,7 @@ func (g *dataDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *dataDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -154,7 +154,7 @@ func (g *dataDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, data := range g.list[v] {
-		if f(NewDataEdge(v, adjacent, data)) {
+		if f(NewDataArc(v, adjacent, data)) {
 			return
 		}
 	}
@@ -168,7 +168,7 @@ func (g *dataDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *dataDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -179,7 +179,7 @@ func (g *dataDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, data := range adjacent {
 			if target == v {
-				if f(NewDataEdge(candidate, target, data)) {
+				if f(NewDataArc(candidate, target, data)) {
 					return
 				}
 			}

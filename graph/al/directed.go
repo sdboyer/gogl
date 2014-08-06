@@ -96,7 +96,7 @@ func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -105,7 +105,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(NewEdge(v, adjacent)) {
+		if f(NewArc(v, adjacent)) {
 			return
 		}
 	}
@@ -119,7 +119,7 @@ func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *mutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -130,7 +130,7 @@ func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(NewEdge(candidate, target)) {
+				if f(NewArc(candidate, target)) {
 					return
 				}
 			}
@@ -315,13 +315,13 @@ func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(NewEdge(v, adjacent)) {
+		if f(NewArc(v, adjacent)) {
 			return
 		}
 	}
@@ -332,7 +332,7 @@ func (g *immutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *immutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
@@ -340,7 +340,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(NewEdge(candidate, target)) {
+				if f(NewArc(candidate, target)) {
 					return
 				}
 			}

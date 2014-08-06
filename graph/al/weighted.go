@@ -145,7 +145,7 @@ func (g *weightedDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *weightedDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *weightedDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -154,7 +154,7 @@ func (g *weightedDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, weight := range g.list[v] {
-		if f(NewWeightedEdge(v, adjacent, weight)) {
+		if f(NewWeightedArc(v, adjacent, weight)) {
 			return
 		}
 	}
@@ -168,7 +168,7 @@ func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *weightedDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *weightedDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -179,7 +179,7 @@ func (g *weightedDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, weight := range adjacent {
 			if target == v {
-				if f(NewWeightedEdge(candidate, target, weight)) {
+				if f(NewWeightedArc(candidate, target, weight)) {
 					return
 				}
 			}
