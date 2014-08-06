@@ -40,11 +40,7 @@ func (el loopEdgeList) EachVertex(fn VertexStep) {
 	set := set.NewNonTS()
 
 	for _, e := range el {
-		if _, ok := e.(loopEdge); ok {
-			set.Add(e.Source())
-		} else {
-			set.Add(e.Both())
-		}
+		set.Add(e.Both())
 	}
 
 	for _, v := range set.List() {
@@ -115,7 +111,8 @@ func TestHookup(t *testing.T) { TestingT(t) }
 
 // Returns an arc with the directionality swapped.
 func Swap(e Edge) Edge {
-	return NewEdge(e.Target(), e.Source())
+	u, v := e.Both()
+	return NewEdge(v, u)
 }
 
 func gdebug(g Graph, args ...interface{}) {
@@ -305,7 +302,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Source(), e.Target()))
+		eset.Add(NewEdge(e.Both()))
 		return
 	})
 
@@ -323,7 +320,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Source(), e.Target()))
+		eset.Add(NewEdge(e.Both()))
 		return
 	})
 
@@ -468,7 +465,7 @@ func (s *DigraphSuite) TestEachArcTo(c *C) {
 
 	g.EachArcTo("bar", func(e Edge) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Source(), e.Target()))
+		eset.Add(NewEdge(e.Both()))
 		hit++
 		return
 	})
@@ -537,7 +534,7 @@ func (s *DigraphSuite) TestEachArcFrom(c *C) {
 
 	g.EachArcFrom("foo", func(e Edge) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Source(), e.Target()))
+		eset.Add(NewEdge(e.Both()))
 		hit++
 		return
 	})
