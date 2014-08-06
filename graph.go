@@ -221,10 +221,10 @@ type IncidentEdgeEnumerator interface {
 type IncidentArcEnumerator interface {
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcFrom(v Vertex, outEdgeStep EdgeStep)
+	EachArcFrom(v Vertex, outArcStep ArcStep)
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcTo(v Vertex, inEdgeStep EdgeStep)
+	EachArcTo(v Vertex, inArcStep ArcStep)
 }
 
 // A ProcessionEnumerator iteratively enumerates a vertex's predecessors or successors

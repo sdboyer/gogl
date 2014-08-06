@@ -122,44 +122,44 @@ func CollectEdgesIncidentTo(v Vertex, g IncidentEdgeEnumerator) (edges []Edge) {
 	return edges
 }
 
-// Collects all of a given vertex's out-edges into an edge slice, for easy range-ing.
+// Collects all of a given vertex's out-arcs into an arc slice, for easy range-ing.
 //
 // This is a convenience function. Avoid it on very large graphs or in performance critical sections.
-func CollectArcsFrom(v Vertex, g IncidentArcEnumerator) (edges []Edge) {
+func CollectArcsFrom(v Vertex, g IncidentArcEnumerator) (arcs []Arc) {
 	if c, ok := g.(DirectedDegreeChecker); ok {
-		// If possible, size the slice based on the number of out-edges the graph reports
+		// If possible, size the slice based on the number of out-arcs the graph reports
 		deg, _ := c.OutDegreeOf(v)
-		edges = make([]Edge, 0, deg)
+		arcs = make([]Arc, 0, deg)
 	} else {
 		// Otherwise just pick something...reasonable?
-		edges = make([]Edge, 0, 8)
+		arcs = make([]Arc, 0, 8)
 	}
 
-	g.EachArcFrom(v, func(e Edge) (terminate bool) {
-		edges = append(edges, e)
+	g.EachArcFrom(v, func(e Arc) (terminate bool) {
+		arcs = append(arcs, e)
 		return
 	})
 
-	return edges
+	return arcs
 }
 
-// Collects all of a given vertex's in-edges into an edge slice, for easy range-ing.
+// Collects all of a given vertex's in-arcs into an arc slice, for easy range-ing.
 //
 // This is a convenience function. Avoid it on very large graphs or in performance critical sections.
-func CollectArcsTo(v Vertex, g IncidentArcEnumerator) (edges []Edge) {
+func CollectArcsTo(v Vertex, g IncidentArcEnumerator) (arcs []Arc) {
 	if c, ok := g.(DirectedDegreeChecker); ok {
-		// If possible, size the slice based on the number of in-edges the graph reports
+		// If possible, size the slice based on the number of in-arcs the graph reports
 		deg, _ := c.InDegreeOf(v)
-		edges = make([]Edge, 0, deg)
+		arcs = make([]Arc, 0, deg)
 	} else {
 		// Otherwise just pick something...reasonable?
-		edges = make([]Edge, 0, 8)
+		arcs = make([]Arc, 0, 8)
 	}
 
-	g.EachArcTo(v, func(e Edge) (terminate bool) {
-		edges = append(edges, e)
+	g.EachArcTo(v, func(e Arc) (terminate bool) {
+		arcs = append(arcs, e)
 		return
 	})
 
-	return edges
+	return arcs
 }
