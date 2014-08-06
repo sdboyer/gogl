@@ -41,9 +41,19 @@ func BernoulliDistribution(n uint, ρ float64, directed bool, stable bool, src s
 	}
 
 	if stable {
-		return &stableBernoulliGraph{order: n, ρ: ρ, trial: f, directed: directed}
+		g := stableBernoulliGraph{order: n, ρ: ρ, trial: f}
+		if directed {
+			return &stableBernoulliDigraph{g}
+		} else {
+			return &g
+		}
 	} else {
-		return unstableBernoulliGraph{order: n, ρ: ρ, trial: f, directed: directed}
+		g := unstableBernoulliGraph{order: n, ρ: ρ, trial: f}
+		if directed {
+			return &unstableBernoulliDigraph{g}
+		} else {
+			return &g
+		}
 	}
 }
 
@@ -54,7 +64,6 @@ type stableBernoulliGraph struct {
 	ρ        float64
 	trial    bTrial
 	size     int
-	directed bool
 	list     [][]bool
 }
 
@@ -73,19 +82,17 @@ func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
 
 		// Wrapping edge step function; records edges into the adjacency list, then passes edge along
 		ff := func(e gogl.Edge) bool {
-			if g.list[e.Source().(int)] == nil {
-				g.list[e.Source().(int)] = make([]bool, g.order, g.order)
+			uv, vv := e.Both()
+			u, v := uv.(int), vv.(int)
+			if g.list[u] == nil {
+				g.list[u] = make([]bool, g.order, g.order)
 			}
-			g.list[e.Source().(int)][e.Target().(int)] = true
+			g.list[u][v] = true
 			g.size++
 			return f(e)
 		}
 
-		if g.directed {
-			bernoulliArcCreator(ff, int(g.order), g.ρ, g.trial)
-		} else {
-			bernoulliEdgeCreator(ff, int(g.order), g.ρ, g.trial)
-		}
+		bernoulliEdgeCreator(ff, int(g.order), g.ρ, g.trial)
 	} else {
 		var e gogl.Edge
 		for u, adj := range g.list {
@@ -109,11 +116,74 @@ func (g *stableBernoulliGraph) Size() int {
 	return g.size
 }
 
+type stableBernoulliDigraph struct {
+	stableBernoulliGraph
+}
+
+func (g *stableBernoulliDigraph) EachEdge(f gogl.EdgeStep) {
+	if g.list == nil {
+		g.list = make([][]bool, g.order, g.order)
+
+		// Wrapping edge step function; records edges into the adjacency list, then passes edge along
+		ff := func(e gogl.Arc) bool {
+			if g.list[e.Source().(int)] == nil {
+				g.list[e.Source().(int)] = make([]bool, g.order, g.order)
+			}
+			g.list[e.Source().(int)][e.Target().(int)] = true
+			g.size++
+			return f(e)
+		}
+
+		bernoulliArcCreator(ff, int(g.order), g.ρ, g.trial)
+	} else {
+		var e gogl.Arc
+		for u, adj := range g.list {
+			for v, exists := range adj {
+				if exists {
+					e = gogl.NewArc(u, v)
+					if f(e) {
+						return
+					}
+				}
+			}
+		}
+	}
+}
+
+func (g *stableBernoulliDigraph) EachArc(f gogl.ArcStep) {
+	if g.list == nil {
+		g.list = make([][]bool, g.order, g.order)
+
+		// Wrapping edge step function; records edges into the adjacency list, then passes edge along
+		ff := func(e gogl.Arc) bool {
+			if g.list[e.Source().(int)] == nil {
+				g.list[e.Source().(int)] = make([]bool, g.order, g.order)
+			}
+			g.list[e.Source().(int)][e.Target().(int)] = true
+			g.size++
+			return f(e)
+		}
+
+		bernoulliArcCreator(ff, int(g.order), g.ρ, g.trial)
+	} else {
+		var e gogl.Arc
+		for u, adj := range g.list {
+			for v, exists := range adj {
+				if exists {
+					e = gogl.NewArc(u, v)
+					if f(e) {
+						return
+					}
+				}
+			}
+		}
+	}
+}
+
 type unstableBernoulliGraph struct {
 	order    uint
 	ρ        float64
 	trial    bTrial
-	directed bool
 }
 
 func (g unstableBernoulliGraph) EachVertex(f gogl.VertexStep) {
@@ -126,15 +196,19 @@ func (g unstableBernoulliGraph) EachVertex(f gogl.VertexStep) {
 }
 
 func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
-	if g.directed {
-		bernoulliArcCreator(f, int(g.order), g.ρ, g.trial)
-	} else {
-		bernoulliEdgeCreator(f, int(g.order), g.ρ, g.trial)
-	}
+	bernoulliEdgeCreator(f, int(g.order), g.ρ, g.trial)
 }
 
 func (g unstableBernoulliGraph) Order() int {
 	return int(g.order)
+}
+
+type unstableBernoulliDigraph struct {
+	unstableBernoulliGraph
+}
+
+func (g unstableBernoulliDigraph) EachArc(f gogl.ArcStep) {
+	bernoulliArcCreator(f, int(g.order), g.ρ, g.trial)
 }
 
 func bernoulliEdgeCreator(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
@@ -153,12 +227,12 @@ func bernoulliEdgeCreator(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
 	}
 }
 
-func bernoulliArcCreator(el gogl.EdgeStep, order int, ρ float64, cmp bTrial) {
-	var e gogl.Edge
+func bernoulliArcCreator(el gogl.ArcStep, order int, ρ float64, cmp bTrial) {
+	var e gogl.Arc
 	for u := 0; u < order; u++ {
 		for v := 0; v < order; v++ {
 			if u != v && cmp(ρ) {
-				e = gogl.NewEdge(u, v)
+				e = gogl.NewArc(u, v)
 				if el(e) {
 					return
 				}
