@@ -11,32 +11,51 @@ package gogl
 // the varying constraints and implementation needs, but still achieve optimal
 // performance given those constraints.
 
-// The Edge interface describes a connection between two vertices.
-//
-// Edge does not have an intrinsic opinion about directionality; gogl treats
-// that as a property of the overall Graph object in which the Edge appears
-// rather than a property of any individual Edge.
+// Edge describes an undirected connection between two vertices.
 type Edge interface {
-	Source() Vertex
-	Target() Vertex
-	Both() (Vertex, Vertex)
+	Both() (u Vertex, v Vertex) // No order consistency is implied.
 }
 
-// A WeightedEdge is an Edge that also has a numerical weight.
+// Arc describes a directed connection between two vertices.
+type Arc interface {
+	Both() (u Vertex, v Vertex) // u is tail/source, v is head/target.
+	Source() Vertex
+	Target() Vertex
+}
+
+// WeightedEdge describes an Edge that carries a numerical weight.
 type WeightedEdge interface {
 	Edge
 	Weight() float64
 }
 
-// A LabeledEdge is an Edge that also has a string label.
+// WeightedArc describes an Arc that carries a numerical weight.
+type WeightedArc interface {
+	Arc
+	Weight() float64
+}
+
+// LabeledEdge describes an Edge that also has a string label.
 type LabeledEdge interface {
 	Edge
 	Label() string
 }
 
-// A DataEdge is an Edge that also holds arbitrary data.
+// LabeledArc describes an Arc that also has a string label.
+type LabeledArc interface {
+	Arc
+	Label() string
+}
+
+// DataEdge describes an Edge that also holds arbitrary data.
 type DataEdge interface {
 	Edge
+	Data() interface{}
+}
+
+// DataArc describes an Arc that also holds arbitrary data.
+type DataArc interface {
+	Arc
 	Data() interface{}
 }
 
@@ -50,14 +69,6 @@ type baseEdge struct {
 	v Vertex
 }
 
-func (e baseEdge) Source() Vertex {
-	return e.u
-}
-
-func (e baseEdge) Target() Vertex {
-	return e.v
-}
-
 func (e baseEdge) Both() (Vertex, Vertex) {
 	return e.u, e.v
 }
@@ -65,6 +76,23 @@ func (e baseEdge) Both() (Vertex, Vertex) {
 // Create a new basic edge.
 func NewEdge(u, v Vertex) Edge {
 	return baseEdge{u: u, v: v}
+}
+
+type baseArc struct {
+	baseEdge
+}
+
+func (e baseArc) Source() Vertex {
+	return e.u
+}
+
+func (e baseArc) Target() Vertex {
+	return e.v
+}
+
+// Create a new basic arc.
+func NewArc(u, v Vertex) Arc {
+	return baseArc{baseEdge{u: u, v: v}}
 }
 
 // BaseWeightedEdge extends BaseEdge with weight data.
@@ -82,6 +110,20 @@ func NewWeightedEdge(u, v Vertex, weight float64) WeightedEdge {
 	return baseWeightedEdge{baseEdge{u: u, v: v}, weight}
 }
 
+type baseWeightedArc struct {
+	baseArc
+	w float64
+}
+
+func (e baseWeightedArc) Weight() float64 {
+	return e.w
+}
+
+// Create a new weighted arc.
+func NewWeightedArc(u, v Vertex, weight float64) WeightedArc {
+	return baseWeightedArc{baseArc{baseEdge{u: u, v: v}}, weight}
+}
+
 // BaseLabeledEdge extends BaseEdge with label data.
 type baseLabeledEdge struct {
 	baseEdge
@@ -97,6 +139,21 @@ func NewLabeledEdge(u, v Vertex, label string) LabeledEdge {
 	return baseLabeledEdge{baseEdge{u: u, v: v}, label}
 }
 
+// BaseLabeledArc extends BaseArc with label data.
+type baseLabeledArc struct {
+	baseArc
+	l string
+}
+
+func (e baseLabeledArc) Label() string {
+	return e.l
+}
+
+// Create a new labeled arc.
+func NewLabeledArc(u, v Vertex, label string) LabeledArc {
+	return baseLabeledArc{baseArc{baseEdge{u: u, v: v}}, label}
+}
+
 // BaseDataEdge extends BaseEdge with arbitrary data.
 type baseDataEdge struct {
 	baseEdge
@@ -110,4 +167,19 @@ func (e baseDataEdge) Data() interface{} {
 // Create a new "data" edge - an edge with arbitrary embedded data.
 func NewDataEdge(u, v Vertex, data interface{}) DataEdge {
 	return baseDataEdge{baseEdge{u: u, v: v}, data}
+}
+
+// BaseDataArc extends BaseArc with arbitrary data.
+type baseDataArc struct {
+	baseArc
+	d interface{}
+}
+
+func (e baseDataArc) Data() interface{} {
+	return e.d
+}
+
+// Create a new "data" edge - an edge with arbitrary embedded data.
+func NewDataArc(u, v Vertex, data interface{}) DataArc {
+	return baseDataArc{baseArc{baseEdge{u: u, v: v}}, data}
 }

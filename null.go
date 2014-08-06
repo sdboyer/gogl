@@ -20,6 +20,7 @@ var _ DataGraph = nullGraph(false)
 
 func (g nullGraph) EachVertex(f VertexStep)                   {}
 func (g nullGraph) EachEdge(f EdgeStep)                       {}
+func (g nullGraph) EachArc(f ArcStep)                         {}
 func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeStep)       {}
 func (g nullGraph) EachArcFrom(Vertex, EdgeStep)              {}
 func (g nullGraph) EachPredecessorOf(Vertex, VertexStep)      {}

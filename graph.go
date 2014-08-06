@@ -49,12 +49,20 @@ type GraphSource interface {
 	EdgeEnumerator
 }
 
+// DigraphSource is a subset of Digraph, describing the minimal set of methods
+// necessary to accomplish a naive full digraph traversal and copy.
+type DigraphSource interface {
+	GraphSource
+	ArcEnumerator
+}
+
 // Digraph (directed graph) describes a Graph where all the edges are directed.
 //
 // gogl treats edge directionality as a property of the graph, not the edge itself.
 // Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
 type Digraph interface {
 	Graph
+	ArcEnumerator         // Enumerates all arcs to an injected step function
 	IncidentArcEnumerator // Enumerates a vertex's incident in- or out-arcs to an injected step function
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	ProcessionEnumerator  // Enumerates a vertex's predecessor or successor vertices to a step function
@@ -167,6 +175,11 @@ type MutableDataGraph interface {
 // If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type EdgeStep func(Edge) (terminate bool)
 
+// ArcSteps are used as arguments to various enumerators. They are called once for each arc produced by the enumerator.
+//
+// If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type ArcStep func(Arc) (terminate bool)
+
 // VertexSteps are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
 //
 // If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
@@ -185,6 +198,14 @@ type EdgeEnumerator interface {
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
 	EachEdge(EdgeStep)
+}
+
+// An ArcEnumerator iteratively enumerates edges, and can indicate the number of edges present.
+type ArcEnumerator interface {
+	// Calls the provided step function once with each edge in the graph. If a
+	// specialized edge type (e.g., weighted) is known to be used by the
+	// graph, it is the calling code's responsibility to type assert.
+	EachArc(ArcStep)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
@@ -257,10 +278,22 @@ type EdgeSetMutator interface {
 	RemoveEdges(edges ...Edge)
 }
 
+// An ArcSetMutator allows the addition and removal of arcs from a set.
+type ArcSetMutator interface {
+	AddArcs(arcs ...Arc)
+	RemoveArcs(arcs ...Arc)
+}
+
 // A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
 type WeightedEdgeSetMutator interface {
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A WeightedArcSetMutator allows the addition and removal of weighted arcs from a set.
+type WeightedArcSetMutator interface {
+	AddArcs(arcs ...WeightedArc)
+	RemoveArcs(arcs ...WeightedArc)
 }
 
 // A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
@@ -269,10 +302,22 @@ type LabeledEdgeSetMutator interface {
 	RemoveEdges(edges ...LabeledEdge)
 }
 
+// A LabeledArcSetMutator allows the addition and removal of labeled arcs from a set.
+type LabeledArcSetMutator interface {
+	AddArcs(arcs ...LabeledArc)
+	RemoveArcs(arcs ...LabeledArc)
+}
+
 // A DataEdgeSetMutator allows the addition and removal of data edges from a set.
 type DataEdgeSetMutator interface {
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
+}
+
+// A DataArcSetMutator allows the addition and removal of data arcs from a set.
+type DataArcSetMutator interface {
+	AddArcs(arcs ...DataArc)
+	RemoveArcs(arcs ...DataArc)
 }
 
 /* Optional optimization interfaces
