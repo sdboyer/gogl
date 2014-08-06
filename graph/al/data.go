@@ -209,13 +209,29 @@ func (g *dataDirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *dataDirected) EachArc(f ArcStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target := range adjacent {
+			if f(NewArc(source, target)) {
+				return
+			}
+		}
+	}
+}
+
 // Indicates whether or not the given edge is present in the graph. It matches
 // based solely on the presence of an edge, disregarding edge property.
 func (g *dataDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
 	return exists
 }
 
@@ -226,7 +242,8 @@ func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if data, exists := g.list[u][v]; exists {
 		return data == edge.Data()
 	}
 	return false
@@ -283,10 +300,11 @@ func (g *dataDirected) AddEdges(edges ...DataEdge) {
 // Adds a new edge to the graph.
 func (g *dataDirected) addEdges(edges ...DataEdge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Data()
+		if _, exists := g.list[u][v]; !exists {
+			g.list[u][v] = edge.Data()
 			g.size++
 		}
 	}
@@ -408,9 +426,10 @@ func (g *dataUndirected) HasEdge(edge Edge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if _, exists := g.list[u][v]; exists {
 		return true
-	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if _, exists := g.list[v][u]; exists {
 		return true
 	}
 	return false
@@ -424,9 +443,10 @@ func (g *dataUndirected) HasDataEdge(edge DataEdge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if data, exists := g.list[u][v]; exists {
 		return edge.Data() == data
-	} else if data, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if data, exists := g.list[v][u]; exists {
 		return edge.Data() == data
 	}
 	return false
@@ -480,12 +500,13 @@ func (g *dataUndirected) AddEdges(edges ...DataEdge) {
 // Adds a new edge to the graph.
 func (g *dataUndirected) addEdges(edges ...DataEdge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+		if _, exists := g.list[u][v]; !exists {
 			d := edge.Data()
-			g.list[edge.Source()][edge.Target()] = d
-			g.list[edge.Target()][edge.Source()] = d
+			g.list[u][v] = d
+			g.list[v][u] = d
 			g.size++
 		}
 	}

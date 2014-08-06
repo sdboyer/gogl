@@ -215,7 +215,8 @@ func (g *weightedDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
 	return exists
 }
 
@@ -226,7 +227,8 @@ func (g *weightedDirected) HasWeightedEdge(edge WeightedEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if weight, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if weight, exists := g.list[u][v]; exists {
 		return weight == edge.Weight()
 	}
 	return false
@@ -268,25 +270,25 @@ func (g *weightedDirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds edges to the graph.
-func (g *weightedDirected) AddEdges(edges ...WeightedEdge) {
-	if len(edges) == 0 {
+// Adds arcs to the graph.
+func (g *weightedDirected) AddArcs(arcs ...WeightedArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.addEdges(edges...)
+	g.addArcs(arcs...)
 }
 
-// Adds a new edge to the graph.
-func (g *weightedDirected) addEdges(edges ...WeightedEdge) {
-	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+// Adds a new arc to the graph.
+func (g *weightedDirected) addArcs(arcs ...WeightedArc) {
+	for _, arc := range arcs {
+		g.ensureVertex(arc.Source(), arc.Target())
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Weight()
+		if _, exists := g.list[arc.Source()][arc.Target()]; !exists {
+			g.list[arc.Source()][arc.Target()] = arc.Weight()
 			g.size++
 		}
 	}
@@ -377,6 +379,21 @@ func (g *weightedUndirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *weightedDirected) EachArc(f ArcStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target, weight := range adjacent {
+			if f(NewWeightedArc(source, target, weight)) {
+				return
+			}
+		}
+	}
+}
+
 // Enumerates the set of all edges incident to the provided vertex.
 func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
@@ -408,9 +425,10 @@ func (g *weightedUndirected) HasEdge(edge Edge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if _, exists := g.list[u][v]; exists {
 		return true
-	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if _, exists := g.list[v][u]; exists {
 		return true
 	}
 	return false
@@ -424,9 +442,10 @@ func (g *weightedUndirected) HasWeightedEdge(edge WeightedEdge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if weight, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if weight, exists := g.list[u][v]; exists {
 		return edge.Weight() == weight
-	} else if weight, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if weight, exists := g.list[v][u]; exists {
 		return edge.Weight() == weight
 	}
 	return false
@@ -480,12 +499,13 @@ func (g *weightedUndirected) AddEdges(edges ...WeightedEdge) {
 // Adds a new edge to the graph.
 func (g *weightedUndirected) addEdges(edges ...WeightedEdge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+		if _, exists := g.list[u][v]; !exists {
 			w := edge.Weight()
-			g.list[edge.Source()][edge.Target()] = w
-			g.list[edge.Target()][edge.Source()] = w
+			g.list[u][v] = w
+			g.list[v][u] = w
 			g.size++
 		}
 	}
