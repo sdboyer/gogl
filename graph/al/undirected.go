@@ -72,9 +72,10 @@ func (g *mutableUndirected) HasEdge(edge Edge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if _, exists := g.list[u][v]; exists {
 		return true
-	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if _, exists := g.list[v][u]; exists {
 		return true
 	}
 	return false
@@ -128,11 +129,12 @@ func (g *mutableUndirected) AddEdges(edges ...Edge) {
 // Adds a new edge to the graph.
 func (g *mutableUndirected) addEdges(edges ...Edge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = keyExists
-			g.list[edge.Target()][edge.Source()] = keyExists
+		if _, exists := g.list[u][v]; !exists {
+			g.list[u][v] = keyExists
+			g.list[v][u] = keyExists
 			g.size++
 		}
 	}
