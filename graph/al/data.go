@@ -285,26 +285,26 @@ func (g *dataDirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds edges to the graph.
-func (g *dataDirected) AddEdges(edges ...DataEdge) {
-	if len(edges) == 0 {
+// Adds arcs to the graph.
+func (g *dataDirected) AddArcs(arcs ...DataArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.addEdges(edges...)
+	g.addArcs(arcs...)
 }
 
-// Adds a new edge to the graph.
-func (g *dataDirected) addEdges(edges ...DataEdge) {
-	for _, edge := range edges {
-		u, v := edge.Both()
+// Adds a new arc to the graph.
+func (g *dataDirected) addArcs(arcs ...DataArc) {
+	for _, arc := range arcs {
+		u, v := arc.Both()
 		g.ensureVertex(u, v)
 
 		if _, exists := g.list[u][v]; !exists {
-			g.list[u][v] = edge.Data()
+			g.list[u][v] = arc.Data()
 			g.size++
 		}
 	}

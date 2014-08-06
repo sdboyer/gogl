@@ -120,9 +120,8 @@ var GraphFixtures = map[string]GraphSource{
 func TestHookup(t *testing.T) { TestingT(t) }
 
 // Returns an arc with the directionality swapped.
-func Swap(e Edge) Edge {
-	u, v := e.Both()
-	return NewEdge(v, u)
+func Swap(a Arc) Arc {
+	return NewArc(a.Target(), a.Source())
 }
 
 func gdebug(g Graph, args ...interface{}) {
@@ -213,7 +212,7 @@ func (s *GraphSuite) TestHasVertex(c *C) {
 
 func (s *GraphSuite) TestHasEdge(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
-	c.Assert(g.HasEdge(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
+	c.Assert(g.HasEdge(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
 	c.Assert(g.HasEdge(NewEdge("qux", "quark")), Equals, false)
 }
 
@@ -303,8 +302,8 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	flipset := []Edge{
-		Swap(GraphFixtures["2e3v"].(EdgeList)[0]),
-		Swap(GraphFixtures["2e3v"].(EdgeList)[1]),
+		Swap(GraphFixtures["2e3v"].(ArcList)[0]),
+		Swap(GraphFixtures["2e3v"].(ArcList)[1]),
 	}
 
 	eset := set.NewNonTS()
@@ -312,35 +311,35 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Both()))
+		eset.Add(NewArc(e.Both()))
 		return
 	})
 
 	c.Assert(hit, Equals, 1)
 	if s.Directed {
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
 	} else {
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]) != eset.Has(flipset[0]), Equals, true)
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]) != eset.Has(flipset[1]), Equals, false)
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]) != eset.Has(flipset[1]), Equals, false)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
 	}
 
 	eset = set.NewNonTS()
 	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
-		eset.Add(NewEdge(e.Both()))
+		eset.Add(NewArc(e.Both()))
 		return
 	})
 
 	c.Assert(hit, Equals, 3)
 	if s.Directed {
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, true)
 	} else {
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]) != eset.Has(flipset[0]), Equals, true)
-		c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]) != eset.Has(flipset[1]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]) != eset.Has(flipset[0]), Equals, true)
+		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]) != eset.Has(flipset[1]), Equals, true)
 	}
 }
 
@@ -399,11 +398,11 @@ func (s *DigraphSuite) TestTranspose(c *C) {
 
 	g2 := g.Transpose()
 
-	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(EdgeList)[0])), Equals, true)
-	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(EdgeList)[1])), Equals, true)
+	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(ArcList)[0])), Equals, true)
+	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(ArcList)[1])), Equals, true)
 
-	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, false)
-	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
+	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(ArcList)[0]), Equals, false)
+	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
 }
 
 func (s *DigraphSuite) TestOutDegreeOf(c *C) {
@@ -481,9 +480,9 @@ func (s *DigraphSuite) TestEachArcTo(c *C) {
 	})
 
 	c.Assert(hit, Equals, 2)
-	c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
-	c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
-	c.Assert(eset.Has(NewEdge("qux", "bar")), Equals, true)
+	c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
+	c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
+	c.Assert(eset.Has(NewArc("qux", "bar")), Equals, true)
 }
 
 func (s *DigraphSuite) TestEachArcToTermination(c *C) {
@@ -550,9 +549,9 @@ func (s *DigraphSuite) TestEachArcFrom(c *C) {
 	})
 
 	c.Assert(hit, Equals, 2)
-	c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[0]), Equals, true)
-	c.Assert(eset.Has(GraphFixtures["2e3v"].(EdgeList)[1]), Equals, false)
-	c.Assert(eset.Has(NewEdge("foo", "qux")), Equals, true)
+	c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
+	c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
+	c.Assert(eset.Has(NewArc("foo", "qux")), Equals, true)
 }
 
 func (s *DigraphSuite) TestEachArcFromTermination(c *C) {
@@ -758,7 +757,7 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Factory(GraphFixtures["w-2e3v"]).(WeightedGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasWeightedEdge(GraphFixtures["w-2e3v"].(WeightedEdgeList)[0]), Equals, true)
+	c.Assert(g.HasWeightedEdge(GraphFixtures["w-2e3v"].(WeightedArcList)[0].(WeightedArc)), Equals, true)
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 1)), Equals, false) // wrong weight
 }
 
@@ -898,7 +897,7 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 	g := s.Factory(GraphFixtures["l-2e3v"]).(LabeledGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasLabeledEdge(GraphFixtures["l-2e3v"].(LabeledEdgeList)[0]), Equals, true)
+	c.Assert(g.HasLabeledEdge(GraphFixtures["l-2e3v"].(LabeledArcList)[0].(LabeledArc)), Equals, true)
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
@@ -1038,7 +1037,7 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 	g := s.Factory(GraphFixtures["d-2e3v"]).(DataGraph)
 
 	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasDataEdge(GraphFixtures["d-2e3v"].(DataEdgeList)[1]), Equals, true)
+	c.Assert(g.HasDataEdge(GraphFixtures["d-2e3v"].(DataArcList)[1].(DataArc)), Equals, true)
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
