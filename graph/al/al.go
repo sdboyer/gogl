@@ -1,8 +1,8 @@
 package al
 
 import (
-	"sync"
 	. "github.com/sdboyer/gogl"
+	"sync"
 )
 
 /*
@@ -55,13 +55,19 @@ var alCreators = map[GraphProperties]func() Graph{
 // will panic.
 func G(gs GraphSpec) Graph {
 	for gp, gf := range alCreators {
-		flipped := gp &^ gs.Props
 
 		// TODO satisfiability here is not so narrow
-		if flipped == 0 {
+		if gp&^gs.Props == 0 {
 			if gs.Source != nil {
-				return functorToAdjacencyList(gs.Source, gf())
-
+				if gs.Props&G_DIRECTED == G_DIRECTED {
+					if dgs, ok := gs.Source.(DigraphSource); ok {
+						return functorToDirectedAdjacencyList(dgs, gf().(al_digraph))
+					} else {
+						panic("Cannot create a digraph from a graph.")
+					}
+				} else {
+					return functorToAdjacencyList(gs.Source, gf().(al_graph))
+				}
 			} else {
 				return gf()
 			}
