@@ -77,6 +77,14 @@ type MutableGraph interface {
 	EdgeSetMutator
 }
 
+// MutableDigraph describes a digraph with basic arcs (no weighting, labeling, etc.)
+// that can be modified freely by adding or removing vertices or arcs.
+type MutableDigraph interface {
+	Graph
+	VertexSetMutator
+	ArcSetMutator
+}
+
 // A simple graph is in opposition to a multigraph or pseudograph: it disallows loops and
 // parallel edges.
 type SimpleGraph interface {

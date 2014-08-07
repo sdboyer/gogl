@@ -79,7 +79,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 
 	set2 := set.NewNonTS()
 	for _, e := range slice2 {
-		set2.Add(e)
+		set2.Add(NewEdge(e.Both()))
 	}
 
 	c.Assert(set2.Has(NewEdge("foo", "bar")), Equals, true)
@@ -109,7 +109,7 @@ func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set.Has(NewArc("foo", "bar")), Equals, true)
 }
 
 func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
@@ -122,7 +122,7 @@ func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
 		set.Add(e)
 	}
 
-	c.Assert(set.Has(NewEdge("foo", "bar")), Equals, true)
+	c.Assert(set.Has(NewArc("foo", "bar")), Equals, true)
 }
 
 type CountingFunctorsSuite struct{}
