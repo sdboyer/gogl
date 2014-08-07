@@ -294,18 +294,18 @@ func (g *weightedDirected) addArcs(arcs ...WeightedArc) {
 	}
 }
 
-// Removes edges from the graph. This does NOT remove vertex members of the
-// removed edges.
-func (g *weightedDirected) RemoveEdges(edges ...WeightedEdge) {
-	if len(edges) == 0 {
+// Removes arcs from the graph. This does NOT remove vertex members of the
+// removed arcs.
+func (g *weightedDirected) RemoveArcs(arcs ...WeightedArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	for _, edge := range edges {
-		s, t := edge.Both()
+	for _, arc := range arcs {
+		s, t := arc.Both()
 		if _, exists := g.list[s][t]; exists {
 			delete(g.list[s], t)
 			g.size--
