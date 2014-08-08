@@ -30,12 +30,12 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 		return
 	})
 
-	NullGraph.EachArcFrom("foo", func(e Edge) (terminate bool) {
+	NullGraph.EachArcFrom("foo", func(e Arc) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})
 
-	NullGraph.EachArcTo("foo", func(e Edge) (terminate bool) {
+	NullGraph.EachArcTo("foo", func(e Arc) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})

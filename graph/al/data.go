@@ -145,7 +145,7 @@ func (g *dataDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *dataDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -154,7 +154,7 @@ func (g *dataDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, data := range g.list[v] {
-		if f(NewDataEdge(v, adjacent, data)) {
+		if f(NewDataArc(v, adjacent, data)) {
 			return
 		}
 	}
@@ -168,7 +168,7 @@ func (g *dataDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *dataDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *dataDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -179,7 +179,7 @@ func (g *dataDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, data := range adjacent {
 			if target == v {
-				if f(NewDataEdge(candidate, target, data)) {
+				if f(NewDataArc(candidate, target, data)) {
 					return
 				}
 			}
@@ -209,13 +209,41 @@ func (g *dataDirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *dataDirected) EachArc(f ArcStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target, data := range adjacent {
+			if f(NewDataArc(source, target, data)) {
+				return
+			}
+		}
+	}
+}
+
 // Indicates whether or not the given edge is present in the graph. It matches
 // based solely on the presence of an edge, disregarding edge property.
 func (g *dataDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *dataDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
@@ -226,8 +254,24 @@ func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if data, exists := g.list[u][v]; exists {
 		return data == edge.Data()
+	} else if data, exists = g.list[v][u]; exists {
+		return data == edge.Data()
+	}
+	return false
+}
+
+// Indicates whether or not the given data arc is present in the graph.
+// It will only match if the provided DataEdge has the same data as
+// the edge contained in the graph.
+func (g *dataDirected) HasDataArc(arc DataArc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if data, exists := g.list[arc.Source()][arc.Target()]; exists {
+		return data == arc.Data()
 	}
 	return false
 }
@@ -268,42 +312,43 @@ func (g *dataDirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds edges to the graph.
-func (g *dataDirected) AddEdges(edges ...DataEdge) {
-	if len(edges) == 0 {
+// Adds arcs to the graph.
+func (g *dataDirected) AddArcs(arcs ...DataArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.addEdges(edges...)
+	g.addArcs(arcs...)
 }
 
-// Adds a new edge to the graph.
-func (g *dataDirected) addEdges(edges ...DataEdge) {
-	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+// Adds a new arc to the graph.
+func (g *dataDirected) addArcs(arcs ...DataArc) {
+	for _, arc := range arcs {
+		u, v := arc.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Data()
+		if _, exists := g.list[u][v]; !exists {
+			g.list[u][v] = arc.Data()
 			g.size++
 		}
 	}
 }
 
-// Removes edges from the graph. This does NOT remove vertex members of the
-// removed edges.
-func (g *dataDirected) RemoveEdges(edges ...DataEdge) {
-	if len(edges) == 0 {
+// Removes arcs from the graph. This does NOT remove vertex members of the
+// removed arcs.
+func (g *dataDirected) RemoveArcs(arcs ...DataArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	for _, edge := range edges {
-		s, t := edge.Both()
+	for _, arc := range arcs {
+		s, t := arc.Both()
 		if _, exists := g.list[s][t]; exists {
 			delete(g.list[s], t)
 			g.size--
@@ -408,12 +453,9 @@ func (g *dataUndirected) HasEdge(edge Edge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
-		return true
-	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
-		return true
-	}
-	return false
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
+	return exists
 }
 
 // Indicates whether or not the given property edge is present in the graph.
@@ -424,9 +466,10 @@ func (g *dataUndirected) HasDataEdge(edge DataEdge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if data, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if data, exists := g.list[u][v]; exists {
 		return edge.Data() == data
-	} else if data, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if data, exists := g.list[v][u]; exists {
 		return edge.Data() == data
 	}
 	return false
@@ -480,12 +523,13 @@ func (g *dataUndirected) AddEdges(edges ...DataEdge) {
 // Adds a new edge to the graph.
 func (g *dataUndirected) addEdges(edges ...DataEdge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+		if _, exists := g.list[u][v]; !exists {
 			d := edge.Data()
-			g.list[edge.Source()][edge.Target()] = d
-			g.list[edge.Target()][edge.Source()] = d
+			g.list[u][v] = d
+			g.list[v][u] = d
 			g.size++
 		}
 	}

@@ -40,6 +40,27 @@ func (g GraphLiteralFixture) EachEdge(f EdgeStep) {
 	}
 }
 
+func (g GraphLiteralFixture) EachArc(f ArcStep) {
+	var al []Arc
+	if g {
+		al = []Arc{
+			NewArc("foo", "bar"),
+			NewArc("bar", "baz"),
+		}
+	} else {
+		al = []Arc{
+			NewArc("bar", "foo"),
+			NewArc("baz", "bar"),
+		}
+	}
+
+	for _, e := range al {
+		if f(e) {
+			return
+		}
+	}
+}
+
 func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	if g {
 		switch v {
@@ -70,41 +91,41 @@ func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArcFrom(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) EachArcFrom(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "foo":
-			f(NewEdge("foo", "bar"))
+			f(NewArc("foo", "bar"))
 		case "bar":
-			f(NewEdge("bar", "baz"))
+			f(NewArc("bar", "baz"))
 		default:
 		}
 	} else {
 		switch v {
 		case "bar":
-			f(NewEdge("bar", "foo"))
+			f(NewArc("bar", "foo"))
 		case "baz":
-			f(NewEdge("baz", "bar"))
+			f(NewArc("baz", "bar"))
 		default:
 		}
 	}
 }
 
-func (g GraphLiteralFixture) EachArcTo(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) EachArcTo(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "bar":
-			f(NewEdge("foo", "bar"))
+			f(NewArc("foo", "bar"))
 		case "baz":
-			f(NewEdge("bar", "baz"))
+			f(NewArc("bar", "baz"))
 		default:
 		}
 	} else {
 		switch v {
 		case "foo":
-			f(NewEdge("bar", "foo"))
+			f(NewArc("bar", "foo"))
 		case "bar":
-			f(NewEdge("baz", "bar"))
+			f(NewArc("baz", "bar"))
 		default:
 		}
 	}
@@ -252,7 +273,6 @@ func (g GraphLiteralFixture) DegreeOf(v Vertex) (degree int, exists bool) {
 func (g GraphLiteralFixture) HasEdge(e Edge) bool {
 	u, v := e.Both()
 
-	// TODO this is a little hinky until Arc is introduced
 	switch u {
 	case "foo":
 		return v == "bar"
@@ -262,6 +282,30 @@ func (g GraphLiteralFixture) HasEdge(e Edge) bool {
 		return v == "bar"
 	default:
 		return false
+	}
+}
+
+func (g GraphLiteralFixture) HasArc(a Arc) bool {
+	u, v := a.Both()
+
+	if g {
+		switch u {
+		case "foo":
+			return v == "bar"
+		case "bar":
+			return v == "baz"
+		default:
+			return false
+		}
+	} else {
+		switch u {
+		case "bar":
+			return v == "foo"
+		case "baz":
+			return v == "bar"
+		default:
+			return false
+		}
 	}
 }
 

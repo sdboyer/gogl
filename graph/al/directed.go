@@ -58,6 +58,21 @@ func (g *mutableDirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *mutableDirected) EachArc(f ArcStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if f(NewArc(source, target)) {
+				return
+			}
+		}
+	}
+}
+
 // Enumerates the set of all edges incident to the provided vertex.
 func (g *mutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
@@ -81,7 +96,7 @@ func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -90,7 +105,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(NewEdge(v, adjacent)) {
+		if f(NewArc(v, adjacent)) {
 			return
 		}
 	}
@@ -104,7 +119,7 @@ func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *mutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -115,7 +130,7 @@ func (g *mutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(NewEdge(candidate, target)) {
+				if f(NewArc(candidate, target)) {
 					return
 				}
 			}
@@ -135,7 +150,20 @@ func (g *mutableDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *mutableDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
@@ -178,42 +206,42 @@ func (g *mutableDirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds edges to the graph.
-func (g *mutableDirected) AddEdges(edges ...Edge) {
-	if len(edges) == 0 {
+// Adds arcs to the graph.
+func (g *mutableDirected) AddArcs(arcs ...Arc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.addEdges(edges...)
+	g.addArcs(arcs...)
 }
 
-// Adds a new edge to the graph.
-func (g *mutableDirected) addEdges(edges ...Edge) {
-	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+// Adds a new arc to the graph.
+func (g *mutableDirected) addArcs(arcs ...Arc) {
+	for _, arc := range arcs {
+		g.ensureVertex(arc.Source(), arc.Target())
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = keyExists
+		if _, exists := g.list[arc.Source()][arc.Target()]; !exists {
+			g.list[arc.Source()][arc.Target()] = keyExists
 			g.size++
 		}
 	}
 }
 
-// Removes edges from the graph. This does NOT remove vertex members of the
-// removed edges.
-func (g *mutableDirected) RemoveEdges(edges ...Edge) {
-	if len(edges) == 0 {
+// Removes arcs from the graph. This does NOT remove vertex members of the
+// removed arcs.
+func (g *mutableDirected) RemoveArcs(arcs ...Arc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	for _, edge := range edges {
-		s, t := edge.Both()
+	for _, arc := range arcs {
+		s, t := arc.Both()
 		if _, exists := g.list[s][t]; exists {
 			delete(g.list[s], t)
 			g.size--
@@ -269,6 +297,18 @@ func (g *immutableDirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *immutableDirected) EachArc(f ArcStep) {
+	for source, adjacent := range g.list {
+		for target, _ := range adjacent {
+			if f(NewArc(source, target)) {
+				return
+			}
+		}
+	}
+}
+
 // Enumerates the set of all edges incident to the provided vertex.
 func (g *immutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	eachEdgeIncidentToDirected(g, v, f)
@@ -287,13 +327,13 @@ func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *immutableDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
 
 	for adjacent, _ := range g.list[v] {
-		if f(NewEdge(v, adjacent)) {
+		if f(NewArc(v, adjacent)) {
 			return
 		}
 	}
@@ -304,7 +344,7 @@ func (g *immutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *immutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
@@ -312,7 +352,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, _ := range adjacent {
 			if target == v {
-				if f(NewEdge(candidate, target)) {
+				if f(NewArc(candidate, target)) {
 					return
 				}
 			}
@@ -333,7 +373,17 @@ func (g *immutableDirected) Density() float64 {
 
 // Indicates whether or not the given edge is present in the graph.
 func (g *immutableDirected) HasEdge(edge Edge) bool {
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *immutableDirected) HasArc(arc Arc) bool {
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
@@ -353,7 +403,7 @@ func (g *immutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool)
 // a full scan of the graph's edge set.
 func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
-		g.EachEdge(func(e Edge) (terminate bool) {
+		g.EachArc(func(e Arc) (terminate bool) {
 			if vertex == e.Target() {
 				degree++
 			}
@@ -398,13 +448,13 @@ func (g *immutableDirected) Transpose() Digraph {
 	return g2
 }
 
-// Adds a new edge to the graph.
-func (g *immutableDirected) addEdges(edges ...Edge) {
-	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+// Adds a new arc to the graph.
+func (g *immutableDirected) addArcs(arcs ...Arc) {
+	for _, arc := range arcs {
+		g.ensureVertex(arc.Source(), arc.Target())
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = keyExists
+		if _, exists := g.list[arc.Source()][arc.Target()]; !exists {
+			g.list[arc.Source()][arc.Target()] = keyExists
 			g.size++
 		}
 	}

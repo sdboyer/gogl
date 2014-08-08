@@ -13,10 +13,9 @@ type al_graph interface {
 }
 
 type al_digraph interface {
-	al_graph
-	IncidentArcEnumerator
-	DirectedDegreeChecker
-	Transposer
+	Digraph
+	ensureVertex(...Vertex)
+	hasVertex(Vertex) bool
 }
 
 type al_ea interface {
@@ -24,9 +23,19 @@ type al_ea interface {
 	addEdges(...Edge)
 }
 
+type al_dea interface {
+	al_digraph
+	addArcs(...Arc)
+}
+
 type al_wea interface {
 	al_graph
 	addEdges(...WeightedEdge)
+}
+
+type al_dwea interface {
+	al_digraph
+	addArcs(...WeightedArc)
 }
 
 type al_lea interface {
@@ -34,16 +43,26 @@ type al_lea interface {
 	addEdges(...LabeledEdge)
 }
 
+type al_dlea interface {
+	al_digraph
+	addArcs(...LabeledArc)
+}
+
 type al_pea interface {
 	al_graph
 	addEdges(...DataEdge)
 }
 
+type al_dpea interface {
+	al_digraph
+	addArcs(...DataArc)
+}
+
 // Copies an incoming graph into any of the implemented adjacency list types.
 //
 // This encapsulates the full matrix of conversion possibilities between
-// different graph edge types.
-func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
+// different graph edge types, for undirected graphs.
+func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 	vf := func(from GraphSource, to al_graph) {
 		if Order(to) != Order(from) {
 			from.EachVertex(func(vertex Vertex) (terminate bool) {
@@ -64,7 +83,8 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 			if e, ok := edge.(WeightedEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(NewWeightedEdge(edge.Source(), edge.Target(), 0))
+				u, v := edge.Both()
+				g.addEdges(NewWeightedEdge(u, v, 0))
 			}
 			return
 		})
@@ -74,7 +94,8 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 			if e, ok := edge.(LabeledEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(NewLabeledEdge(edge.Source(), edge.Target(), ""))
+				u, v := edge.Both()
+				g.addEdges(NewLabeledEdge(u, v, ""))
 			}
 			return
 		})
@@ -84,8 +105,15 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 			if e, ok := edge.(DataEdge); ok {
 				g.addEdges(e)
 			} else {
-				g.addEdges(NewDataEdge(edge.Source(), edge.Target(), nil))
+				u, v := edge.Both()
+				g.addEdges(NewDataEdge(u, v, nil))
 			}
+			return
+		})
+		vf(from, g)
+	} else if g, ok := to.(al_ea); ok {
+		from.EachEdge(func(edge Edge) (terminate bool) {
+			g.addEdges(edge)
 			return
 		})
 		vf(from, g)
@@ -94,6 +122,63 @@ func functorToAdjacencyList(from GraphSource, to interface{}) Graph {
 	}
 
 	return to.(Graph)
+}
+
+// Copies an incoming graph into any of the implemented adjacency list types.
+//
+// This encapsulates the full matrix of conversion possibilities between
+// different graph edge types, for directed graphs.
+func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
+	vf := func(from GraphSource, to al_graph) {
+		if Order(to) != Order(from) {
+			from.EachVertex(func(vertex Vertex) (terminate bool) {
+				to.ensureVertex(vertex)
+				return
+			})
+		}
+	}
+
+	if g, ok := to.(al_dea); ok {
+		from.EachArc(func(arc Arc) (terminate bool) {
+			g.addArcs(arc)
+			return
+		})
+		vf(from, g)
+	} else if g, ok := to.(al_dwea); ok {
+		from.EachArc(func(arc Arc) (terminate bool) {
+			if e, ok := arc.(WeightedArc); ok {
+				g.addArcs(e)
+			} else {
+				g.addArcs(NewWeightedArc(arc.Source(), arc.Target(), 0))
+			}
+			return
+		})
+		vf(from, g)
+	} else if g, ok := to.(al_dlea); ok {
+		from.EachArc(func(arc Arc) (terminate bool) {
+			if e, ok := arc.(LabeledArc); ok {
+				g.addArcs(e)
+			} else {
+				g.addArcs(NewLabeledArc(arc.Source(), arc.Target(), ""))
+			}
+			return
+		})
+		vf(from, g)
+	} else if g, ok := to.(al_dpea); ok {
+		from.EachArc(func(arc Arc) (terminate bool) {
+			if e, ok := arc.(DataArc); ok {
+				g.addArcs(e)
+			} else {
+				g.addArcs(NewDataArc(arc.Source(), arc.Target(), nil))
+			}
+			return
+		})
+		vf(from, g)
+	} else {
+		panic("Target graph did not implement a recognized adjacency list internal type")
+	}
+
+	return to.(Digraph)
 }
 
 func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
@@ -191,9 +276,9 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 
 }
 
-func inDegreeOf(g al_graph, v Vertex) (degree int, exists bool) {
+func inDegreeOf(g al_digraph, v Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(v); exists {
-		g.EachEdge(func(e Edge) (terminate bool) {
+		g.EachArc(func(e Arc) (terminate bool) {
 			if v == e.Target() {
 				degree++
 			}
@@ -209,7 +294,7 @@ func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeStep) {
 	}
 
 	var terminate bool
-	interloper := func(e Edge) bool {
+	interloper := func(e Arc) bool {
 		terminate = terminate || f(e)
 		return terminate
 	}

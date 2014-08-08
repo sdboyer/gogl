@@ -18,6 +18,12 @@ var dfEdgeSet = gogl.EdgeList{
 	gogl.NewEdge("baz", "qux"),
 }
 
+var dfArcSet = gogl.ArcList{
+	gogl.NewArc("foo", "bar"),
+	gogl.NewArc("bar", "baz"),
+	gogl.NewArc("baz", "qux"),
+}
+
 type DepthFirstSearchSuite struct{}
 
 var _ = Suite(&DepthFirstSearchSuite{})
@@ -25,7 +31,7 @@ var _ = Suite(&DepthFirstSearchSuite{})
 // Basic test of outermost search functionality.
 func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 	// extra edge demonstrates non-productive search paths are not included
-	extraSet := append(dfEdgeSet, gogl.NewEdge("bar", "quark"))
+	extraSet := append(dfArcSet, gogl.NewArc("bar", "quark"))
 	// directed
 	g := gogl.Spec().Directed().Using(extraSet).
 		Create(al.G).(gogl.Digraph)
@@ -45,7 +51,7 @@ func (s *DepthFirstSearchSuite) TestSearch(c *C) {
 
 func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 	g := gogl.Spec().Mutable().Directed().
-		Create(al.G).(gogl.MutableGraph)
+		Create(al.G).(gogl.MutableDigraph)
 	g.EnsureVertex("foo")
 
 	_, err := Search(g.(gogl.Digraph), "foo", "bar")
@@ -56,7 +62,7 @@ func (s *DepthFirstSearchSuite) TestSearchVertexVerification(c *C) {
 
 func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	g := gogl.Spec().Directed().
-		Mutable().Using(dfEdgeSet).
+		Mutable().Using(dfArcSet).
 		Create(al.G).(gogl.Digraph)
 
 	sources, err := FindSources(g)
@@ -64,7 +70,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	c.Assert(err, IsNil)
 
 	// Ensure it finds multiple, as well
-	g.(gogl.MutableGraph).AddEdges(gogl.NewEdge("quark", "baz"))
+	g.(gogl.MutableDigraph).AddArcs(gogl.NewArc("quark", "baz"))
 	sources, err = FindSources(g)
 
 	possibles := [][]gogl.Vertex{
@@ -77,7 +83,7 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 
 func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	g := gogl.Spec().Directed().
-		Mutable().Using(dfEdgeSet).
+		Mutable().Using(dfArcSet).
 		Create(al.G).(gogl.Digraph)
 
 	tsl, err := Toposort(g, "foo")
@@ -85,7 +91,7 @@ func (s *DepthFirstSearchSuite) TestToposort(c *C) {
 	c.Assert(tsl, DeepEquals, []gogl.Vertex{"qux", "baz", "bar", "foo"})
 
 	// add a cycle, ensure error comes back
-	g.(gogl.MutableGraph).AddEdges(gogl.NewEdge("bar", "foo"))
+	g.(gogl.MutableDigraph).AddArcs(gogl.NewArc("bar", "foo"))
 	tsl, err = Toposort(g, "foo")
 	c.Assert(err, ErrorMatches, "Cycle detected in graph")
 
@@ -108,7 +114,7 @@ type TestVisitor struct {
 	c           *C
 	vertices    []string
 	colors      map[string]int
-	found_edges []gogl.Edge
+	found_edges []gogl.Arc
 }
 
 func (v *TestVisitor) OnBackEdge(vertex gogl.Vertex) {
@@ -124,7 +130,7 @@ func (v *TestVisitor) OnStartVertex(vertex gogl.Vertex) {
 
 func (v *TestVisitor) OnExamineEdge(edge gogl.Edge) {
 	v.c.Assert(v.found_edges, Not(Contains), edge)
-	v.found_edges = append(v.found_edges, edge)
+	v.found_edges = append(v.found_edges, edge.(gogl.Arc))
 }
 
 func (v *TestVisitor) OnFinishVertex(vertex gogl.Vertex) {
@@ -136,12 +142,12 @@ func (v *TestVisitor) OnFinishVertex(vertex gogl.Vertex) {
 func (v *TestVisitor) TestTraverse(c *C) {
 	v.c = c
 
-	el := gogl.EdgeList{
-		gogl.NewEdge("foo", "bar"),
-		gogl.NewEdge("bar", "baz"),
-		gogl.NewEdge("bar", "foo"),
-		gogl.NewEdge("bar", "quark"),
-		gogl.NewEdge("baz", "qux"),
+	el := gogl.ArcList{
+		gogl.NewArc("foo", "bar"),
+		gogl.NewArc("bar", "baz"),
+		gogl.NewArc("bar", "foo"),
+		gogl.NewArc("bar", "quark"),
+		gogl.NewArc("baz", "qux"),
 	}
 	g := gogl.Spec().Directed().
 		Mutable().Using(el).
@@ -154,7 +160,7 @@ func (v *TestVisitor) TestTraverse(c *C) {
 		v.colors[vtx] = white
 	}
 
-	v.found_edges = make([]gogl.Edge, 0)
+	v.found_edges = make([]gogl.Arc, 0)
 
 	Traverse(g, v, "foo")
 

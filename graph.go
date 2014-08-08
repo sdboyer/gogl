@@ -55,10 +55,19 @@ type GraphSource interface {
 // Thus, implementing this interface is gogl's only signal that a graph's edges are directed.
 type Digraph interface {
 	Graph
+	ArcEnumerator         // Enumerates all arcs to an injected step function
 	IncidentArcEnumerator // Enumerates a vertex's incident in- or out-arcs to an injected step function
-	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	ProcessionEnumerator  // Enumerates a vertex's predecessor or successor vertices to a step function
+	DirectedDegreeChecker // Reports in- and out-degree of vertices
+	ArcMembershipChecker  // Allows inspection of contained arcs
 	Transposer            // Digraphs can produce a transpose of themselves
+}
+
+// DigraphSource is a subset of Digraph, describing the minimal set of methods
+// necessary to accomplish a naive full digraph traversal and copy.
+type DigraphSource interface {
+	GraphSource
+	ArcEnumerator
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
@@ -67,6 +76,14 @@ type MutableGraph interface {
 	Graph
 	VertexSetMutator
 	EdgeSetMutator
+}
+
+// MutableDigraph describes a digraph with basic arcs (no weighting, labeling, etc.)
+// that can be modified freely by adding or removing vertices or arcs.
+type MutableDigraph interface {
+	Graph
+	VertexSetMutator
+	ArcSetMutator
 }
 
 // A simple graph is in opposition to a multigraph or pseudograph: it disallows loops and
@@ -92,6 +109,13 @@ type SimpleGraph interface {
 type WeightedGraph interface {
 	Graph
 	HasWeightedEdge(e WeightedEdge) bool
+}
+
+// WeightedDigraph describes a graph where all edges are weighted arcs (directed).
+type WeightedDigraph interface {
+	Digraph
+	HasWeightedEdge(e WeightedEdge) bool
+	HasWeightedArc(a WeightedArc) bool
 }
 
 // MutableWeightedGraph is the mutable version of a weighted graph. Its
@@ -121,7 +145,14 @@ type LabeledGraph interface {
 	HasLabeledEdge(e LabeledEdge) bool
 }
 
-// LabeledWeightedGraph is the mutable version of a labeled graph. Its
+// LabeledDigraph describes a graph where all edges are labeled arcs (directed).
+type LabeledDigraph interface {
+	Digraph
+	HasLabeledEdge(e LabeledEdge) bool
+	HasLabeledArc(a LabeledArc) bool
+}
+
+// MutableLabeledGraph is the mutable version of a labeled graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only labeled edges can be present in the graph.
 type MutableLabeledGraph interface {
@@ -151,7 +182,14 @@ type DataGraph interface {
 	HasDataEdge(e DataEdge) bool
 }
 
-// MutableDataGraph is the mutable version of a propety graph. Its
+// DataDigraph describes a graph where all edges are data arcs (directed).
+type DataDigraph interface {
+	Digraph
+	HasDataEdge(e DataEdge) bool
+	HasDataArc(a DataArc) bool
+}
+
+// MutableDataGraph is the mutable version of a data graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only property edges can be present in the graph.
 type MutableDataGraph interface {
@@ -166,6 +204,11 @@ type MutableDataGraph interface {
 //
 // If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
 type EdgeStep func(Edge) (terminate bool)
+
+// ArcSteps are used as arguments to various enumerators. They are called once for each arc produced by the enumerator.
+//
+// If the step function returns true, the calling enumerator is expected to end enumeration and return control to its caller.
+type ArcStep func(Arc) (terminate bool)
 
 // VertexSteps are used as arguments to various enumerators. They are called once for each vertex produced by the enumerator.
 //
@@ -187,6 +230,14 @@ type EdgeEnumerator interface {
 	EachEdge(EdgeStep)
 }
 
+// An ArcEnumerator iteratively enumerates edges, and can indicate the number of edges present.
+type ArcEnumerator interface {
+	// Calls the provided step function once with each edge in the graph. If a
+	// specialized edge type (e.g., weighted) is known to be used by the
+	// graph, it is the calling code's responsibility to type assert.
+	EachArc(ArcStep)
+}
+
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
 type IncidentEdgeEnumerator interface {
 	// Calls the provided step function once with each edge incident to the
@@ -200,10 +251,10 @@ type IncidentEdgeEnumerator interface {
 type IncidentArcEnumerator interface {
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcFrom(v Vertex, outEdgeStep EdgeStep)
+	EachArcFrom(v Vertex, outArcStep ArcStep)
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcTo(v Vertex, inEdgeStep EdgeStep)
+	EachArcTo(v Vertex, inArcStep ArcStep)
 }
 
 // A ProcessionEnumerator iteratively enumerates a vertex's predecessors or successors
@@ -243,6 +294,11 @@ type EdgeMembershipChecker interface {
 	HasEdge(Edge) bool
 }
 
+// An ArcMembershipChecker can indicate the presence of an arc.
+type ArcMembershipChecker interface {
+	HasArc(Arc) bool
+}
+
 // A VertexSetMutator allows the addition and removal of vertices from a set.
 type VertexSetMutator interface {
 	// Ensures the provided vertices are present in the graph.
@@ -257,10 +313,22 @@ type EdgeSetMutator interface {
 	RemoveEdges(edges ...Edge)
 }
 
+// An ArcSetMutator allows the addition and removal of arcs from a set.
+type ArcSetMutator interface {
+	AddArcs(arcs ...Arc)
+	RemoveArcs(arcs ...Arc)
+}
+
 // A WeightedEdgeSetMutator allows the addition and removal of weighted edges from a set.
 type WeightedEdgeSetMutator interface {
 	AddEdges(edges ...WeightedEdge)
 	RemoveEdges(edges ...WeightedEdge)
+}
+
+// A WeightedArcSetMutator allows the addition and removal of weighted arcs from a set.
+type WeightedArcSetMutator interface {
+	AddArcs(arcs ...WeightedArc)
+	RemoveArcs(arcs ...WeightedArc)
 }
 
 // A LabeledEdgeSetMutator allows the addition and removal of labeled edges from a set.
@@ -269,10 +337,22 @@ type LabeledEdgeSetMutator interface {
 	RemoveEdges(edges ...LabeledEdge)
 }
 
+// A LabeledArcSetMutator allows the addition and removal of labeled arcs from a set.
+type LabeledArcSetMutator interface {
+	AddArcs(arcs ...LabeledArc)
+	RemoveArcs(arcs ...LabeledArc)
+}
+
 // A DataEdgeSetMutator allows the addition and removal of data edges from a set.
 type DataEdgeSetMutator interface {
 	AddEdges(edges ...DataEdge)
 	RemoveEdges(edges ...DataEdge)
+}
+
+// A DataArcSetMutator allows the addition and removal of data arcs from a set.
+type DataArcSetMutator interface {
+	AddArcs(arcs ...DataArc)
+	RemoveArcs(arcs ...DataArc)
 }
 
 /* Optional optimization interfaces

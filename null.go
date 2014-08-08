@@ -20,10 +20,11 @@ var _ DataGraph = nullGraph(false)
 
 func (g nullGraph) EachVertex(f VertexStep)                   {}
 func (g nullGraph) EachEdge(f EdgeStep)                       {}
+func (g nullGraph) EachArc(f ArcStep)                         {}
 func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeStep)       {}
-func (g nullGraph) EachArcFrom(Vertex, EdgeStep)              {}
+func (g nullGraph) EachArcFrom(Vertex, ArcStep)               {}
 func (g nullGraph) EachPredecessorOf(Vertex, VertexStep)      {}
-func (g nullGraph) EachArcTo(Vertex, EdgeStep)                {}
+func (g nullGraph) EachArcTo(Vertex, ArcStep)                 {}
 func (g nullGraph) EachSuccessorOf(Vertex, VertexStep)        {}
 func (g nullGraph) EachAdjacentTo(start Vertex, f VertexStep) {}
 
@@ -44,6 +45,10 @@ func (g nullGraph) DegreeOf(Vertex) (degree int, exists bool) {
 }
 
 func (g nullGraph) HasEdge(e Edge) bool {
+	return false
+}
+
+func (g nullGraph) HasArc(e Arc) bool {
 	return false
 }
 

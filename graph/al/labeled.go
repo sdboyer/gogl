@@ -137,6 +137,21 @@ func (g *labeledDirected) EachEdge(f EdgeStep) {
 	}
 }
 
+// Traverses the set of arcs in the graph, passing each arc to the
+// provided closure.
+func (g *labeledDirected) EachArc(f ArcStep) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	for source, adjacent := range g.list {
+		for target, label := range adjacent {
+			if f(NewLabeledArc(source, target, label)) {
+				return
+			}
+		}
+	}
+}
+
 // Enumerates the set of all edges incident to the provided vertex.
 func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
@@ -160,7 +175,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
+func (g *labeledDirected) EachArcFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -169,7 +184,7 @@ func (g *labeledDirected) EachArcFrom(v Vertex, f EdgeStep) {
 	}
 
 	for adjacent, label := range g.list[v] {
-		if f(NewLabeledEdge(v, adjacent, label)) {
+		if f(NewLabeledArc(v, adjacent, label)) {
 			return
 		}
 	}
@@ -183,7 +198,7 @@ func (g *labeledDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
+func (g *labeledDirected) EachArcTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -194,7 +209,7 @@ func (g *labeledDirected) EachArcTo(v Vertex, f EdgeStep) {
 	for candidate, adjacent := range g.list {
 		for target, label := range adjacent {
 			if target == v {
-				if f(NewLabeledEdge(candidate, target, label)) {
+				if f(NewLabeledArc(candidate, target, label)) {
 					return
 				}
 			}
@@ -215,7 +230,20 @@ func (g *labeledDirected) HasEdge(edge Edge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	_, exists := g.list[edge.Source()][edge.Target()]
+	u, v := edge.Both()
+	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *labeledDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
@@ -226,8 +254,24 @@ func (g *labeledDirected) HasLabeledEdge(edge LabeledEdge) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	if label, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if label, exists := g.list[u][v]; exists {
 		return label == edge.Label()
+	} else if label, exists = g.list[v][u]; exists {
+		return label == edge.Label()
+	}
+	return false
+}
+
+// Indicates whether or not the given labeled arc is present in the graph.
+// It will only match if the provided LabeledEdge has the same label as
+// the edge contained in the graph.
+func (g *labeledDirected) HasLabeledArc(arc LabeledArc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if label, exists := g.list[arc.Source()][arc.Target()]; exists {
+		return label == arc.Label()
 	}
 	return false
 }
@@ -268,42 +312,42 @@ func (g *labeledDirected) RemoveVertex(vertices ...Vertex) {
 	return
 }
 
-// Adds edges to the graph.
-func (g *labeledDirected) AddEdges(edges ...LabeledEdge) {
-	if len(edges) == 0 {
+// Adds arcs to the graph.
+func (g *labeledDirected) AddArcs(arcs ...LabeledArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.addEdges(edges...)
+	g.addArcs(arcs...)
 }
 
-// Adds a new edge to the graph.
-func (g *labeledDirected) addEdges(edges ...LabeledEdge) {
-	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+// Adds a new arc to the graph.
+func (g *labeledDirected) addArcs(arcs ...LabeledArc) {
+	for _, arc := range arcs {
+		g.ensureVertex(arc.Source(), arc.Target())
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
-			g.list[edge.Source()][edge.Target()] = edge.Label()
+		if _, exists := g.list[arc.Source()][arc.Target()]; !exists {
+			g.list[arc.Source()][arc.Target()] = arc.Label()
 			g.size++
 		}
 	}
 }
 
-// Removes edges from the graph. This does NOT remove vertex members of the
-// removed edges.
-func (g *labeledDirected) RemoveEdges(edges ...LabeledEdge) {
-	if len(edges) == 0 {
+// Removes arcs from the graph. This does NOT remove vertex members of the
+// removed arcs.
+func (g *labeledDirected) RemoveArcs(arcs ...LabeledArc) {
+	if len(arcs) == 0 {
 		return
 	}
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	for _, edge := range edges {
-		s, t := edge.Both()
+	for _, arc := range arcs {
+		s, t := arc.Both()
 		if _, exists := g.list[s][t]; exists {
 			delete(g.list[s], t)
 			g.size--
@@ -408,9 +452,10 @@ func (g *labeledUndirected) HasEdge(edge Edge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if _, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if _, exists := g.list[u][v]; exists {
 		return true
-	} else if _, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if _, exists := g.list[v][u]; exists {
 		return true
 	}
 	return false
@@ -424,9 +469,10 @@ func (g *labeledUndirected) HasLabeledEdge(edge LabeledEdge) bool {
 	defer g.mu.RUnlock()
 
 	// Spread it into two expressions to avoid evaluating the second if possible
-	if label, exists := g.list[edge.Source()][edge.Target()]; exists {
+	u, v := edge.Both()
+	if label, exists := g.list[u][v]; exists {
 		return edge.Label() == label
-	} else if label, exists := g.list[edge.Target()][edge.Source()]; exists {
+	} else if label, exists := g.list[v][u]; exists {
 		return edge.Label() == label
 	}
 	return false
@@ -480,12 +526,13 @@ func (g *labeledUndirected) AddEdges(edges ...LabeledEdge) {
 // Adds a new edge to the graph.
 func (g *labeledUndirected) addEdges(edges ...LabeledEdge) {
 	for _, edge := range edges {
-		g.ensureVertex(edge.Source(), edge.Target())
+		u, v := edge.Both()
+		g.ensureVertex(u, v)
 
-		if _, exists := g.list[edge.Source()][edge.Target()]; !exists {
+		if _, exists := g.list[u][v]; !exists {
 			l := edge.Label()
-			g.list[edge.Source()][edge.Target()] = l
-			g.list[edge.Target()][edge.Source()] = l
+			g.list[u][v] = l
+			g.list[v][u] = l
 			g.size++
 		}
 	}
