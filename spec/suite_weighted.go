@@ -32,8 +32,9 @@ func (s *WeightedGraphSuite) TestEachEdge(c *C) {
 func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Factory(GraphFixtures["w-2e3v"])
 
-	c.Assert(g.HasWeightedEdge(GraphFixtures["w-2e3v"].(WeightedArcList)[0].(WeightedArc)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 1)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true) // both directions work
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, -3.7212)), Equals, false) // wrong weight
 }
 
 type WeightedDigraphSuite struct {
@@ -95,18 +96,12 @@ func (s *WeightedEdgeSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Size(g), Equals, 0)
 }
 
-func (s *WeightedEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
+func (s *WeightedEdgeSetMutatorSuite) TestAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(WeightedEdgeSetMutator)
+
 	m.AddEdges(NewWeightedEdge(1, 2, 5.23))
-
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
-
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 3)), Equals, false)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, -3.22771)), Equals, false)
 
 	// Now test removal
 	m.RemoveEdges(NewWeightedEdge(1, 2, 5.23))
@@ -114,35 +109,18 @@ func (s *WeightedEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, false)
 }
 
-func (s *WeightedEdgeSetMutatorSuite) TestMultiAddRemoveHasEdge(c *C) {
+func (s *WeightedEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(WeightedEdgeSetMutator)
-	m.AddEdges(NewWeightedEdge(1, 2, 5), NewWeightedEdge(2, 3, -5))
 
-	// Basic edge tests first
-	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true) // only if undirected
-	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, true) // only if undirected
-
-	// Now weighted edge tests
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 3)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 3)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, -5)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, 1)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(3, 2, -5)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(3, 2, 1)), Equals, false) // wrong weight
+	m.AddEdges(NewWeightedEdge(1, 2, 5.23), NewWeightedEdge(2, 3, 5.821))
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, 5.821)), Equals, true)
 
 	// Now test removal
-	m.RemoveEdges(NewWeightedEdge(1, 2, 5), NewWeightedEdge(2, 3, -5))
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5)), Equals, false)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, -5)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+	m.RemoveEdges(NewWeightedEdge(1, 2, 5.23), NewWeightedEdge(2, 3, 5.821))
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, false)
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 3, 5.821)), Equals, false)
 }
 
 /* WeightedArcSetMutatorSuite - tests for mutable weighted graphs */
@@ -171,49 +149,25 @@ func (s *WeightedArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 func (s *WeightedArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(WeightedDigraph)
 	m := g.(WeightedArcSetMutator)
+
 	m.AddArcs(NewWeightedArc(1, 2, 5.23))
-
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
-
 	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 3)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5.23)), Equals, false) // wrong direction
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 3)), Equals, false) // wrong direction & weight
+	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, -3.7212)), Equals, false) // wrong weight
 
 	// Now test removal
 	m.RemoveArcs(NewWeightedArc(1, 2, 5.23))
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
 	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5.23)), Equals, false)
 }
 
 func (s *WeightedArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(WeightedDigraph)
 	m := g.(WeightedArcSetMutator)
-	m.AddArcs(NewWeightedArc(1, 2, 5), NewWeightedArc(2, 3, -5))
 
-	// Basic edge tests first
-	// We test both Has*Arc() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Arc() method.
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
-	c.Assert(g.HasArc(NewArc(3, 2)), Equals, false)
+	m.AddArcs(NewWeightedArc(1, 2, 5.23), NewWeightedArc(2, 3, 5.821))
+	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5.23)), Equals, true)
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, 5.821)), Equals, true)
 
-	// Now weighted edge tests
-	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 3)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5)), Equals, false) // wrong direction
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 3)), Equals, false) // wrong direction & weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, -5)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, 1)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, -5)), Equals, false) // wrong direction
-	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, 1)), Equals, false) // wrong direction & weight
-
-	// Now test removal
-	m.RemoveArcs(NewWeightedArc(1, 2, 5), NewWeightedArc(2, 3, -5))
-	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5)), Equals, false)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, -5)), Equals, false)
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
+	m.RemoveArcs(NewWeightedArc(1, 2, 5.23), NewWeightedArc(2, 3, 5.821))
+	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5.23)), Equals, false)
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, 5.821)), Equals, false)
 }

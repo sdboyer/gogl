@@ -32,7 +32,8 @@ func (s *LabeledGraphSuite) TestEachEdge(c *C) {
 func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 	g := s.Factory(GraphFixtures["l-2e3v"])
 
-	c.Assert(g.HasLabeledEdge(GraphFixtures["l-2e3v"].(LabeledArcList)[0].(LabeledArc)), Equals, true)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, true) // both directions work
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
@@ -95,18 +96,12 @@ func (s *LabeledEdgeSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Size(g), Equals, 0)
 }
 
-func (s *LabeledEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
+func (s *LabeledEdgeSetMutatorSuite) TestAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(LabeledEdgeSetMutator)
+
 	m.AddEdges(NewLabeledEdge(1, 2, "foo"))
-
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
-
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "baz")), Equals, false)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "qux")), Equals, false)
 
 	// Now test removal
 	m.RemoveEdges(NewLabeledEdge(1, 2, "foo"))
@@ -114,35 +109,18 @@ func (s *LabeledEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, false)
 }
 
-func (s *LabeledEdgeSetMutatorSuite) TestMultiAddRemoveHasEdge(c *C) {
+func (s *LabeledEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(LabeledEdgeSetMutator)
+
 	m.AddEdges(NewLabeledEdge(1, 2, "foo"), NewLabeledEdge(2, 3, "bar"))
-
-	// Basic edge tests first
-	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true) // only if undirected
-	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, true) // only if undirected
-
-	// Now labeled edge tests
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "baz")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "baz")), Equals, false) // wrong label
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "bar")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "qux")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(3, 2, "bar")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(3, 2, "qux")), Equals, false) // wrong label
 
 	// Now test removal
 	m.RemoveEdges(NewLabeledEdge(1, 2, "foo"), NewLabeledEdge(2, 3, "bar"))
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, false)
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 3, "bar")), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
 /* LabeledArcSetMutatorSuite - tests for mutable labeled graphs */
@@ -171,49 +149,25 @@ func (s *LabeledArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 func (s *LabeledArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(LabeledDigraph)
 	m := g.(LabeledArcSetMutator)
+
 	m.AddArcs(NewLabeledArc(1, 2, "foo"))
-
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
-
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "bar")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, false) // wrong direction
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "bar")), Equals, false) // wrong direction & label
+	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "qux")), Equals, false) // wrong label
 
 	// Now test removal
 	m.RemoveArcs(NewLabeledArc(1, 2, "foo"))
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, false)
 }
 
 func (s *LabeledArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(LabeledDigraph)
 	m := g.(LabeledArcSetMutator)
+
 	m.AddArcs(NewLabeledArc(1, 2, "foo"), NewLabeledArc(2, 3, "bar"))
-
-	// Basic edge tests first
-	// We test both Has*Arc() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Arc() method.
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
-	c.Assert(g.HasArc(NewArc(3, 2)), Equals, false)
-
-	// Now labeled edge tests
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "baz")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, false) // wrong direction
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "baz")), Equals, false) // wrong direction & label
 	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 3, "bar")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 3, "qux")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "bar")), Equals, false) // wrong direction
-	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "qux")), Equals, false) // wrong direction & label
 
-	// Now test removal
 	m.RemoveArcs(NewLabeledArc(1, 2, "foo"), NewLabeledArc(2, 3, "bar"))
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, false)
 	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 3, "bar")), Equals, false)
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
 }

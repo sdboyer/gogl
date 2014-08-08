@@ -32,7 +32,8 @@ func (s *DataGraphSuite) TestEachEdge(c *C) {
 func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 	g := s.Factory(GraphFixtures["d-2e3v"])
 
-	c.Assert(g.HasDataEdge(GraphFixtures["d-2e3v"].(DataArcList)[0].(DataArc)), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true) // both directions work
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong data
 }
 
@@ -50,22 +51,22 @@ func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	g := s.Factory(GraphFixtures["d-2e3v"]).(DataDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
-	var da DataArc
+	var wa DataArc
 	g.EachArc(func(e Arc) (terminate bool) {
 		hit++
-		c.Assert(e, Implements, &da)
+		c.Assert(e, Implements, &wa)
 		return
 	})
 
 	g.EachArcFrom(2, func(e Arc) (terminate bool) {
 		hit++
-		c.Assert(e, Implements, &da)
+		c.Assert(e, Implements, &wa)
 		return
 	})
 
 	g.EachArcFrom(2, func(e Arc) (terminate bool) {
 		hit++
-		c.Assert(e, Implements, &da)
+		c.Assert(e, Implements, &wa)
 		return
 	})
 
@@ -95,18 +96,12 @@ func (s *DataEdgeSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Size(g), Equals, 0)
 }
 
-func (s *DataEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
+func (s *DataEdgeSetMutatorSuite) TestAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(DataEdgeSetMutator)
+
 	m.AddEdges(NewDataEdge(1, 2, "foo"))
-
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
-
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "qux")), Equals, false)
 
 	// Now test removal
 	m.RemoveEdges(NewDataEdge(1, 2, "foo"))
@@ -114,35 +109,18 @@ func (s *DataEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
 }
 
-func (s *DataEdgeSetMutatorSuite) TestMultiAddRemoveHasEdge(c *C) {
+func (s *DataEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 	g := s.Factory(NullGraph)
 	m := g.(DataEdgeSetMutator)
+
 	m.AddEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, "bar"))
-
-	// Basic edge tests first
-	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Edge() method.
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true) // only if undirected
-	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, true) // only if undirected
-
-	// Now data edge tests
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false) // wrong data
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "baz")), Equals, false) // wrong data
 	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "bar")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "qux")), Equals, false) // wrong data
-	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "bar")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "qux")), Equals, false) // wrong data
 
 	// Now test removal
 	m.RemoveEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, "bar"))
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
 	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "bar")), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
 /* DataArcSetMutatorSuite - tests for mutable data graphs */
@@ -171,49 +149,25 @@ func (s *DataArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 func (s *DataArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(DataDigraph)
 	m := g.(DataArcSetMutator)
+
 	m.AddArcs(NewDataArc(1, 2, "foo"))
-
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
-
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "bar")), Equals, false) // wrong data
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, false) // wrong direction
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "bar")), Equals, false) // wrong direction & data
 
 	// Now test removal
 	m.RemoveArcs(NewDataArc(1, 2, "foo"))
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, false)
 }
 
 func (s *DataArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	g := s.Factory(NullGraph).(DataDigraph)
 	m := g.(DataArcSetMutator)
+
 	m.AddArcs(NewDataArc(1, 2, "foo"), NewDataArc(2, 3, "bar"))
-
-	// Basic edge tests first
-	// We test both Has*Arc() methods to ensure that adding our known edge fixture type results in the expected behavior.
-	// Thus, this is not just duplicate testing of the Has*Arc() method.
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
-	c.Assert(g.HasArc(NewArc(3, 2)), Equals, false)
-
-	// Now data edge tests
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(1, 2, "baz")), Equals, false) // wrong data
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, false) // wrong direction
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false) // wrong direction & data
 	c.Assert(g.HasDataArc(NewDataArc(2, 3, "bar")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(2, 3, "qux")), Equals, false) // wrong data
-	c.Assert(g.HasDataArc(NewDataArc(3, 2, "bar")), Equals, false) // wrong direction
-	c.Assert(g.HasDataArc(NewDataArc(3, 2, "qux")), Equals, false) // wrong direction & data
 
-	// Now test removal
 	m.RemoveArcs(NewDataArc(1, 2, "foo"), NewDataArc(2, 3, "bar"))
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, false)
 	c.Assert(g.HasDataArc(NewDataArc(2, 3, "bar")), Equals, false)
-	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
-	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
 }
