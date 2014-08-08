@@ -132,7 +132,9 @@ Calling `EachEdge()` will call the injected step six times, once for each of the
 
 ![EachEdge()](doc/ee.dot.png)
 
-An important guarantee of enumerators not necessarily implied by the interface is that they call the step function *exactly* once for each relevant datum. Client code should never have to deduplicate data.
+*Note that on directed graphs, `EachArc()` can also be used to this same effect; it simply passes the edge object with `Arc` interface type instead of `Edge`.*
+
+An important guarantee of enumerators not necessarily implied by the interface is that they call the step function **exactly** once for each relevant datum. Client code should never have to deduplicate data.
 
 Also, remember that while implementations must enumerate all the elements exactly once, gogl has no requirement as to ordering. Graph implementations are free to sort the results, or not, as they choose.
 
