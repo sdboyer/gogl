@@ -11,7 +11,6 @@ import (
 
 type VertexSetMutatorSuite struct {
 	Factory  func(GraphSource) Graph
-	Directed bool
 }
 
 func (s *VertexSetMutatorSuite) SuiteLabel() string {
@@ -37,9 +36,36 @@ func (s *VertexSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Order(g), Equals, 0)
 }
 
+func (s *VertexSetMutatorSuite) TestMultiEnsureVertex(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(VertexSetMutator)
+
+	m.EnsureVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, true)
+	c.Assert(g.HasVertex("baz"), Equals, true)
+}
+
+func (s *VertexSetMutatorSuite) TestRemoveVertex(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(VertexSetMutator)
+
+	m.EnsureVertex("bar", "baz")
+	m.RemoveVertex("bar")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+}
+
+func (s *VertexSetMutatorSuite) TestMultiRemoveVertex(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(VertexSetMutator)
+
+	m.EnsureVertex("bar", "baz")
+	m.RemoveVertex("bar", "baz")
+	c.Assert(g.HasVertex("bar"), Equals, false)
+	c.Assert(g.HasVertex("baz"), Equals, false)
+}
+
 type EdgeSetMutatorSuite struct {
 	Factory  func(GraphSource) Graph
-	Directed bool
 }
 
 func (s *EdgeSetMutatorSuite) SuiteLabel() string {
@@ -59,13 +85,58 @@ func (s *EdgeSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Size(g), Equals, 0)
 }
 
+func (s *EdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(EdgeSetMutator)
+
+	m.AddEdges(NewEdge(1, 2))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
+
+	// Now test removal
+	m.RemoveEdges(NewEdge(1, 2))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, false)
+}
+
+func (s *EdgeSetMutatorSuite) TestMultiAddRemoveHasEdge(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(EdgeSetMutator)
+
+	m.AddEdges(NewEdge(1, 2), NewEdge(2, 3))
+
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, true)
+
+	// Now test removal
+	m.RemoveEdges(NewEdge(1, 2), NewEdge(2, 3))
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+}
+
+// Checks to ensure that removal works for both in-edges and out-edges.
+func (s *EdgeSetMutatorSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(EdgeSetMutator)
+
+	if v, ok := g.(VertexSetMutator); ok { // Almost always gonna be the case that we have both
+		m.AddEdges(NewEdge(1, 2), NewEdge(2, 3), NewEdge(4, 1))
+		v.RemoveVertex(1)
+
+		c.Assert(Size(g), Equals, 1)
+	}
+}
+
 func (s *ArcSetMutatorSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
 type ArcSetMutatorSuite struct {
 	Factory  func(GraphSource) Graph
-	Directed bool
 }
 
 func (s *ArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
@@ -81,78 +152,50 @@ func (s *ArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
 	c.Assert(Size(g), Equals, 0)
 }
 
-type MutableGraphSuite struct {
-	Factory  func(GraphSource) Graph
-	Directed bool
-}
+func (s *ArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
+	g := s.Factory(NullGraph).(Digraph)
+	m := g.(ArcSetMutator)
 
-func (s *MutableGraphSuite) SuiteLabel() string {
-	return fmt.Sprintf("%T", s.Factory(NullGraph))
-}
-
-func (s *MutableGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
-
-	g.EnsureVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, true)
-	c.Assert(g.HasVertex("baz"), Equals, true)
-}
-
-func (s *MutableGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-}
-
-func (s *MutableGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-	c.Assert(g.HasVertex("baz"), Equals, false)
-}
-
-func (s *MutableGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
-	g.AddEdges(NewEdge(1, 2))
-
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
+	m.AddArcs(NewArc(1, 2))
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(NewEdge(1, 2))
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, false)
+	m.RemoveArcs(NewArc(1, 2))
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
 }
 
-func (s *MutableGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
+func (s *ArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
+	g := s.Factory(NullGraph).(Digraph)
+	m := g.(ArcSetMutator)
 
-	g.AddEdges(NewEdge(1, 2), NewEdge(2, 3))
+	m.AddArcs(NewArc(1, 2), NewArc(2, 3))
 
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
-	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed)
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 3)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
+	c.Assert(g.HasArc(NewArc(3, 2)), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(NewEdge(1, 2), NewEdge(2, 3))
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
-	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
+	m.RemoveArcs(NewArc(1, 2), NewArc(2, 3))
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
+	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
+	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
 }
 
 // Checks to ensure that removal works for both in-edges and out-edges.
-func (s *MutableGraphSuite) TestVertexRemovalAlsoRemovesConnectedEdges(c *C) {
-	g := s.Factory(NullGraph).(MutableGraph)
+func (s *ArcSetMutatorSuite) TestVertexRemovalAlsoRemovesConnectedArcs(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(ArcSetMutator)
 
-	g.AddEdges(NewEdge(1, 2), NewEdge(2, 3), NewEdge(4, 1))
-	g.RemoveVertex(1)
+	if v, ok := g.(VertexSetMutator); ok {
+		// Almost always gonona be the case that we have both
+		m.AddArcs(NewArc(1, 2), NewArc(2, 3), NewArc(4, 1))
+		v.RemoveVertex(1)
 
-	c.Assert(Size(g), Equals, 1)
+		c.Assert(Size(g), Equals, 1)
+	}
 }
 

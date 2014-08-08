@@ -156,19 +156,15 @@ func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
 	}
 
 	if _, ok := g.(VertexSetMutator); ok {
-		Suite(&VertexSetMutatorSuite{fact, directed})
+		Suite(&VertexSetMutatorSuite{fact})
 	}
 
 	if _, ok := g.(EdgeSetMutator); ok {
-		Suite(&EdgeSetMutatorSuite{fact, directed})
+		Suite(&EdgeSetMutatorSuite{fact})
 	}
 
 	if _, ok := g.(ArcSetMutator); ok {
-		Suite(&ArcSetMutatorSuite{fact, directed})
-	}
-
-	if _, ok := g.(MutableGraph); ok {
-		Suite(&MutableGraphSuite{fact, directed})
+		Suite(&ArcSetMutatorSuite{fact})
 	}
 
 	if _, ok := g.(WeightedGraph); ok {
