@@ -27,6 +27,7 @@ func (s *GraphSuite) TestHasVertex(c *C) {
 
 func (s *GraphSuite) TestHasEdge(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
+	// Testing match with minimum possible specificity here
 	c.Assert(g.HasEdge(GraphFixtures["2e3v"].(ArcList)[0]), Equals, true)
 	c.Assert(g.HasEdge(NewEdge("qux", "quark")), Equals, false)
 }
