@@ -217,6 +217,9 @@ func (g *weightedDirected) HasEdge(edge Edge) bool {
 
 	u, v := edge.Both()
 	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
 	return exists
 }
 
@@ -238,6 +241,8 @@ func (g *weightedDirected) HasWeightedEdge(edge WeightedEdge) bool {
 
 	u, v := edge.Both()
 	if weight, exists := g.list[u][v]; exists {
+		return weight == edge.Weight()
+	} else if weight, exists = g.list[v][u]; exists {
 		return weight == edge.Weight()
 	}
 	return false

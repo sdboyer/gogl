@@ -232,6 +232,9 @@ func (g *dataDirected) HasEdge(edge Edge) bool {
 
 	u, v := edge.Both()
 	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
 	return exists
 }
 
@@ -253,6 +256,8 @@ func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 
 	u, v := edge.Both()
 	if data, exists := g.list[u][v]; exists {
+		return data == edge.Data()
+	} else if data, exists = g.list[v][u]; exists {
 		return data == edge.Data()
 	}
 	return false

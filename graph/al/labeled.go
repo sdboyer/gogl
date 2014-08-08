@@ -232,6 +232,9 @@ func (g *labeledDirected) HasEdge(edge Edge) bool {
 
 	u, v := edge.Both()
 	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
 	return exists
 }
 
@@ -253,6 +256,8 @@ func (g *labeledDirected) HasLabeledEdge(edge LabeledEdge) bool {
 
 	u, v := edge.Both()
 	if label, exists := g.list[u][v]; exists {
+		return label == edge.Label()
+	} else if label, exists = g.list[v][u]; exists {
 		return label == edge.Label()
 	}
 	return false
