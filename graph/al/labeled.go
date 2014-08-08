@@ -235,6 +235,15 @@ func (g *labeledDirected) HasEdge(edge Edge) bool {
 	return exists
 }
 
+// Indicates whether or not the given arc is present in the graph.
+func (g *labeledDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
+	return exists
+}
+
 // Indicates whether or not the given labeled edge is present in the graph.
 // It will only match if the provided LabeledEdge has the same label as
 // the edge contained in the graph.

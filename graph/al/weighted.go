@@ -220,6 +220,15 @@ func (g *weightedDirected) HasEdge(edge Edge) bool {
 	return exists
 }
 
+// Indicates whether or not the given arc is present in the graph.
+func (g *weightedDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
+	return exists
+}
+
 // Indicates whether or not the given weighted edge is present in the graph.
 // It will only match if the provided WeightedEdge has the same weight as
 // the edge contained in the graph.

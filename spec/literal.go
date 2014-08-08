@@ -273,7 +273,6 @@ func (g GraphLiteralFixture) DegreeOf(v Vertex) (degree int, exists bool) {
 func (g GraphLiteralFixture) HasEdge(e Edge) bool {
 	u, v := e.Both()
 
-	// TODO this is a little hinky until Arc is introduced
 	switch u {
 	case "foo":
 		return v == "bar"
@@ -283,6 +282,30 @@ func (g GraphLiteralFixture) HasEdge(e Edge) bool {
 		return v == "bar"
 	default:
 		return false
+	}
+}
+
+func (g GraphLiteralFixture) HasArc(a Arc) bool {
+	u, v := a.Both()
+
+	if g {
+		switch u {
+		case "foo":
+			return v == "bar"
+		case "bar":
+			return v == "baz"
+		default:
+			return false
+		}
+	} else {
+		switch u {
+		case "bar":
+			return v == "foo"
+		case "baz":
+			return v == "bar"
+		default:
+			return false
+		}
 	}
 }
 

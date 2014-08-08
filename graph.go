@@ -64,8 +64,9 @@ type Digraph interface {
 	Graph
 	ArcEnumerator         // Enumerates all arcs to an injected step function
 	IncidentArcEnumerator // Enumerates a vertex's incident in- or out-arcs to an injected step function
-	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	ProcessionEnumerator  // Enumerates a vertex's predecessor or successor vertices to a step function
+	DirectedDegreeChecker // Reports in- and out-degree of vertices
+	ArcMembershipChecker  // Allows inspection of contained arcs
 	Transposer            // Digraphs can produce a transpose of themselves
 }
 
@@ -270,6 +271,11 @@ type DirectedDegreeChecker interface {
 // An EdgeMembershipChecker can indicate the presence of an edge.
 type EdgeMembershipChecker interface {
 	HasEdge(Edge) bool
+}
+
+// An ArcMembershipChecker can indicate the presence of an arc.
+type ArcMembershipChecker interface {
+	HasArc(Arc) bool
 }
 
 // A VertexSetMutator allows the addition and removal of vertices from a set.

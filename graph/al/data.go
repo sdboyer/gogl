@@ -235,6 +235,15 @@ func (g *dataDirected) HasEdge(edge Edge) bool {
 	return exists
 }
 
+// Indicates whether or not the given arc is present in the graph.
+func (g *dataDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
+	return exists
+}
+
 // Indicates whether or not the given property edge is present in the graph.
 // It will only match if the provided DataEdge has the same property as
 // the edge contained in the graph.
@@ -427,12 +436,8 @@ func (g *dataUndirected) HasEdge(edge Edge) bool {
 
 	// Spread it into two expressions to avoid evaluating the second if possible
 	u, v := edge.Both()
-	if _, exists := g.list[u][v]; exists {
-		return true
-	} else if _, exists := g.list[v][u]; exists {
-		return true
-	}
-	return false
+	_, exists := g.list[u][v]
+	return exists
 }
 
 // Indicates whether or not the given property edge is present in the graph.

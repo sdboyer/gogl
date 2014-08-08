@@ -48,6 +48,10 @@ func (g nullGraph) HasEdge(e Edge) bool {
 	return false
 }
 
+func (g nullGraph) HasArc(e Arc) bool {
+	return false
+}
+
 func (g nullGraph) HasWeightedEdge(e WeightedEdge) bool {
 	return false
 }

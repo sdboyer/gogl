@@ -23,11 +23,11 @@ func (s *DigraphSuite) TestTranspose(c *C) {
 
 	g2 := g.Transpose()
 
-	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(ArcList)[0])), Equals, true)
-	c.Assert(g2.HasEdge(Swap(GraphFixtures["2e3v"].(ArcList)[1])), Equals, true)
+	c.Assert(g2.HasArc(Swap(GraphFixtures["2e3v"].(ArcList)[0])), Equals, true)
+	c.Assert(g2.HasArc(Swap(GraphFixtures["2e3v"].(ArcList)[1])), Equals, true)
 
-	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(ArcList)[0]), Equals, false)
-	c.Assert(g2.HasEdge(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
+	c.Assert(g2.HasArc(GraphFixtures["2e3v"].(ArcList)[0]), Equals, false)
+	c.Assert(g2.HasArc(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
 }
 
 func (s *DigraphSuite) TestOutDegreeOf(c *C) {

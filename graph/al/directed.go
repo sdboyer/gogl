@@ -152,6 +152,18 @@ func (g *mutableDirected) HasEdge(edge Edge) bool {
 
 	u, v := edge.Both()
 	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *mutableDirected) HasArc(arc Arc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
@@ -363,6 +375,15 @@ func (g *immutableDirected) Density() float64 {
 func (g *immutableDirected) HasEdge(edge Edge) bool {
 	u, v := edge.Both()
 	_, exists := g.list[u][v]
+	if !exists {
+		_, exists = g.list[v][u]
+	}
+	return exists
+}
+
+// Indicates whether or not the given arc is present in the graph.
+func (g *immutableDirected) HasArc(arc Arc) bool {
+	_, exists := g.list[arc.Source()][arc.Target()]
 	return exists
 }
 
