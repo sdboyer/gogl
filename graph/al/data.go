@@ -216,8 +216,8 @@ func (g *dataDirected) EachArc(f ArcStep) {
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target := range adjacent {
-			if f(NewArc(source, target)) {
+		for target, data := range adjacent {
+			if f(NewDataArc(source, target, data)) {
 				return
 			}
 		}
