@@ -258,6 +258,19 @@ func (g *labeledDirected) HasLabeledEdge(edge LabeledEdge) bool {
 	return false
 }
 
+// Indicates whether or not the given labeled arc is present in the graph.
+// It will only match if the provided LabeledEdge has the same label as
+// the edge contained in the graph.
+func (g *labeledDirected) HasLabeledArc(arc LabeledArc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if label, exists := g.list[arc.Source()][arc.Target()]; exists {
+		return label == arc.Label()
+	}
+	return false
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *labeledDirected) Density() float64 {

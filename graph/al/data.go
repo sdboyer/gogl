@@ -258,6 +258,19 @@ func (g *dataDirected) HasDataEdge(edge DataEdge) bool {
 	return false
 }
 
+// Indicates whether or not the given data arc is present in the graph.
+// It will only match if the provided DataEdge has the same data as
+// the edge contained in the graph.
+func (g *dataDirected) HasDataArc(arc DataArc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if data, exists := g.list[arc.Source()][arc.Target()]; exists {
+		return data == arc.Data()
+	}
+	return false
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *dataDirected) Density() float64 {

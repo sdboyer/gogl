@@ -243,6 +243,19 @@ func (g *weightedDirected) HasWeightedEdge(edge WeightedEdge) bool {
 	return false
 }
 
+// Indicates whether or not the given weighted arc is present in the graph.
+// It will only match if the provided LabeledEdge has the same label as
+// the edge contained in the graph.
+func (g *weightedDirected) HasWeightedArc(arc WeightedArc) bool {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	if weight, exists := g.list[arc.Source()][arc.Target()]; exists {
+		return weight == arc.Weight()
+	}
+	return false
+}
+
 // Returns the density of the graph. Density is the ratio of edge count to the
 // number of edges there would be in complete graph (maximum edge count).
 func (g *weightedDirected) Density() float64 {

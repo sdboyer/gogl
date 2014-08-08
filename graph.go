@@ -49,13 +49,6 @@ type GraphSource interface {
 	EdgeEnumerator
 }
 
-// DigraphSource is a subset of Digraph, describing the minimal set of methods
-// necessary to accomplish a naive full digraph traversal and copy.
-type DigraphSource interface {
-	GraphSource
-	ArcEnumerator
-}
-
 // Digraph (directed graph) describes a Graph where all the edges are directed.
 //
 // gogl treats edge directionality as a property of the graph, not the edge itself.
@@ -68,6 +61,13 @@ type Digraph interface {
 	DirectedDegreeChecker // Reports in- and out-degree of vertices
 	ArcMembershipChecker  // Allows inspection of contained arcs
 	Transposer            // Digraphs can produce a transpose of themselves
+}
+
+// DigraphSource is a subset of Digraph, describing the minimal set of methods
+// necessary to accomplish a naive full digraph traversal and copy.
+type DigraphSource interface {
+	GraphSource
+	ArcEnumerator
 }
 
 // MutableGraph describes a graph with basic edges (no weighting, labeling, etc.)
@@ -111,6 +111,13 @@ type WeightedGraph interface {
 	HasWeightedEdge(e WeightedEdge) bool
 }
 
+// WeightedDigraph describes a graph where all edges are weighted arcs (directed).
+type WeightedDigraph interface {
+	Digraph
+	HasWeightedEdge(e WeightedEdge) bool
+	HasWeightedArc(a WeightedArc) bool
+}
+
 // MutableWeightedGraph is the mutable version of a weighted graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only weighted edges can be present in the graph.
@@ -138,7 +145,14 @@ type LabeledGraph interface {
 	HasLabeledEdge(e LabeledEdge) bool
 }
 
-// LabeledWeightedGraph is the mutable version of a labeled graph. Its
+// LabeledDigraph describes a graph where all edges are labeled arcs (directed).
+type LabeledDigraph interface {
+	Digraph
+	HasLabeledEdge(e LabeledEdge) bool
+	HasLabeledArc(a LabeledArc) bool
+}
+
+// MutableLabeledGraph is the mutable version of a labeled graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only labeled edges can be present in the graph.
 type MutableLabeledGraph interface {
@@ -168,7 +182,14 @@ type DataGraph interface {
 	HasDataEdge(e DataEdge) bool
 }
 
-// MutableDataGraph is the mutable version of a propety graph. Its
+// DataDigraph describes a graph where all edges are data arcs (directed).
+type DataDigraph interface {
+	Digraph
+	HasDataEdge(e DataEdge) bool
+	HasDataArc(a DataArc) bool
+}
+
+// MutableDataGraph is the mutable version of a data graph. Its
 // AddEdges() method is incompatible with MutableGraph, guaranteeing
 // only property edges can be present in the graph.
 type MutableDataGraph interface {
