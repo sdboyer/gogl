@@ -134,7 +134,9 @@ func gdebug(g Graph, args ...interface{}) {
 //
 /////////////////////////////////////////////////////////////////////
 
-func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
+type graphFactory func(GraphSpec) Graph
+
+func SetUpTestsFromSpec(gp GraphProperties, fn graphFactory) bool {
 	var directed bool
 
 	g := fn(GraphSpec{Props: gp})
@@ -168,27 +170,57 @@ func SetUpTestsFromSpec(gp GraphProperties, fn func(GraphSpec) Graph) bool {
 	}
 
 	if _, ok := g.(WeightedGraph); ok {
-		Suite(&WeightedGraphSuite{fact, directed})
-	}
+		wfact := func(gs GraphSource) WeightedGraph {
+			return fact(gs).(WeightedGraph)
+		}
 
-	if _, ok := g.(MutableWeightedGraph); ok {
-		Suite(&MutableWeightedGraphSuite{fact, directed})
+		Suite(&WeightedGraphSuite{wfact})
+
+		if _, ok := g.(WeightedDigraph); ok {
+			Suite(&WeightedDigraphSuite{wfact})
+		}
+		if _, ok := g.(WeightedEdgeSetMutator); ok {
+			Suite(&WeightedEdgeSetMutatorSuite{wfact})
+		}
+		if _, ok := g.(WeightedArcSetMutator); ok {
+			Suite(&WeightedArcSetMutatorSuite{wfact})
+		}
 	}
 
 	if _, ok := g.(LabeledGraph); ok {
-		Suite(&LabeledGraphSuite{fact, directed})
-	}
+		wfact := func(gs GraphSource) LabeledGraph {
+			return fact(gs).(LabeledGraph)
+		}
 
-	if _, ok := g.(MutableLabeledGraph); ok {
-		Suite(&MutableLabeledGraphSuite{fact, directed})
+		Suite(&LabeledGraphSuite{wfact})
+
+		if _, ok := g.(LabeledDigraph); ok {
+			Suite(&LabeledDigraphSuite{wfact})
+		}
+		if _, ok := g.(LabeledEdgeSetMutator); ok {
+			Suite(&LabeledEdgeSetMutatorSuite{wfact})
+		}
+		if _, ok := g.(LabeledArcSetMutator); ok {
+			Suite(&LabeledArcSetMutatorSuite{wfact})
+		}
 	}
 
 	if _, ok := g.(DataGraph); ok {
-		Suite(&DataGraphSuite{fact, directed})
-	}
+		wfact := func(gs GraphSource) DataGraph {
+			return fact(gs).(DataGraph)
+		}
 
-	if _, ok := g.(MutableDataGraph); ok {
-		Suite(&MutableDataGraphSuite{fact, directed})
+		Suite(&DataGraphSuite{wfact})
+
+		if _, ok := g.(DataDigraph); ok {
+			Suite(&DataDigraphSuite{wfact})
+		}
+		if _, ok := g.(DataEdgeSetMutator); ok {
+			Suite(&DataEdgeSetMutatorSuite{wfact})
+		}
+		if _, ok := g.(DataArcSetMutator); ok {
+			Suite(&DataArcSetMutatorSuite{wfact})
+		}
 	}
 
 	return true

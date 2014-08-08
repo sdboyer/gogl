@@ -7,11 +7,10 @@ import (
 	. "github.com/sdboyer/gogl"
 )
 
-/* DataGraphSuite - tests for labeled graphs */
+/* DataGraphSuite - tests for data graphs */
 
 type DataGraphSuite struct {
-	Factory  func(GraphSource) Graph
-	Directed bool
+	Factory  func(GraphSource) DataGraph
 }
 
 func (s *DataGraphSuite) SuiteLabel() string {
@@ -21,7 +20,7 @@ func (s *DataGraphSuite) SuiteLabel() string {
 func (s *DataGraphSuite) TestEachEdge(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
 	// provided by the EachEdge() iterator actually do implement DataEdge.
-	g := s.Factory(GraphFixtures["d-2e3v"]).(DataGraph)
+	g := s.Factory(GraphFixtures["d-2e3v"])
 
 	var we DataEdge
 	g.EachEdge(func(e Edge) (terminate bool) {
@@ -31,119 +30,190 @@ func (s *DataGraphSuite) TestEachEdge(c *C) {
 }
 
 func (s *DataGraphSuite) TestHasDataEdge(c *C) {
-	g := s.Factory(GraphFixtures["d-2e3v"]).(DataGraph)
+	g := s.Factory(GraphFixtures["d-2e3v"])
 
-	// TODO figure out how to meaningfully test undirected graphs' logic here
-	c.Assert(g.HasDataEdge(GraphFixtures["d-2e3v"].(DataArcList)[1].(DataArc)), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(GraphFixtures["d-2e3v"].(DataArcList)[0].(DataArc)), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong data
 }
 
-/* MutableDataGraphSuite - tests for mutable labeled graphs */
-
-type MutableDataGraphSuite struct {
-	Factory  func(GraphSource) Graph
-	Directed bool
+type DataDigraphSuite struct {
+	Factory  func(GraphSource) DataGraph
 }
 
-func (s *MutableDataGraphSuite) SuiteLabel() string {
+func (s *DataDigraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
-func (s *MutableDataGraphSuite) TestGracefulEmptyVariadics(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
+func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
+	// This method is not redundant with the base Graph suite as it ensures that the edges
+	// provided by the EachArc() iterator actually do implement DataArc.
+	g := s.Factory(GraphFixtures["d-2e3v"]).(DataDigraph)
 
-	g.EnsureVertex()
-	c.Assert(Order(g), Equals, 0)
+	var hit int // just internal safety check to ensure the fixture is good and hits
+	var da DataArc
+	g.EachArc(func(e Arc) (terminate bool) {
+		hit++
+		c.Assert(e, Implements, &da)
+		return
+	})
 
-	g.RemoveVertex()
-	c.Assert(Order(g), Equals, 0)
+	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+		hit++
+		c.Assert(e, Implements, &da)
+		return
+	})
 
-	g.AddEdges()
+	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+		hit++
+		c.Assert(e, Implements, &da)
+		return
+	})
+
+	c.Assert(hit, Equals, 4)
+}
+
+/* DataEdgeSetMutatorSuite - tests for mutable data graphs */
+
+type DataEdgeSetMutatorSuite struct {
+	Factory  func(GraphSource) DataGraph
+}
+
+func (s *DataEdgeSetMutatorSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
+}
+
+func (s *DataEdgeSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(DataEdgeSetMutator)
+
+	m.AddEdges()
 	c.Assert(Order(g), Equals, 0)
 	c.Assert(Size(g), Equals, 0)
 
-	g.RemoveEdges()
+	m.RemoveEdges()
 	c.Assert(Order(g), Equals, 0)
 	c.Assert(Size(g), Equals, 0)
 }
 
-func (s *MutableDataGraphSuite) TestEnsureVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-
-	g.EnsureVertex("foo")
-	c.Assert(g.HasVertex("foo"), Equals, true)
-}
-
-func (s *MutableDataGraphSuite) TestMultiEnsureVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-
-	g.EnsureVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, true)
-	c.Assert(g.HasVertex("baz"), Equals, true)
-}
-
-func (s *MutableDataGraphSuite) TestRemoveVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-}
-
-func (s *MutableDataGraphSuite) TestMultiRemoveVertex(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-
-	g.EnsureVertex("bar", "baz")
-	g.RemoveVertex("bar", "baz")
-	c.Assert(g.HasVertex("bar"), Equals, false)
-	c.Assert(g.HasVertex("baz"), Equals, false)
-}
-
-func (s *MutableDataGraphSuite) TestAddAndRemoveEdge(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-	g.AddEdges(NewDataEdge(1, 2, "foo"))
+func (s *DataEdgeSetMutatorSuite) TestAddRemoveHasEdge(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(DataEdgeSetMutator)
+	m.AddEdges(NewDataEdge(1, 2, "foo"))
 
 	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed)
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true)
 
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "quark")), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "qux")), Equals, false)
 
 	// Now test removal
-	g.RemoveEdges(NewDataEdge(1, 2, "foo"))
+	m.RemoveEdges(NewDataEdge(1, 2, "foo"))
 	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
 }
 
-func (s *MutableDataGraphSuite) TestMultiAddAndRemoveEdge(c *C) {
-	g := s.Factory(NullGraph).(MutableDataGraph)
-	g.AddEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, struct{ a int }{a: 2}))
+func (s *DataEdgeSetMutatorSuite) TestMultiAddRemoveHasEdge(c *C) {
+	g := s.Factory(NullGraph)
+	m := g.(DataEdgeSetMutator)
+	m.AddEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, "bar"))
 
 	// Basic edge tests first
 	// We test both Has*Edge() methods to ensure that adding our known edge fixture type results in the expected behavior.
 	// Thus, this is not just duplicate testing of the Has*Edge() method.
 	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, true)
 	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, true)
-	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, !s.Directed) // only if undirected
-	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, !s.Directed) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(2, 1)), Equals, true) // only if undirected
+	c.Assert(g.HasEdge(NewEdge(3, 2)), Equals, true) // only if undirected
 
-	// Now labeled edge tests
+	// Now data edge tests
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "baz")), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, struct{ a int }{a: 2})), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "qux")), Equals, false) // wrong label
-	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, struct{ a int }{a: 2})), Equals, !s.Directed)
-	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "qux")), Equals, false) // wrong label
+	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "baz")), Equals, false) // wrong data
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "baz")), Equals, false) // wrong data
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "bar")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "qux")), Equals, false) // wrong data
+	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "bar")), Equals, true)
+	c.Assert(g.HasDataEdge(NewDataEdge(3, 2, "qux")), Equals, false) // wrong data
 
 	// Now test removal
-	g.RemoveEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, struct{ a int }{a: 2}))
+	m.RemoveEdges(NewDataEdge(1, 2, "foo"), NewDataEdge(2, 3, "bar"))
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, false)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, struct{ a int }{a: 2})), Equals, false)
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 3, "bar")), Equals, false)
 	c.Assert(g.HasEdge(NewEdge(1, 2)), Equals, false)
 	c.Assert(g.HasEdge(NewEdge(2, 3)), Equals, false)
 }
 
+/* DataArcSetMutatorSuite - tests for mutable data graphs */
+
+type DataArcSetMutatorSuite struct {
+	Factory  func(GraphSource) DataGraph
+}
+
+func (s *DataArcSetMutatorSuite) SuiteLabel() string {
+	return fmt.Sprintf("%T", s.Factory(NullGraph))
+}
+
+func (s *DataArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
+	g := s.Factory(NullGraph).(DataDigraph)
+	m := g.(DataArcSetMutator)
+
+	m.AddArcs()
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
+
+	m.RemoveArcs()
+	c.Assert(Order(g), Equals, 0)
+	c.Assert(Size(g), Equals, 0)
+}
+
+func (s *DataArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
+	g := s.Factory(NullGraph).(DataDigraph)
+	m := g.(DataArcSetMutator)
+	m.AddArcs(NewDataArc(1, 2, "foo"))
+
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, true)
+
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "bar")), Equals, false)
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false)
+
+	// Now test removal
+	m.RemoveArcs(NewDataArc(1, 2, "foo"))
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, false)
+}
+
+func (s *DataArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
+	g := s.Factory(NullGraph).(DataDigraph)
+	m := g.(DataArcSetMutator)
+	m.AddArcs(NewDataArc(1, 2, "foo"), NewDataArc(2, 3, "bar"))
+
+	// Basic edge tests first
+	// We test both Has*Arc() methods to ensure that adding our known edge fixture type results in the expected behavior.
+	// Thus, this is not just duplicate testing of the Has*Arc() method.
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 3)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false)
+	c.Assert(g.HasArc(NewArc(3, 2)), Equals, false)
+
+	// Now data edge tests
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "baz")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(2, 3, "bar")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(2, 3, "qux")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(3, 2, "bar")), Equals, true)
+	c.Assert(g.HasDataArc(NewDataArc(3, 2, "qux")), Equals, false) // wrong data
+
+	// Now test removal
+	m.RemoveArcs(NewDataArc(1, 2, "foo"), NewDataArc(2, 3, "bar"))
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, false)
+	c.Assert(g.HasDataArc(NewDataArc(2, 3, "bar")), Equals, false)
+	c.Assert(g.HasArc(NewArc(1, 2)), Equals, false)
+	c.Assert(g.HasArc(NewArc(2, 3)), Equals, false)
+}
