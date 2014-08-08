@@ -174,12 +174,12 @@ func (s *DataArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	m.AddArcs(NewDataArc(1, 2, "foo"))
 
 	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
 
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(1, 2, "bar")), Equals, false)
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false)
+	c.Assert(g.HasDataArc(NewDataArc(1, 2, "bar")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, false) // wrong direction
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "bar")), Equals, false) // wrong direction & data
 
 	// Now test removal
 	m.RemoveArcs(NewDataArc(1, 2, "foo"))
@@ -203,12 +203,12 @@ func (s *DataArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	// Now data edge tests
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "foo")), Equals, true)
 	c.Assert(g.HasDataArc(NewDataArc(1, 2, "baz")), Equals, false) // wrong data
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "foo")), Equals, false) // wrong direction
+	c.Assert(g.HasDataArc(NewDataArc(2, 1, "baz")), Equals, false) // wrong direction & data
 	c.Assert(g.HasDataArc(NewDataArc(2, 3, "bar")), Equals, true)
 	c.Assert(g.HasDataArc(NewDataArc(2, 3, "qux")), Equals, false) // wrong data
-	c.Assert(g.HasDataArc(NewDataArc(3, 2, "bar")), Equals, true)
-	c.Assert(g.HasDataArc(NewDataArc(3, 2, "qux")), Equals, false) // wrong data
+	c.Assert(g.HasDataArc(NewDataArc(3, 2, "bar")), Equals, false) // wrong direction
+	c.Assert(g.HasDataArc(NewDataArc(3, 2, "qux")), Equals, false) // wrong direction & data
 
 	// Now test removal
 	m.RemoveArcs(NewDataArc(1, 2, "foo"), NewDataArc(2, 3, "bar"))

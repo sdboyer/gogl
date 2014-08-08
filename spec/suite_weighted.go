@@ -174,12 +174,12 @@ func (s *WeightedArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	m.AddArcs(NewWeightedArc(1, 2, 5.23))
 
 	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
 
 	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 3)), Equals, false)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, -3.22771)), Equals, false)
+	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 3)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5.23)), Equals, false) // wrong direction
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 3)), Equals, false) // wrong direction & weight
 
 	// Now test removal
 	m.RemoveArcs(NewWeightedArc(1, 2, 5.23))
@@ -203,12 +203,12 @@ func (s *WeightedArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	// Now weighted edge tests
 	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 5)), Equals, true)
 	c.Assert(g.HasWeightedArc(NewWeightedArc(1, 2, 3)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 3)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 5)), Equals, false) // wrong direction
+	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 1, 3)), Equals, false) // wrong direction & weight
 	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, -5)), Equals, true)
 	c.Assert(g.HasWeightedArc(NewWeightedArc(2, 3, 1)), Equals, false) // wrong weight
-	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, -5)), Equals, true)
-	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, 1)), Equals, false) // wrong weight
+	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, -5)), Equals, false) // wrong direction
+	c.Assert(g.HasWeightedArc(NewWeightedArc(3, 2, 1)), Equals, false) // wrong direction & weight
 
 	// Now test removal
 	m.RemoveArcs(NewWeightedArc(1, 2, 5), NewWeightedArc(2, 3, -5))

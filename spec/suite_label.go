@@ -174,12 +174,12 @@ func (s *LabeledArcSetMutatorSuite) TestAddRemoveHasArc(c *C) {
 	m.AddArcs(NewLabeledArc(1, 2, "foo"))
 
 	c.Assert(g.HasArc(NewArc(1, 2)), Equals, true)
-	c.Assert(g.HasArc(NewArc(2, 1)), Equals, true)
+	c.Assert(g.HasArc(NewArc(2, 1)), Equals, false) // wrong direction
 
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "bar")), Equals, false)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "baz")), Equals, false)
+	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "bar")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, false) // wrong direction
+	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "bar")), Equals, false) // wrong direction & label
 
 	// Now test removal
 	m.RemoveArcs(NewLabeledArc(1, 2, "foo"))
@@ -203,12 +203,12 @@ func (s *LabeledArcSetMutatorSuite) TestMultiAddRemoveHasArc(c *C) {
 	// Now labeled edge tests
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "foo")), Equals, true)
 	c.Assert(g.HasLabeledArc(NewLabeledArc(1, 2, "baz")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "baz")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "foo")), Equals, false) // wrong direction
+	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 1, "baz")), Equals, false) // wrong direction & label
 	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 3, "bar")), Equals, true)
 	c.Assert(g.HasLabeledArc(NewLabeledArc(2, 3, "qux")), Equals, false) // wrong label
-	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "bar")), Equals, true)
-	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "qux")), Equals, false) // wrong label
+	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "bar")), Equals, false) // wrong direction
+	c.Assert(g.HasLabeledArc(NewLabeledArc(3, 2, "qux")), Equals, false) // wrong direction & label
 
 	// Now test removal
 	m.RemoveArcs(NewLabeledArc(1, 2, "foo"), NewLabeledArc(2, 3, "bar"))
