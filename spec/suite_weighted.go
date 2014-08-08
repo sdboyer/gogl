@@ -10,7 +10,7 @@ import (
 /* WeightedGraphSuite - tests for weighted graphs */
 
 type WeightedGraphSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedGraphSuite) SuiteLabel() string {
@@ -33,12 +33,12 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Factory(GraphFixtures["w-2e3v"])
 
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true) // both directions work
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true)     // both directions work
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, -3.7212)), Equals, false) // wrong weight
 }
 
 type WeightedDigraphSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedDigraphSuite) SuiteLabel() string {
@@ -76,7 +76,7 @@ func (s *WeightedDigraphSuite) TestArcSubtypeImplementation(c *C) {
 /* WeightedEdgeSetMutatorSuite - tests for mutable weighted graphs */
 
 type WeightedEdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedEdgeSetMutatorSuite) SuiteLabel() string {
@@ -126,7 +126,7 @@ func (s *WeightedEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 /* WeightedArcSetMutatorSuite - tests for mutable weighted graphs */
 
 type WeightedArcSetMutatorSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedArcSetMutatorSuite) SuiteLabel() string {

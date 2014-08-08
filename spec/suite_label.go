@@ -10,7 +10,7 @@ import (
 /* LabeledGraphSuite - tests for labeled graphs */
 
 type LabeledGraphSuite struct {
-	Factory  func(GraphSource) LabeledGraph
+	Factory func(GraphSource) LabeledGraph
 }
 
 func (s *LabeledGraphSuite) SuiteLabel() string {
@@ -33,12 +33,12 @@ func (s *LabeledGraphSuite) TestHasLabeledEdge(c *C) {
 	g := s.Factory(GraphFixtures["l-2e3v"])
 
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, true) // both directions work
+	c.Assert(g.HasLabeledEdge(NewLabeledEdge(2, 1, "foo")), Equals, true)  // both directions work
 	c.Assert(g.HasLabeledEdge(NewLabeledEdge(1, 2, "qux")), Equals, false) // wrong label
 }
 
 type LabeledDigraphSuite struct {
-	Factory  func(GraphSource) LabeledGraph
+	Factory func(GraphSource) LabeledGraph
 }
 
 func (s *LabeledDigraphSuite) SuiteLabel() string {
@@ -76,7 +76,7 @@ func (s *LabeledDigraphSuite) TestArcSubtypeImplementation(c *C) {
 /* LabeledEdgeSetMutatorSuite - tests for mutable labeled graphs */
 
 type LabeledEdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) LabeledGraph
+	Factory func(GraphSource) LabeledGraph
 }
 
 func (s *LabeledEdgeSetMutatorSuite) SuiteLabel() string {
@@ -126,7 +126,7 @@ func (s *LabeledEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 /* LabeledArcSetMutatorSuite - tests for mutable labeled graphs */
 
 type LabeledArcSetMutatorSuite struct {
-	Factory  func(GraphSource) LabeledGraph
+	Factory func(GraphSource) LabeledGraph
 }
 
 func (s *LabeledArcSetMutatorSuite) SuiteLabel() string {

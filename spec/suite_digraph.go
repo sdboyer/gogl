@@ -223,4 +223,3 @@ func (s *DigraphSuite) TestEachSuccessorOfTermination(c *C) {
 
 	c.Assert(hit, Equals, 1)
 }
-

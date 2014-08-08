@@ -8,6 +8,7 @@ import (
 )
 
 type EdgeListSuite struct{}
+
 var _ = Suite(&EdgeListSuite{})
 
 func (s *EdgeListSuite) TestEachVertex(c *C) {
@@ -79,6 +80,7 @@ func (s *EdgeListSuite) TestEachEdgeTermination(c *C) {
 }
 
 type ArcListSuite struct{}
+
 var _ = Suite(&ArcListSuite{})
 
 func (s *ArcListSuite) TestEachVertex(c *C) {
@@ -150,6 +152,7 @@ func (s *ArcListSuite) TestEachArcTermination(c *C) {
 }
 
 type EdgeSuite struct{}
+
 var _ = Suite(&EdgeSuite{})
 
 func (s *EdgeSuite) TestEdges(c *C) {
@@ -182,6 +185,7 @@ func (s *EdgeSuite) TestEdges(c *C) {
 }
 
 type ArcSuite struct{}
+
 var _ = Suite(&ArcSuite{})
 
 func (s *ArcSuite) TestArcs(c *C) {

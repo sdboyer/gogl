@@ -10,7 +10,7 @@ import (
 /* DataGraphSuite - tests for data graphs */
 
 type DataGraphSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataGraphSuite) SuiteLabel() string {
@@ -33,12 +33,12 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 	g := s.Factory(GraphFixtures["d-2e3v"])
 
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true) // both directions work
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)  // both directions work
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong data
 }
 
 type DataDigraphSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataDigraphSuite) SuiteLabel() string {
@@ -76,7 +76,7 @@ func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 /* DataEdgeSetMutatorSuite - tests for mutable data graphs */
 
 type DataEdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataEdgeSetMutatorSuite) SuiteLabel() string {
@@ -126,7 +126,7 @@ func (s *DataEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 /* DataArcSetMutatorSuite - tests for mutable data graphs */
 
 type DataArcSetMutatorSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataArcSetMutatorSuite) SuiteLabel() string {

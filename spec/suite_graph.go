@@ -198,4 +198,3 @@ func (s *GraphSuite) TestDegreeOf(c *C) {
 	c.Assert(exists, Equals, false)
 	c.Assert(count, Equals, 0)
 }
-
