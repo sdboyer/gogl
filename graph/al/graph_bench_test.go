@@ -102,7 +102,7 @@ type benchGraph struct {
 }
 
 func (g *benchGraph) EachVertex(f VertexStep) {
-	for v, _ := range g.list {
+	for v := range g.list {
 		if f(v) {
 			return
 		}

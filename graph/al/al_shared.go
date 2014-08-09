@@ -185,7 +185,7 @@ func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
 	switch l := list.(type) {
 	case map[Vertex]map[Vertex]struct{}:
 		if _, exists := l[vertex]; exists {
-			for adjacent, _ := range l[vertex] {
+			for adjacent := range l[vertex] {
 				if vs(adjacent) {
 					return
 				}
@@ -193,7 +193,7 @@ func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
 		}
 	case map[Vertex]map[Vertex]float64:
 		if _, exists := l[vertex]; exists {
-			for adjacent, _ := range l[vertex] {
+			for adjacent := range l[vertex] {
 				if vs(adjacent) {
 					return
 				}
@@ -201,7 +201,7 @@ func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
 		}
 	case map[Vertex]map[Vertex]string:
 		if _, exists := l[vertex]; exists {
-			for adjacent, _ := range l[vertex] {
+			for adjacent := range l[vertex] {
 				if vs(adjacent) {
 					return
 				}
@@ -209,7 +209,7 @@ func eachVertexInAdjacencyList(list interface{}, vertex Vertex, vs VertexStep) {
 		}
 	case map[Vertex]map[Vertex]interface{}:
 		if _, exists := l[vertex]; exists {
-			for adjacent, _ := range l[vertex] {
+			for adjacent := range l[vertex] {
 				if vs(adjacent) {
 					return
 				}
@@ -225,7 +225,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 	case map[Vertex]map[Vertex]struct{}:
 		if _, exists := l[vertex]; exists {
 			for candidate, adjacent := range l {
-				for target, _ := range adjacent {
+				for target := range adjacent {
 					if target == vertex {
 						if vs(candidate) {
 							return
@@ -237,7 +237,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 	case map[Vertex]map[Vertex]float64:
 		if _, exists := l[vertex]; exists {
 			for candidate, adjacent := range l {
-				for target, _ := range adjacent {
+				for target := range adjacent {
 					if target == vertex {
 						if vs(candidate) {
 							return
@@ -249,7 +249,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 	case map[Vertex]map[Vertex]string:
 		if _, exists := l[vertex]; exists {
 			for candidate, adjacent := range l {
-				for target, _ := range adjacent {
+				for target := range adjacent {
 					if target == vertex {
 						if vs(candidate) {
 							return
@@ -261,7 +261,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 	case map[Vertex]map[Vertex]interface{}:
 		if _, exists := l[vertex]; exists {
 			for candidate, adjacent := range l {
-				for target, _ := range adjacent {
+				for target := range adjacent {
 					if target == vertex {
 						if vs(candidate) {
 							return

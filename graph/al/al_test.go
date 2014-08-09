@@ -11,7 +11,7 @@ import (
 func TestHookup(t *testing.T) { gocheck.TestingT(t) }
 
 func init() {
-	for gp, _ := range alCreators {
+	for gp := range alCreators {
 		spec.SetUpTestsFromSpec(gp, G)
 	}
 }

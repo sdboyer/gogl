@@ -74,8 +74,8 @@ func (s *DepthFirstSearchSuite) TestFindSources(c *C) {
 	sources, err = FindSources(g)
 
 	possibles := [][]gogl.Vertex{
-		[]gogl.Vertex{"foo", "quark"},
-		[]gogl.Vertex{"quark", "foo"},
+		{"foo", "quark"},
+		{"quark", "foo"},
 	}
 	c.Assert(possibles, Contains, sources)
 	c.Assert(err, IsNil)

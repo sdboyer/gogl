@@ -30,7 +30,7 @@ func (g *mutableUndirected) EachEdge(f EdgeStep) {
 	visited := set.NewNonTS()
 
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			e := NewEdge(source, target)
 			if !visited.Has(NewEdge(target, source)) {
 				visited.Add(e)
@@ -51,7 +51,7 @@ func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 		return
 	}
 
-	for adjacent, _ := range g.list[v] {
+	for adjacent := range g.list[v] {
 		if f(NewEdge(v, adjacent)) {
 			return
 		}

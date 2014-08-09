@@ -50,7 +50,7 @@ func (g *mutableDirected) EachEdge(f EdgeStep) {
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if f(NewEdge(source, target)) {
 				return
 			}
@@ -65,7 +65,7 @@ func (g *mutableDirected) EachArc(f ArcStep) {
 	defer g.mu.RUnlock()
 
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if f(NewArc(source, target)) {
 				return
 			}
@@ -104,7 +104,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 		return
 	}
 
-	for adjacent, _ := range g.list[v] {
+	for adjacent := range g.list[v] {
 		if f(NewArc(v, adjacent)) {
 			return
 		}
@@ -128,7 +128,7 @@ func (g *mutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	}
 
 	for candidate, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if target == v {
 				if f(NewArc(candidate, target)) {
 					return
@@ -268,7 +268,7 @@ func (g *mutableDirected) Transpose() Digraph {
 		if !g2.hasVertex(source) {
 			g2.list[source] = make(map[Vertex]struct{}, startcap+1)
 		}
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if !g2.hasVertex(target) {
 				g2.list[target] = make(map[Vertex]struct{}, startcap+1)
 			}
@@ -289,7 +289,7 @@ type immutableDirected struct {
 // provided closure.
 func (g *immutableDirected) EachEdge(f EdgeStep) {
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if f(NewEdge(source, target)) {
 				return
 			}
@@ -301,7 +301,7 @@ func (g *immutableDirected) EachEdge(f EdgeStep) {
 // provided closure.
 func (g *immutableDirected) EachArc(f ArcStep) {
 	for source, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if f(NewArc(source, target)) {
 				return
 			}
@@ -332,7 +332,7 @@ func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 		return
 	}
 
-	for adjacent, _ := range g.list[v] {
+	for adjacent := range g.list[v] {
 		if f(NewArc(v, adjacent)) {
 			return
 		}
@@ -350,7 +350,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	}
 
 	for candidate, adjacent := range g.list {
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if target == v {
 				if f(NewArc(candidate, target)) {
 					return
@@ -437,7 +437,7 @@ func (g *immutableDirected) Transpose() Digraph {
 		if !g2.hasVertex(source) {
 			g2.list[source] = make(map[Vertex]struct{}, startcap+1)
 		}
-		for target, _ := range adjacent {
+		for target := range adjacent {
 			if !g2.hasVertex(target) {
 				g2.list[target] = make(map[Vertex]struct{}, startcap+1)
 			}
