@@ -176,17 +176,17 @@ func (s *BernoulliTest) TestEdgesTermination(c *C) {
 	c.Assert(hit, Equals, 4)
 }
 
-func (s *BernoulliTest) TestEachArcStability(c *C) {
+func (s *BernoulliTest) TestArcsStability(c *C) {
 	setd := set.NewNonTS()
 	var hitd int
 
 	g := BernoulliDistribution(10, 0.5, true, true, nil).(gogl.DigraphSource)
-	g.EachArc(func(e gogl.Arc) (terminate bool) {
+	g.Arcs(func(e gogl.Arc) (terminate bool) {
 		setd.Add(e)
 		return
 	})
 
-	g.EachArc(func(e gogl.Arc) (terminate bool) {
+	g.Arcs(func(e gogl.Arc) (terminate bool) {
 		c.Assert(setd.Has(e), Equals, true)
 		hitd++
 		return
@@ -196,16 +196,16 @@ func (s *BernoulliTest) TestEachArcStability(c *C) {
 	c.Assert(g.(gogl.EdgeCounter).Size(), Equals, hitd)
 }
 
-func (s *BernoulliTest) TestEachArcTermination(c *C) {
+func (s *BernoulliTest) TestArcsTermination(c *C) {
 	var hit int
-	s.graphs["dir_unstable"].(gogl.DigraphSource).EachArc(func(e gogl.Arc) bool {
+	s.graphs["dir_unstable"].(gogl.DigraphSource).Arcs(func(e gogl.Arc) bool {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 1)
 
 	gogl.CollectEdges(s.graphs["dir_stable"])
-	s.graphs["dir_stable"].(gogl.DigraphSource).EachArc(func(e gogl.Arc) bool {
+	s.graphs["dir_stable"].(gogl.DigraphSource).Arcs(func(e gogl.Arc) bool {
 		hit++
 		return true
 	})

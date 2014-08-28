@@ -167,7 +167,7 @@ func FindSources(g gogl.Digraph) (sources []gogl.Vertex, err error) {
 	// TODO hardly the most efficient way to keep track, i'm sure
 	incomings := set.NewNonTS()
 
-	g.EachArc(func(e gogl.Arc) (terminate bool) {
+	g.Arcs(func(e gogl.Arc) (terminate bool) {
 		incomings.Add(e.Target())
 		return
 	})

@@ -47,12 +47,12 @@ func (s *WeightedDigraphSuite) SuiteLabel() string {
 
 func (s *WeightedDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachArc() iterator actually do implement WeightedArc.
+	// provided by the Arcs() iterator actually do implement WeightedArc.
 	g := s.Factory(GraphFixtures["w-2e3v"]).(WeightedDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
 	var wa WeightedArc
-	g.EachArc(func(e Arc) (terminate bool) {
+	g.Arcs(func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return

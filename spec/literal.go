@@ -40,7 +40,7 @@ func (g GraphLiteralFixture) Edges(f EdgeStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArc(f ArcStep) {
+func (g GraphLiteralFixture) Arcs(f ArcStep) {
 	var al []Arc
 	if g {
 		al = []Arc{

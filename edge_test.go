@@ -132,27 +132,27 @@ func (s *ArcListSuite) TestVerticesTermination(c *C) {
 	c.Assert(hit, Equals, 4)
 }
 
-func (s *ArcListSuite) TestEachArcTermination(c *C) {
+func (s *ArcListSuite) TestArcsTermination(c *C) {
 	var hit int
-	spec.GraphFixtures["2e3v"].(DigraphSource).EachArc(func(e Arc) (terminate bool) {
+	spec.GraphFixtures["2e3v"].(DigraphSource).Arcs(func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 1)
 
-	spec.GraphFixtures["w-2e3v"].(DigraphSource).EachArc(func(e Arc) (terminate bool) {
+	spec.GraphFixtures["w-2e3v"].(DigraphSource).Arcs(func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 2)
 
-	spec.GraphFixtures["l-2e3v"].(DigraphSource).EachArc(func(e Arc) (terminate bool) {
+	spec.GraphFixtures["l-2e3v"].(DigraphSource).Arcs(func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 3)
 
-	spec.GraphFixtures["d-2e3v"].(DigraphSource).EachArc(func(e Arc) (terminate bool) {
+	spec.GraphFixtures["d-2e3v"].(DigraphSource).Arcs(func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})

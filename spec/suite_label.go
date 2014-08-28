@@ -47,12 +47,12 @@ func (s *LabeledDigraphSuite) SuiteLabel() string {
 
 func (s *LabeledDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachArc() iterator actually do implement LabeledArc.
+	// provided by the Arcs() iterator actually do implement LabeledArc.
 	g := s.Factory(GraphFixtures["l-2e3v"]).(LabeledDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
 	var wa LabeledArc
-	g.EachArc(func(e Arc) (terminate bool) {
+	g.Arcs(func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return

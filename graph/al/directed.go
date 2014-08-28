@@ -60,7 +60,7 @@ func (g *mutableDirected) Edges(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *mutableDirected) EachArc(f ArcStep) {
+func (g *mutableDirected) Arcs(f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -299,7 +299,7 @@ func (g *immutableDirected) Edges(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *immutableDirected) EachArc(f ArcStep) {
+func (g *immutableDirected) Arcs(f ArcStep) {
 	for source, adjacent := range g.list {
 		for target := range adjacent {
 			if f(NewArc(source, target)) {
@@ -403,7 +403,7 @@ func (g *immutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool)
 // a full scan of the graph's edge set.
 func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
-		g.EachArc(func(e Arc) (terminate bool) {
+		g.Arcs(func(e Arc) (terminate bool) {
 			if vertex == e.Target() {
 				degree++
 			}

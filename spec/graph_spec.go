@@ -49,7 +49,7 @@ func (el loopArcList) Vertices(fn VertexStep) {
 	}
 }
 
-func (el loopArcList) EachArc(fn ArcStep) {
+func (el loopArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if _, ok := e.(loopArc); !ok {
 			if fn(e) {

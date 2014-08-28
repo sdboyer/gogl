@@ -141,13 +141,13 @@ func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 	}
 
 	if g, ok := to.(al_dea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			g.addArcs(arc)
 			return
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dwea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(WeightedArc); ok {
 				g.addArcs(e)
 			} else {
@@ -157,7 +157,7 @@ func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dlea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(LabeledArc); ok {
 				g.addArcs(e)
 			} else {
@@ -167,7 +167,7 @@ func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dpea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(DataArc); ok {
 				g.addArcs(e)
 			} else {
@@ -280,7 +280,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 
 func inDegreeOf(g al_digraph, v Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(v); exists {
-		g.EachArc(func(e Arc) (terminate bool) {
+		g.Arcs(func(e Arc) (terminate bool) {
 			if v == e.Target() {
 				degree++
 			}

@@ -150,7 +150,7 @@ func (g *stableBernoulliDigraph) Edges(f gogl.EdgeStep) {
 	}
 }
 
-func (g *stableBernoulliDigraph) EachArc(f gogl.ArcStep) {
+func (g *stableBernoulliDigraph) Arcs(f gogl.ArcStep) {
 	if g.list == nil {
 		g.list = make([][]bool, g.order, g.order)
 
@@ -207,7 +207,7 @@ type unstableBernoulliDigraph struct {
 	unstableBernoulliGraph
 }
 
-func (g unstableBernoulliDigraph) EachArc(f gogl.ArcStep) {
+func (g unstableBernoulliDigraph) Arcs(f gogl.ArcStep) {
 	bernoulliArcCreator(f, int(g.order), g.ρ, g.trial)
 }
 

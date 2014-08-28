@@ -47,12 +47,12 @@ func (s *DataDigraphSuite) SuiteLabel() string {
 
 func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachArc() iterator actually do implement DataArc.
+	// provided by the Arcs() iterator actually do implement DataArc.
 	g := s.Factory(GraphFixtures["d-2e3v"]).(DataDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
 	var wa DataArc
-	g.EachArc(func(e Arc) (terminate bool) {
+	g.Arcs(func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return

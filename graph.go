@@ -235,7 +235,7 @@ type ArcEnumerator interface {
 	// Calls the provided step function once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
-	EachArc(ArcStep)
+	Arcs(ArcStep)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.

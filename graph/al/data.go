@@ -211,7 +211,7 @@ func (g *dataDirected) Edges(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *dataDirected) EachArc(f ArcStep) {
+func (g *dataDirected) Arcs(f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

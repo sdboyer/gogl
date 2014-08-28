@@ -58,7 +58,7 @@ func (el ArcList) Edges(fn EdgeStep) {
 	}
 }
 
-func (el ArcList) EachArc(fn ArcStep) {
+func (el ArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -98,7 +98,7 @@ func (el WeightedArcList) Edges(fn EdgeStep) {
 	}
 }
 
-func (el WeightedArcList) EachArc(fn ArcStep) {
+func (el WeightedArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -138,7 +138,7 @@ func (el LabeledArcList) Edges(fn EdgeStep) {
 	}
 }
 
-func (el LabeledArcList) EachArc(fn ArcStep) {
+func (el LabeledArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -178,7 +178,7 @@ func (el DataArcList) Edges(fn EdgeStep) {
 	}
 }
 
-func (el DataArcList) EachArc(fn ArcStep) {
+func (el DataArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
