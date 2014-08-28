@@ -269,7 +269,7 @@ type AdjacencyEnumerator interface {
 	// Calls the provided step function once with each vertex adjacent to the
 	// the provided vertex. In a digraph, this includes both successor
 	// and predecessor vertices.
-	EachAdjacentTo(start Vertex, adjacentVertexStep VertexStep)
+	AdjacentTo(start Vertex, adjacentVertexStep VertexStep)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.

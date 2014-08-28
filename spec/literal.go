@@ -170,7 +170,7 @@ func (g GraphLiteralFixture) EachSuccessorOf(v Vertex, f VertexStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachAdjacentTo(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) AdjacentTo(v Vertex, f VertexStep) {
 	switch v {
 	case "foo":
 		f("bar")

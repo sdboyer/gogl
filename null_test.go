@@ -25,7 +25,7 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 		return
 	})
 
-	NullGraph.EachAdjacentTo("foo", func(v Vertex) (terminate bool) {
+	NullGraph.AdjacentTo("foo", func(v Vertex) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})

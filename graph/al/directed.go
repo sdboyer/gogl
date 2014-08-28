@@ -81,7 +81,7 @@ func (g *mutableDirected) IncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *mutableDirected) AdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -315,7 +315,7 @@ func (g *immutableDirected) IncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *immutableDirected) AdjacentTo(start Vertex, f VertexStep) {
 	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {

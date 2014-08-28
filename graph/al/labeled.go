@@ -160,7 +160,7 @@ func (g *labeledDirected) IncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *labeledDirected) AdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -438,7 +438,7 @@ func (g *labeledUndirected) IncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *labeledUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
+func (g *labeledUndirected) AdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

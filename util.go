@@ -74,7 +74,7 @@ func CollectVerticesAdjacentTo(v Vertex, g AdjacencyEnumerator) (vertices []Vert
 		vertices = make([]Vertex, 0, 8)
 	}
 
-	g.EachAdjacentTo(v, func(v Vertex) (terminate bool) {
+	g.AdjacentTo(v, func(v Vertex) (terminate bool) {
 		vertices = append(vertices, v)
 		return
 	})
