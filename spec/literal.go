@@ -10,7 +10,7 @@ import (
 // bool state indicates whether using a transpose or not.
 type GraphLiteralFixture bool
 
-func (g GraphLiteralFixture) EachVertex(f VertexStep) {
+func (g GraphLiteralFixture) Vertices(f VertexStep) {
 	vl := []Vertex{"foo", "bar", "baz", "isolate"}
 	for _, v := range vl {
 		if f(v) {

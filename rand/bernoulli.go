@@ -67,7 +67,7 @@ type stableBernoulliGraph struct {
 	list  [][]bool
 }
 
-func (g *stableBernoulliGraph) EachVertex(f gogl.VertexStep) {
+func (g *stableBernoulliGraph) Vertices(f gogl.VertexStep) {
 	o := int(g.order)
 	for i := 0; i < o; i++ {
 		if f(i) {
@@ -186,7 +186,7 @@ type unstableBernoulliGraph struct {
 	trial bTrial
 }
 
-func (g unstableBernoulliGraph) EachVertex(f gogl.VertexStep) {
+func (g unstableBernoulliGraph) Vertices(f gogl.VertexStep) {
 	o := int(g.order)
 	for i := 0; i < o; i++ {
 		if f(i) {

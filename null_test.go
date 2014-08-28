@@ -1,8 +1,8 @@
 package gogl
 
 import (
-	"math"
 	. "github.com/sdboyer/gocheck"
+	"math"
 )
 
 type NullGraphSuite bool
@@ -10,7 +10,7 @@ type NullGraphSuite bool
 var _ = Suite(NullGraphSuite(false))
 
 func (s NullGraphSuite) TestEnumerators(c *C) {
-	NullGraph.EachVertex(func(v Vertex) (terminate bool) {
+	NullGraph.Vertices(func(v Vertex) (terminate bool) {
 		c.Error("The NullGraph should not have any vertices.")
 		return
 	})

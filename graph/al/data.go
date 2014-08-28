@@ -18,7 +18,7 @@ type baseData struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseData) EachVertex(f VertexStep) {
+func (g *baseData) Vertices(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

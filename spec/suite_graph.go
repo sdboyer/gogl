@@ -32,12 +32,12 @@ func (s *GraphSuite) TestHasEdge(c *C) {
 	c.Assert(g.HasEdge(NewEdge("qux", "quark")), Equals, false)
 }
 
-func (s *GraphSuite) TestEachVertex(c *C) {
+func (s *GraphSuite) TestVertices(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	vset := set.NewNonTS()
 	var hit int
-	g.EachVertex(func(v Vertex) (terminate bool) {
+	g.Vertices(func(v Vertex) (terminate bool) {
 		hit++
 		vset.Add(v)
 		return
@@ -49,11 +49,11 @@ func (s *GraphSuite) TestEachVertex(c *C) {
 	c.Assert(hit, Equals, 3)
 }
 
-func (s *GraphSuite) TestEachVertexTermination(c *C) {
+func (s *GraphSuite) TestVerticesTermination(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	var hit int
-	g.EachVertex(func(v Vertex) bool {
+	g.Vertices(func(v Vertex) bool {
 		hit++
 		return true
 	})
@@ -198,4 +198,3 @@ func (s *GraphSuite) TestDegreeOf(c *C) {
 	c.Assert(exists, Equals, false)
 	c.Assert(count, Equals, 0)
 }
-

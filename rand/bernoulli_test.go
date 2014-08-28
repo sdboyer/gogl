@@ -52,14 +52,15 @@ func (s *BernoulliTest) TestProbabilityRange(c *C) {
 	c.Assert(f2, PanicMatches, "ρ must be in the range \\[0\\.0,1\\.0\\).")
 }
 
-func (s *BernoulliTest) TestEachVertex(c *C) {
+func (s *BernoulliTest) TestVertices(c *C) {
 	sl := make([]int, 0, 50)
 
 	for _, g := range s.graphs {
-		g.EachVertex(func(v gogl.Vertex) (terminate bool) {
+		g.Vertices(func(v gogl.Vertex) (terminate bool) {
 			sl = append(sl, v.(int))
 			return
 		})
+
 	}
 
 	c.Assert(len(sl), Equals, 50)
@@ -69,16 +70,16 @@ func (s *BernoulliTest) TestEachVertex(c *C) {
 	}
 }
 
-func (s *BernoulliTest) TestEachVertexTermination(c *C) {
+func (s *BernoulliTest) TestVerticesTermination(c *C) {
 	var hit int
-	s.graphs["dir_stable"].EachVertex(func(v gogl.Vertex) bool {
+	s.graphs["dir_stable"].Vertices(func(v gogl.Vertex) bool {
 		hit++
 		return true
 	})
 
 	c.Assert(hit, Equals, 1)
 
-	s.graphs["dir_unstable"].EachVertex(func(v gogl.Vertex) bool {
+	s.graphs["dir_unstable"].Vertices(func(v gogl.Vertex) bool {
 		hit++
 		return true
 	})

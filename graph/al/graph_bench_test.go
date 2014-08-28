@@ -101,7 +101,7 @@ type benchGraph struct {
 	size          int
 }
 
-func (g *benchGraph) EachVertex(f VertexStep) {
+func (g *benchGraph) Vertices(f VertexStep) {
 	for v := range g.list {
 		if f(v) {
 			return
@@ -172,11 +172,12 @@ func BenchmarkHasVertex(b *testing.B) {
 	}
 }
 
-func BenchmarkEachVertex(b *testing.B) {
+func BenchmarkVertices(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bgraph.EachVertex(func(v Vertex) (terminate bool) {
+		bgraph.Vertices(func(v Vertex) (terminate bool) {
 			return
 		})
+
 	}
 }
 

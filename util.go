@@ -11,10 +11,11 @@ func Order(g VertexEnumerator) int {
 		return c.Order()
 	} else {
 		var order int
-		g.EachVertex(func(v Vertex) (terminate bool) {
+		g.Vertices(func(v Vertex) (terminate bool) {
 			order++
 			return
 		})
+
 		return order
 	}
 }
@@ -52,7 +53,7 @@ func CollectVertices(g VertexEnumerator) (vertices []Vertex) {
 		vertices = make([]Vertex, 0, 32)
 	}
 
-	g.EachVertex(func(v Vertex) (terminate bool) {
+	g.Vertices(func(v Vertex) (terminate bool) {
 		vertices = append(vertices, v)
 		return
 	})

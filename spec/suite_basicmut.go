@@ -10,7 +10,7 @@ import (
 /* Suites for mutable graph methods */
 
 type VertexSetMutatorSuite struct {
-	Factory  func(GraphSource) Graph
+	Factory func(GraphSource) Graph
 }
 
 func (s *VertexSetMutatorSuite) SuiteLabel() string {
@@ -65,7 +65,7 @@ func (s *VertexSetMutatorSuite) TestMultiRemoveVertex(c *C) {
 }
 
 type EdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) Graph
+	Factory func(GraphSource) Graph
 }
 
 func (s *EdgeSetMutatorSuite) SuiteLabel() string {
@@ -136,7 +136,7 @@ func (s *ArcSetMutatorSuite) SuiteLabel() string {
 }
 
 type ArcSetMutatorSuite struct {
-	Factory  func(GraphSource) Graph
+	Factory func(GraphSource) Graph
 }
 
 func (s *ArcSetMutatorSuite) TestGracefulEmptyVariadics(c *C) {
@@ -198,4 +198,3 @@ func (s *ArcSetMutatorSuite) TestVertexRemovalAlsoRemovesConnectedArcs(c *C) {
 		c.Assert(Size(g), Equals, 1)
 	}
 }
-

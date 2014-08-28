@@ -18,7 +18,7 @@ type baseLabeled struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseLabeled) EachVertex(f VertexStep) {
+func (g *baseLabeled) Vertices(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

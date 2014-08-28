@@ -18,7 +18,7 @@ var _ WeightedGraph = nullGraph(false)
 var _ LabeledGraph = nullGraph(false)
 var _ DataGraph = nullGraph(false)
 
-func (g nullGraph) EachVertex(f VertexStep)                   {}
+func (g nullGraph) Vertices(f VertexStep)                   {}
 func (g nullGraph) EachEdge(f EdgeStep)                       {}
 func (g nullGraph) EachArc(f ArcStep)                         {}
 func (g nullGraph) EachEdgeIncidentTo(Vertex, EdgeStep)       {}

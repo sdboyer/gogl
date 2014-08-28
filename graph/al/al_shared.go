@@ -65,10 +65,11 @@ type al_dpea interface {
 func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 	vf := func(from GraphSource, to al_graph) {
 		if Order(to) != Order(from) {
-			from.EachVertex(func(vertex Vertex) (terminate bool) {
+			from.Vertices(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return
 			})
+
 		}
 	}
 
@@ -131,10 +132,11 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 	vf := func(from GraphSource, to al_graph) {
 		if Order(to) != Order(from) {
-			from.EachVertex(func(vertex Vertex) (terminate bool) {
+			from.Vertices(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return
 			})
+
 		}
 	}
 

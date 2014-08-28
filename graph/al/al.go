@@ -1,8 +1,8 @@
 package al
 
 import (
-	"sync"
 	. "github.com/sdboyer/gogl"
+	"sync"
 )
 
 /*
@@ -115,7 +115,7 @@ type al_basic_immut struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *al_basic_immut) EachVertex(f VertexStep) {
+func (g *al_basic_immut) Vertices(f VertexStep) {
 	for v := range g.list {
 		if f(v) {
 			return
@@ -142,7 +142,7 @@ type al_basic_mut struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *al_basic_mut) EachVertex(f VertexStep) {
+func (g *al_basic_mut) Vertices(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

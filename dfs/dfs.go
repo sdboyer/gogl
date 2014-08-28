@@ -172,7 +172,7 @@ func FindSources(g gogl.Digraph) (sources []gogl.Vertex, err error) {
 		return
 	})
 
-	g.EachVertex(func(v gogl.Vertex) (terminate bool) {
+	g.Vertices(func(v gogl.Vertex) (terminate bool) {
 		if !incomings.Has(v) {
 			sources = append(sources, v)
 		}

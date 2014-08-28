@@ -35,7 +35,7 @@ func (e loopArc) Target() Vertex {
 
 type loopArcList []Arc
 
-func (el loopArcList) EachVertex(fn VertexStep) {
+func (el loopArcList) Vertices(fn VertexStep) {
 	set := set.NewNonTS()
 
 	for _, e := range el {

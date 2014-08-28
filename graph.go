@@ -219,7 +219,7 @@ type VertexStep func(Vertex) (terminate bool)
 type VertexEnumerator interface {
 	// Calls the provided step function once with each vertex in the graph. Type
 	// assert as appropriate in client code.
-	EachVertex(VertexStep)
+	Vertices(VertexStep)
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
