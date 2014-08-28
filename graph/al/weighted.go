@@ -160,7 +160,7 @@ func (g *weightedDirected) ArcsFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *weightedDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

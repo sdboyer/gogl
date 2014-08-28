@@ -111,7 +111,7 @@ func (g *mutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *mutableDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -339,7 +339,7 @@ func (g *immutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *immutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *immutableDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	eachVertexInAdjacencyList(g.list, v, f)
 }
 

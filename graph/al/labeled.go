@@ -190,7 +190,7 @@ func (g *labeledDirected) ArcsFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *labeledDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *labeledDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

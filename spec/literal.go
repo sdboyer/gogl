@@ -150,7 +150,7 @@ func (g GraphLiteralFixture) EachPredecessorOf(v Vertex, f VertexStep) {
 		}
 	}
 }
-func (g GraphLiteralFixture) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) SuccessorsOf(v Vertex, f VertexStep) {
 	if g {
 		switch v {
 		case "foo":

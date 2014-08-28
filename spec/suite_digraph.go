@@ -191,17 +191,17 @@ func (s *DigraphSuite) TestArcsFromTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *DigraphSuite) TestEachSuccessorOf(c *C) {
+func (s *DigraphSuite) TestSuccessorsOf(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	eset := set.NewNonTS()
-	g.EachSuccessorOf("baz", func(v Vertex) (terminate bool) {
+	g.SuccessorsOf("baz", func(v Vertex) (terminate bool) {
 		c.Error("Vertex 'foo' should have no successors")
 		c.FailNow()
 		return
 	})
 
-	g.EachSuccessorOf("foo", func(v Vertex) (terminate bool) {
+	g.SuccessorsOf("foo", func(v Vertex) (terminate bool) {
 		eset.Add(v)
 		return
 	})
@@ -212,11 +212,11 @@ func (s *DigraphSuite) TestEachSuccessorOf(c *C) {
 
 }
 
-func (s *DigraphSuite) TestEachSuccessorOfTermination(c *C) {
+func (s *DigraphSuite) TestSuccessorsOfTermination(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	var hit int
-	g.EachSuccessorOf("foo", func(v Vertex) (terminate bool) {
+	g.SuccessorsOf("foo", func(v Vertex) (terminate bool) {
 		hit++
 		return true
 	})
