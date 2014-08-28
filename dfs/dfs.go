@@ -411,7 +411,7 @@ func (w *walker) dfutraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachEdgeIncidentTo(v, func(e gogl.Edge) (terminate bool) {
+		w.g.IncidentTo(v, func(e gogl.Edge) (terminate bool) {
 			w.vis.OnExamineEdge(e)
 			v1, v2 := e.Both()
 			if v == v1 {

@@ -123,7 +123,7 @@ func (g *dataDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *dataDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *dataDirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
@@ -134,7 +134,7 @@ func (g *dataDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
 			return f(v)
@@ -423,7 +423,7 @@ func (g *dataUndirected) EachEdge(f EdgeStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *dataUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *dataUndirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

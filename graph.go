@@ -243,7 +243,7 @@ type IncidentEdgeEnumerator interface {
 	// Calls the provided step function once with each edge incident to the
 	// provided vertex. In a directed graph, this must include both
 	// inbound and outbound edges.
-	EachEdgeIncidentTo(v Vertex, incidentEdgeStep EdgeStep)
+	IncidentTo(v Vertex, incidentEdgeStep EdgeStep)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).

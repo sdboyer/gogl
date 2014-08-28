@@ -43,7 +43,7 @@ func (g *mutableUndirected) EachEdge(f EdgeStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *mutableUndirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

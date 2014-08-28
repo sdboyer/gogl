@@ -153,7 +153,7 @@ func (g *labeledDirected) EachArc(f ArcStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *labeledDirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
@@ -164,7 +164,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
 			return f(v)
@@ -422,7 +422,7 @@ func (g *labeledUndirected) EachEdge(f EdgeStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *labeledUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *labeledUndirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

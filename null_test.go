@@ -20,7 +20,7 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 		return
 	})
 
-	NullGraph.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
+	NullGraph.IncidentTo("foo", func(e Edge) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})

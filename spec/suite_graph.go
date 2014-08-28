@@ -114,7 +114,7 @@ func (s *GraphSuite) TestEachAdjacentToTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
+func (s *GraphSuite) TestIncidentTo(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	flipset := []Edge{
@@ -124,7 +124,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 
 	eset := set.NewNonTS()
 	var hit int
-	g.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
+	g.IncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
 		eset.Add(NewArc(e.Both()))
@@ -142,7 +142,7 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	}
 
 	eset = set.NewNonTS()
-	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
+	g.IncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base
 		eset.Add(NewArc(e.Both()))
@@ -159,11 +159,11 @@ func (s *GraphSuite) TestEachEdgeIncidentTo(c *C) {
 	}
 }
 
-func (s *GraphSuite) TestEachEdgeIncidentToTermination(c *C) {
+func (s *GraphSuite) TestIncidentToTermination(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	var hit int
-	g.EachEdgeIncidentTo("bar", func(e Edge) (terminate bool) {
+	g.IncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})

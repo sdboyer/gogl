@@ -115,7 +115,7 @@ func CollectEdgesIncidentTo(v Vertex, g IncidentEdgeEnumerator) (edges []Edge) {
 		edges = make([]Edge, 0, 8)
 	}
 
-	g.EachEdgeIncidentTo(v, func(e Edge) (terminate bool) {
+	g.IncidentTo(v, func(e Edge) (terminate bool) {
 		edges = append(edges, e)
 		return
 	})

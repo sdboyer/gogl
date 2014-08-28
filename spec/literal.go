@@ -61,7 +61,7 @@ func (g GraphLiteralFixture) EachArc(f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) IncidentTo(v Vertex, f EdgeStep) {
 	if g {
 		switch v {
 		case "foo":
