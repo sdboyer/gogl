@@ -155,18 +155,18 @@ func (s *DigraphSuite) TestEachPredecessorOfTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *DigraphSuite) TestEachArcFrom(c *C) {
+func (s *DigraphSuite) TestArcsFrom(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	eset := set.NewNonTS()
 	var hit int
-	g.EachArcFrom("baz", func(e Arc) (terminate bool) {
+	g.ArcsFrom("baz", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'baz' should have no out-edges")
 		c.FailNow()
 		return
 	})
 
-	g.EachArcFrom("foo", func(e Arc) (terminate bool) {
+	g.ArcsFrom("foo", func(e Arc) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
 		eset.Add(NewArc(e.Both()))
 		hit++
@@ -179,11 +179,11 @@ func (s *DigraphSuite) TestEachArcFrom(c *C) {
 	c.Assert(eset.Has(NewArc("foo", "qux")), Equals, true)
 }
 
-func (s *DigraphSuite) TestEachArcFromTermination(c *C) {
+func (s *DigraphSuite) TestArcsFromTermination(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	var hit int
-	g.EachArcFrom("foo", func(e Arc) (terminate bool) {
+	g.ArcsFrom("foo", func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})

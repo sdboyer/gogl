@@ -251,7 +251,7 @@ type IncidentEdgeEnumerator interface {
 type IncidentArcEnumerator interface {
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcFrom(v Vertex, outArcStep ArcStep)
+	ArcsFrom(v Vertex, outArcStep ArcStep)
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
 	EachArcTo(v Vertex, inArcStep ArcStep)

@@ -22,7 +22,7 @@ func (g nullGraph) Vertices(f VertexStep)                   {}
 func (g nullGraph) EachEdge(f EdgeStep)                       {}
 func (g nullGraph) EachArc(f ArcStep)                         {}
 func (g nullGraph) IncidentTo(Vertex, EdgeStep)       {}
-func (g nullGraph) EachArcFrom(Vertex, ArcStep)               {}
+func (g nullGraph) ArcsFrom(Vertex, ArcStep)               {}
 func (g nullGraph) EachPredecessorOf(Vertex, VertexStep)      {}
 func (g nullGraph) EachArcTo(Vertex, ArcStep)                 {}
 func (g nullGraph) EachSuccessorOf(Vertex, VertexStep)        {}

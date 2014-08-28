@@ -175,7 +175,7 @@ func (g *labeledDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *labeledDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *labeledDirected) ArcsFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

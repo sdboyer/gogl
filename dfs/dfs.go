@@ -359,7 +359,7 @@ func (w *walker) dftraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.dg.EachArcFrom(v, func(e gogl.Arc) (terminate bool) {
+		w.dg.ArcsFrom(v, func(e gogl.Arc) (terminate bool) {
 			w.vis.OnExamineEdge(e)
 			w.dftraverse(e.Target())
 			return
@@ -388,7 +388,7 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.dg.EachArcFrom(v, func(e gogl.Arc) bool {
+		w.dg.ArcsFrom(v, func(e gogl.Arc) bool {
 			// no more new visits if complete
 			if !w.complete {
 				w.vis.OnExamineEdge(e)

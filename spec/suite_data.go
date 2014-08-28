@@ -58,13 +58,13 @@ func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return

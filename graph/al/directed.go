@@ -96,7 +96,7 @@ func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *mutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -327,7 +327,7 @@ func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *immutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}

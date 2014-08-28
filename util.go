@@ -136,7 +136,7 @@ func CollectArcsFrom(v Vertex, g IncidentArcEnumerator) (arcs []Arc) {
 		arcs = make([]Arc, 0, 8)
 	}
 
-	g.EachArcFrom(v, func(e Arc) (terminate bool) {
+	g.ArcsFrom(v, func(e Arc) (terminate bool) {
 		arcs = append(arcs, e)
 		return
 	})
