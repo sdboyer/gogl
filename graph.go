@@ -261,7 +261,7 @@ type IncidentArcEnumerator interface {
 // into an injected step function.
 type ProcessionEnumerator interface { // TODO ProcessionEnumerator? really?
 	SuccessorsOf(v Vertex, successorStep VertexStep)
-	EachPredecessorOf(v Vertex, predecessorStep VertexStep)
+	PredecessorsOf(v Vertex, predecessorStep VertexStep)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.

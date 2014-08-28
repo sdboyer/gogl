@@ -138,7 +138,7 @@ func (g *mutableDirected) ArcsTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *mutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *mutableDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -360,7 +360,7 @@ func (g *immutableDirected) ArcsTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *immutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *immutableDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	eachPredecessorOf(g.list, v, f)
 }
 

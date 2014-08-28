@@ -131,7 +131,7 @@ func (g GraphLiteralFixture) ArcsTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) PredecessorsOf(v Vertex, f VertexStep) {
 	if g {
 		switch v {
 		case "bar":

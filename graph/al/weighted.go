@@ -187,7 +187,7 @@ func (g *weightedDirected) ArcsTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *weightedDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *weightedDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
