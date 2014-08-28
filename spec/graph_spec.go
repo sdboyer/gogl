@@ -59,7 +59,7 @@ func (el loopArcList) EachArc(fn ArcStep) {
 	}
 }
 
-func (el loopArcList) EachEdge(fn EdgeStep) {
+func (el loopArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if _, ok := e.(loopArc); !ok {
 			if fn(e) {

@@ -74,13 +74,13 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 	}
 
 	if g, ok := to.(al_ea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			g.addEdges(edge)
 			return
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_wea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(WeightedEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -91,7 +91,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_lea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(LabeledEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -102,7 +102,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_pea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(DataEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -113,7 +113,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_ea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			g.addEdges(edge)
 			return
 		})

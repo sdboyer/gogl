@@ -56,27 +56,27 @@ func (s *EdgeListSuite) TestVerticesTermination(c *C) {
 	c.Assert(hit, Equals, 4)
 }
 
-func (s *EdgeListSuite) TestEachEdgeTermination(c *C) {
+func (s *EdgeListSuite) TestEdgesTermination(c *C) {
 	var hit int
-	spec.GraphFixtures["2e3v"].EachEdge(func(e Edge) (terminate bool) {
+	spec.GraphFixtures["2e3v"].Edges(func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 1)
 
-	spec.GraphFixtures["w-2e3v"].EachEdge(func(e Edge) (terminate bool) {
+	spec.GraphFixtures["w-2e3v"].Edges(func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 2)
 
-	spec.GraphFixtures["l-2e3v"].EachEdge(func(e Edge) (terminate bool) {
+	spec.GraphFixtures["l-2e3v"].Edges(func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})
 	c.Assert(hit, Equals, 3)
 
-	spec.GraphFixtures["d-2e3v"].EachEdge(func(e Edge) (terminate bool) {
+	spec.GraphFixtures["d-2e3v"].Edges(func(e Edge) (terminate bool) {
 		hit++
 		return true
 	})

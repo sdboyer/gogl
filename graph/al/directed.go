@@ -45,7 +45,7 @@ func (g *mutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableDirected) EachEdge(f EdgeStep) {
+func (g *mutableDirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -287,7 +287,7 @@ type immutableDirected struct {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *immutableDirected) EachEdge(f EdgeStep) {
+func (g *immutableDirected) Edges(f EdgeStep) {
 	for source, adjacent := range g.list {
 		for target := range adjacent {
 			if f(NewEdge(source, target)) {

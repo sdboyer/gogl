@@ -227,7 +227,7 @@ type EdgeEnumerator interface {
 	// Calls the provided step function once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
-	EachEdge(EdgeStep)
+	Edges(EdgeStep)
 }
 
 // An ArcEnumerator iteratively enumerates edges, and can indicate the number of edges present.

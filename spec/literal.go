@@ -19,7 +19,7 @@ func (g GraphLiteralFixture) Vertices(f VertexStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachEdge(f EdgeStep) {
+func (g GraphLiteralFixture) Edges(f EdgeStep) {
 	var el []Edge
 	if g {
 		el = []Edge{

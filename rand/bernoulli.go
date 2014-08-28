@@ -13,11 +13,11 @@ import (
 //
 // ρ must be a float64 in the range [0.0,1.0) - that is, 0.0 <= ρ < 1.0 - else, panic.
 //
-// If a stable graph is requested (stable == true), then the edge set presented by calling EachEdge() on the returned graph
+// If a stable graph is requested (stable == true), then the edge set presented by calling Edges() on the returned graph
 // will be the same on every call. To provide stability, however, a memory allocation of n^2 * (int width) bytes
 // is required to store the generated graph.
 //
-// Unstable graphs will create a new probabilistic edge set on the fly each time EachEdge(). It thus makes only minimal
+// Unstable graphs will create a new probabilistic edge set on the fly each time Edges(). It thus makes only minimal
 // allocations, but is still CPU intensive for successive runs (and produces a different edge set). Given these
 // characteristics, unstable graphs should always be used for single-use random graphs.
 //
@@ -76,7 +76,7 @@ func (g *stableBernoulliGraph) Vertices(f gogl.VertexStep) {
 	}
 }
 
-func (g *stableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
+func (g *stableBernoulliGraph) Edges(f gogl.EdgeStep) {
 	if g.list == nil {
 		g.list = make([][]bool, g.order, g.order)
 
@@ -120,7 +120,7 @@ type stableBernoulliDigraph struct {
 	stableBernoulliGraph
 }
 
-func (g *stableBernoulliDigraph) EachEdge(f gogl.EdgeStep) {
+func (g *stableBernoulliDigraph) Edges(f gogl.EdgeStep) {
 	if g.list == nil {
 		g.list = make([][]bool, g.order, g.order)
 
@@ -195,7 +195,7 @@ func (g unstableBernoulliGraph) Vertices(f gogl.VertexStep) {
 	}
 }
 
-func (g unstableBernoulliGraph) EachEdge(f gogl.EdgeStep) {
+func (g unstableBernoulliGraph) Edges(f gogl.EdgeStep) {
 	bernoulliEdgeCreator(f, int(g.order), g.ρ, g.trial)
 }
 

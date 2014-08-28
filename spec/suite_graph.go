@@ -61,11 +61,11 @@ func (s *GraphSuite) TestVerticesTermination(c *C) {
 	c.Assert(hit, Equals, 1)
 }
 
-func (s *GraphSuite) TestEachEdge(c *C) {
+func (s *GraphSuite) TestEdges(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	var hit int
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		hit++
 		return
 	})
@@ -73,11 +73,11 @@ func (s *GraphSuite) TestEachEdge(c *C) {
 	c.Assert(hit, Equals, 2)
 }
 
-func (s *GraphSuite) TestEachEdgeTermination(c *C) {
+func (s *GraphSuite) TestEdgesTermination(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
 	var hit int
-	g.EachEdge(func(e Edge) bool {
+	g.Edges(func(e Edge) bool {
 		hit++
 		return true
 	})

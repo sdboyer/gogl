@@ -31,7 +31,7 @@ func Size(g EdgeEnumerator) int {
 		return c.Size()
 	} else {
 		var size int
-		g.EachEdge(func(e Edge) (terminate bool) {
+		g.Edges(func(e Edge) (terminate bool) {
 			size++
 			return
 		})
@@ -94,7 +94,7 @@ func CollectEdges(g EdgeEnumerator) (edges []Edge) {
 		edges = make([]Edge, 0, 32)
 	}
 
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		edges = append(edges, e)
 		return
 	})

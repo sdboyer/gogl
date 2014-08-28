@@ -17,13 +17,13 @@ func (s *DataGraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
-func (s *DataGraphSuite) TestEachEdge(c *C) {
+func (s *DataGraphSuite) TestEdges(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachEdge() iterator actually do implement DataEdge.
+	// provided by the Edges() iterator actually do implement DataEdge.
 	g := s.Factory(GraphFixtures["d-2e3v"])
 
 	var we DataEdge
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
 		return
 	})

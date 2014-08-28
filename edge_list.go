@@ -8,7 +8,7 @@ import (
 func elVertices(el interface{}, fn VertexStep) {
 	set := set.NewNonTS()
 
-	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
+	el.(EdgeEnumerator).Edges(func(e Edge) (terminate bool) {
 		set.Add(e.Both())
 		return
 	})
@@ -35,7 +35,7 @@ func (el EdgeList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el EdgeList) EachEdge(fn EdgeStep) {
+func (el EdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -50,7 +50,7 @@ func (el ArcList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el ArcList) EachEdge(fn EdgeStep) {
+func (el ArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -75,7 +75,7 @@ func (el WeightedEdgeList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el WeightedEdgeList) EachEdge(fn EdgeStep) {
+func (el WeightedEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -90,7 +90,7 @@ func (el WeightedArcList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el WeightedArcList) EachEdge(fn EdgeStep) {
+func (el WeightedArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -115,7 +115,7 @@ func (el LabeledEdgeList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el LabeledEdgeList) EachEdge(fn EdgeStep) {
+func (el LabeledEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -130,7 +130,7 @@ func (el LabeledArcList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el LabeledArcList) EachEdge(fn EdgeStep) {
+func (el LabeledArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -155,7 +155,7 @@ func (el DataEdgeList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el DataEdgeList) EachEdge(fn EdgeStep) {
+func (el DataEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -170,7 +170,7 @@ func (el DataArcList) Vertices(fn VertexStep) {
 	elVertices(el, fn)
 }
 
-func (el DataArcList) EachEdge(fn EdgeStep) {
+func (el DataArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return

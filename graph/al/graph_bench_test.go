@@ -109,7 +109,7 @@ func (g *benchGraph) Vertices(f VertexStep) {
 	}
 }
 
-func (g *benchGraph) EachEdge(f EdgeStep) {
+func (g *benchGraph) Edges(f EdgeStep) {
 	for _, adj := range g.list {
 		for _, e := range adj {
 			if f(e) {
@@ -181,9 +181,9 @@ func BenchmarkVertices(b *testing.B) {
 	}
 }
 
-func BenchmarkEachEdge(b *testing.B) {
+func BenchmarkEdges(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bgraph.EachEdge(func(e Edge) (terminate bool) {
+		bgraph.Edges(func(e Edge) (terminate bool) {
 			return
 		})
 	}

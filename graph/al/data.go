@@ -196,7 +196,7 @@ func (g *dataDirected) EachPredecessorOf(v Vertex, f VertexStep) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *dataDirected) EachEdge(f EdgeStep) {
+func (g *dataDirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -402,7 +402,7 @@ func (g *dataUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *dataUndirected) EachEdge(f EdgeStep) {
+func (g *dataUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

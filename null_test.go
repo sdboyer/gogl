@@ -15,7 +15,7 @@ func (s NullGraphSuite) TestEnumerators(c *C) {
 		return
 	})
 
-	NullGraph.EachEdge(func(e Edge) (terminate bool) {
+	NullGraph.Edges(func(e Edge) (terminate bool) {
 		c.Error("The NullGraph should not have any edges.")
 		return
 	})
