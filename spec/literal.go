@@ -111,7 +111,7 @@ func (g GraphLiteralFixture) ArcsFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArcTo(v Vertex, f ArcStep) {
+func (g GraphLiteralFixture) ArcsTo(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "bar":

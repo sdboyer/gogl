@@ -86,18 +86,18 @@ func (s *DigraphSuite) TestInDegreeOf(c *C) {
 	c.Assert(count, Equals, 0)
 }
 
-func (s *DigraphSuite) TestEachArcTo(c *C) {
+func (s *DigraphSuite) TestArcsTo(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	eset := set.NewNonTS()
 	var hit int
-	g.EachArcTo("foo", func(e Arc) (terminate bool) {
+	g.ArcsTo("foo", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'foo' should have no in-edges")
 		c.FailNow()
 		return
 	})
 
-	g.EachArcTo("bar", func(e Arc) (terminate bool) {
+	g.ArcsTo("bar", func(e Arc) (terminate bool) {
 		// A more specific edge type may be passed, but in this test we care only about the base
 		eset.Add(NewArc(e.Both()))
 		hit++
@@ -110,11 +110,11 @@ func (s *DigraphSuite) TestEachArcTo(c *C) {
 	c.Assert(eset.Has(NewArc("qux", "bar")), Equals, true)
 }
 
-func (s *DigraphSuite) TestEachArcToTermination(c *C) {
+func (s *DigraphSuite) TestArcsToTermination(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
 	var hit int
-	g.EachArcTo("baz", func(e Arc) (terminate bool) {
+	g.ArcsTo("baz", func(e Arc) (terminate bool) {
 		hit++
 		return true
 	})

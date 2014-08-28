@@ -24,7 +24,7 @@ func (g nullGraph) EachArc(f ArcStep)                         {}
 func (g nullGraph) IncidentTo(Vertex, EdgeStep)       {}
 func (g nullGraph) ArcsFrom(Vertex, ArcStep)               {}
 func (g nullGraph) EachPredecessorOf(Vertex, VertexStep)      {}
-func (g nullGraph) EachArcTo(Vertex, ArcStep)                 {}
+func (g nullGraph) ArcsTo(Vertex, ArcStep)                 {}
 func (g nullGraph) EachSuccessorOf(Vertex, VertexStep)        {}
 func (g nullGraph) EachAdjacentTo(start Vertex, f VertexStep) {}
 

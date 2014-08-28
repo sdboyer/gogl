@@ -302,5 +302,5 @@ func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeStep) {
 	}
 
 	g.ArcsFrom(v, interloper)
-	g.EachArcTo(v, interloper)
+	g.ArcsTo(v, interloper)
 }

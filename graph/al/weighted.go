@@ -168,7 +168,7 @@ func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *weightedDirected) EachArcTo(v Vertex, f ArcStep) {
+func (g *weightedDirected) ArcsTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

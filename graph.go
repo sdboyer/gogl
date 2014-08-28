@@ -254,7 +254,7 @@ type IncidentArcEnumerator interface {
 	ArcsFrom(v Vertex, outArcStep ArcStep)
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcTo(v Vertex, inArcStep ArcStep)
+	ArcsTo(v Vertex, inArcStep ArcStep)
 }
 
 // A ProcessionEnumerator iteratively enumerates a vertex's predecessors or successors
