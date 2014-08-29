@@ -101,7 +101,7 @@ type benchGraph struct {
 	size          int
 }
 
-func (g *benchGraph) EachVertex(f VertexStep) {
+func (g *benchGraph) Vertices(f VertexStep) {
 	for v := range g.list {
 		if f(v) {
 			return
@@ -109,7 +109,7 @@ func (g *benchGraph) EachVertex(f VertexStep) {
 	}
 }
 
-func (g *benchGraph) EachEdge(f EdgeStep) {
+func (g *benchGraph) Edges(f EdgeStep) {
 	for _, adj := range g.list {
 		for _, e := range adj {
 			if f(e) {
@@ -172,17 +172,18 @@ func BenchmarkHasVertex(b *testing.B) {
 	}
 }
 
-func BenchmarkEachVertex(b *testing.B) {
+func BenchmarkVertices(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bgraph.EachVertex(func(v Vertex) (terminate bool) {
+		bgraph.Vertices(func(v Vertex) (terminate bool) {
 			return
 		})
+
 	}
 }
 
-func BenchmarkEachEdge(b *testing.B) {
+func BenchmarkEdges(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		bgraph.EachEdge(func(e Edge) (terminate bool) {
+		bgraph.Edges(func(e Edge) (terminate bool) {
 			return
 		})
 	}

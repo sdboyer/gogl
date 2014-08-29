@@ -5,10 +5,10 @@ import (
 )
 
 // Shared helper function for edge lists to enumerate vertices.
-func elEachVertex(el interface{}, fn VertexStep) {
+func elVertices(el interface{}, fn VertexStep) {
 	set := set.NewNonTS()
 
-	el.(EdgeEnumerator).EachEdge(func(e Edge) (terminate bool) {
+	el.(EdgeEnumerator).Edges(func(e Edge) (terminate bool) {
 		set.Add(e.Both())
 		return
 	})
@@ -31,11 +31,11 @@ func elEachVertex(el interface{}, fn VertexStep) {
 // and multigraphs), they *should* be interpreted as vertex isolates.
 type EdgeList []Edge
 
-func (el EdgeList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el EdgeList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el EdgeList) EachEdge(fn EdgeStep) {
+func (el EdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -46,11 +46,11 @@ func (el EdgeList) EachEdge(fn EdgeStep) {
 // An ArcList is a naive DigraphSource implementation that is backed only by an arc slice.
 type ArcList []Arc
 
-func (el ArcList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el ArcList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el ArcList) EachEdge(fn EdgeStep) {
+func (el ArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -58,7 +58,7 @@ func (el ArcList) EachEdge(fn EdgeStep) {
 	}
 }
 
-func (el ArcList) EachArc(fn ArcStep) {
+func (el ArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -71,11 +71,11 @@ func (el ArcList) EachArc(fn ArcStep) {
 // This variant is for weighted edges.
 type WeightedEdgeList []WeightedEdge
 
-func (el WeightedEdgeList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el WeightedEdgeList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el WeightedEdgeList) EachEdge(fn EdgeStep) {
+func (el WeightedEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -86,11 +86,11 @@ func (el WeightedEdgeList) EachEdge(fn EdgeStep) {
 // A WeightedArcList is a naive DigraphSource implementation that is backed only by an arc slice.
 type WeightedArcList []Arc
 
-func (el WeightedArcList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el WeightedArcList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el WeightedArcList) EachEdge(fn EdgeStep) {
+func (el WeightedArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -98,7 +98,7 @@ func (el WeightedArcList) EachEdge(fn EdgeStep) {
 	}
 }
 
-func (el WeightedArcList) EachArc(fn ArcStep) {
+func (el WeightedArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -111,11 +111,11 @@ func (el WeightedArcList) EachArc(fn ArcStep) {
 // This variant is for labeled edges.
 type LabeledEdgeList []LabeledEdge
 
-func (el LabeledEdgeList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el LabeledEdgeList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el LabeledEdgeList) EachEdge(fn EdgeStep) {
+func (el LabeledEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -126,11 +126,11 @@ func (el LabeledEdgeList) EachEdge(fn EdgeStep) {
 // A LabeledArcList is a naive DigraphSource implementation that is backed only by an arc slice.
 type LabeledArcList []Arc
 
-func (el LabeledArcList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el LabeledArcList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el LabeledArcList) EachEdge(fn EdgeStep) {
+func (el LabeledArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -138,7 +138,7 @@ func (el LabeledArcList) EachEdge(fn EdgeStep) {
 	}
 }
 
-func (el LabeledArcList) EachArc(fn ArcStep) {
+func (el LabeledArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -151,11 +151,11 @@ func (el LabeledArcList) EachArc(fn ArcStep) {
 // This variant is for labeled edges.
 type DataEdgeList []DataEdge
 
-func (el DataEdgeList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el DataEdgeList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el DataEdgeList) EachEdge(fn EdgeStep) {
+func (el DataEdgeList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -166,11 +166,11 @@ func (el DataEdgeList) EachEdge(fn EdgeStep) {
 // A DataArcList is a naive DigraphSource implementation that is backed only by an arc slice.
 type DataArcList []Arc
 
-func (el DataArcList) EachVertex(fn VertexStep) {
-	elEachVertex(el, fn)
+func (el DataArcList) Vertices(fn VertexStep) {
+	elVertices(el, fn)
 }
 
-func (el DataArcList) EachEdge(fn EdgeStep) {
+func (el DataArcList) Edges(fn EdgeStep) {
 	for _, e := range el {
 		if fn(e) {
 			return
@@ -178,7 +178,7 @@ func (el DataArcList) EachEdge(fn EdgeStep) {
 	}
 }
 
-func (el DataArcList) EachArc(fn ArcStep) {
+func (el DataArcList) Arcs(fn ArcStep) {
 	for _, e := range el {
 		if fn(e) {
 			return

@@ -11,10 +11,11 @@ func Order(g VertexEnumerator) int {
 		return c.Order()
 	} else {
 		var order int
-		g.EachVertex(func(v Vertex) (terminate bool) {
+		g.Vertices(func(v Vertex) (terminate bool) {
 			order++
 			return
 		})
+
 		return order
 	}
 }
@@ -30,7 +31,7 @@ func Size(g EdgeEnumerator) int {
 		return c.Size()
 	} else {
 		var size int
-		g.EachEdge(func(e Edge) (terminate bool) {
+		g.Edges(func(e Edge) (terminate bool) {
 			size++
 			return
 		})
@@ -52,7 +53,7 @@ func CollectVertices(g VertexEnumerator) (vertices []Vertex) {
 		vertices = make([]Vertex, 0, 32)
 	}
 
-	g.EachVertex(func(v Vertex) (terminate bool) {
+	g.Vertices(func(v Vertex) (terminate bool) {
 		vertices = append(vertices, v)
 		return
 	})
@@ -73,7 +74,7 @@ func CollectVerticesAdjacentTo(v Vertex, g AdjacencyEnumerator) (vertices []Vert
 		vertices = make([]Vertex, 0, 8)
 	}
 
-	g.EachAdjacentTo(v, func(v Vertex) (terminate bool) {
+	g.AdjacentTo(v, func(v Vertex) (terminate bool) {
 		vertices = append(vertices, v)
 		return
 	})
@@ -93,7 +94,7 @@ func CollectEdges(g EdgeEnumerator) (edges []Edge) {
 		edges = make([]Edge, 0, 32)
 	}
 
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		edges = append(edges, e)
 		return
 	})
@@ -114,7 +115,7 @@ func CollectEdgesIncidentTo(v Vertex, g IncidentEdgeEnumerator) (edges []Edge) {
 		edges = make([]Edge, 0, 8)
 	}
 
-	g.EachEdgeIncidentTo(v, func(e Edge) (terminate bool) {
+	g.IncidentTo(v, func(e Edge) (terminate bool) {
 		edges = append(edges, e)
 		return
 	})
@@ -135,7 +136,7 @@ func CollectArcsFrom(v Vertex, g IncidentArcEnumerator) (arcs []Arc) {
 		arcs = make([]Arc, 0, 8)
 	}
 
-	g.EachArcFrom(v, func(e Arc) (terminate bool) {
+	g.ArcsFrom(v, func(e Arc) (terminate bool) {
 		arcs = append(arcs, e)
 		return
 	})
@@ -156,7 +157,7 @@ func CollectArcsTo(v Vertex, g IncidentArcEnumerator) (arcs []Arc) {
 		arcs = make([]Arc, 0, 8)
 	}
 
-	g.EachArcTo(v, func(e Arc) (terminate bool) {
+	g.ArcsTo(v, func(e Arc) (terminate bool) {
 		arcs = append(arcs, e)
 		return
 	})

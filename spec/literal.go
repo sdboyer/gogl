@@ -10,7 +10,7 @@ import (
 // bool state indicates whether using a transpose or not.
 type GraphLiteralFixture bool
 
-func (g GraphLiteralFixture) EachVertex(f VertexStep) {
+func (g GraphLiteralFixture) Vertices(f VertexStep) {
 	vl := []Vertex{"foo", "bar", "baz", "isolate"}
 	for _, v := range vl {
 		if f(v) {
@@ -19,7 +19,7 @@ func (g GraphLiteralFixture) EachVertex(f VertexStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachEdge(f EdgeStep) {
+func (g GraphLiteralFixture) Edges(f EdgeStep) {
 	var el []Edge
 	if g {
 		el = []Edge{
@@ -40,7 +40,7 @@ func (g GraphLiteralFixture) EachEdge(f EdgeStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArc(f ArcStep) {
+func (g GraphLiteralFixture) Arcs(f ArcStep) {
 	var al []Arc
 	if g {
 		al = []Arc{
@@ -61,7 +61,7 @@ func (g GraphLiteralFixture) EachArc(f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g GraphLiteralFixture) IncidentTo(v Vertex, f EdgeStep) {
 	if g {
 		switch v {
 		case "foo":
@@ -91,7 +91,7 @@ func (g GraphLiteralFixture) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArcFrom(v Vertex, f ArcStep) {
+func (g GraphLiteralFixture) ArcsFrom(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "foo":
@@ -111,7 +111,7 @@ func (g GraphLiteralFixture) EachArcFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachArcTo(v Vertex, f ArcStep) {
+func (g GraphLiteralFixture) ArcsTo(v Vertex, f ArcStep) {
 	if g {
 		switch v {
 		case "bar":
@@ -131,7 +131,7 @@ func (g GraphLiteralFixture) EachArcTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) PredecessorsOf(v Vertex, f VertexStep) {
 	if g {
 		switch v {
 		case "bar":
@@ -150,7 +150,7 @@ func (g GraphLiteralFixture) EachPredecessorOf(v Vertex, f VertexStep) {
 		}
 	}
 }
-func (g GraphLiteralFixture) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) SuccessorsOf(v Vertex, f VertexStep) {
 	if g {
 		switch v {
 		case "foo":
@@ -170,7 +170,7 @@ func (g GraphLiteralFixture) EachSuccessorOf(v Vertex, f VertexStep) {
 	}
 }
 
-func (g GraphLiteralFixture) EachAdjacentTo(v Vertex, f VertexStep) {
+func (g GraphLiteralFixture) AdjacentTo(v Vertex, f VertexStep) {
 	switch v {
 	case "foo":
 		f("bar")

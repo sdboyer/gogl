@@ -167,12 +167,12 @@ func FindSources(g gogl.Digraph) (sources []gogl.Vertex, err error) {
 	// TODO hardly the most efficient way to keep track, i'm sure
 	incomings := set.NewNonTS()
 
-	g.EachArc(func(e gogl.Arc) (terminate bool) {
+	g.Arcs(func(e gogl.Arc) (terminate bool) {
 		incomings.Add(e.Target())
 		return
 	})
 
-	g.EachVertex(func(v gogl.Vertex) (terminate bool) {
+	g.Vertices(func(v gogl.Vertex) (terminate bool) {
 		if !incomings.Has(v) {
 			sources = append(sources, v)
 		}
@@ -359,7 +359,7 @@ func (w *walker) dftraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.dg.EachArcFrom(v, func(e gogl.Arc) (terminate bool) {
+		w.dg.ArcsFrom(v, func(e gogl.Arc) (terminate bool) {
 			w.vis.OnExamineEdge(e)
 			w.dftraverse(e.Target())
 			return
@@ -388,7 +388,7 @@ func (w *walker) dfsearch(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.dg.EachArcFrom(v, func(e gogl.Arc) bool {
+		w.dg.ArcsFrom(v, func(e gogl.Arc) bool {
 			// no more new visits if complete
 			if !w.complete {
 				w.vis.OnExamineEdge(e)
@@ -411,7 +411,7 @@ func (w *walker) dfutraverse(v gogl.Vertex) {
 		w.colors[v] = grey
 		w.vis.OnStartVertex(v)
 
-		w.g.EachEdgeIncidentTo(v, func(e gogl.Edge) (terminate bool) {
+		w.g.IncidentTo(v, func(e gogl.Edge) (terminate bool) {
 			w.vis.OnExamineEdge(e)
 			v1, v2 := e.Both()
 			if v == v1 {

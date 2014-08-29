@@ -10,20 +10,20 @@ import (
 /* WeightedGraphSuite - tests for weighted graphs */
 
 type WeightedGraphSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedGraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
-func (s *WeightedGraphSuite) TestEachEdge(c *C) {
+func (s *WeightedGraphSuite) TestEdges(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachEdge() iterator actually do implement WeightedEdge.
+	// provided by the Edges() iterator actually do implement WeightedEdge.
 	g := s.Factory(GraphFixtures["w-2e3v"])
 
 	var we WeightedEdge
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
 		return
 	})
@@ -33,12 +33,12 @@ func (s *WeightedGraphSuite) TestHasWeightedEdge(c *C) {
 	g := s.Factory(GraphFixtures["w-2e3v"])
 
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, 5.23)), Equals, true)
-	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true) // both directions work
+	c.Assert(g.HasWeightedEdge(NewWeightedEdge(2, 1, 5.23)), Equals, true)     // both directions work
 	c.Assert(g.HasWeightedEdge(NewWeightedEdge(1, 2, -3.7212)), Equals, false) // wrong weight
 }
 
 type WeightedDigraphSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedDigraphSuite) SuiteLabel() string {
@@ -47,24 +47,24 @@ func (s *WeightedDigraphSuite) SuiteLabel() string {
 
 func (s *WeightedDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachArc() iterator actually do implement WeightedArc.
+	// provided by the Arcs() iterator actually do implement WeightedArc.
 	g := s.Factory(GraphFixtures["w-2e3v"]).(WeightedDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
 	var wa WeightedArc
-	g.EachArc(func(e Arc) (terminate bool) {
+	g.Arcs(func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
@@ -76,7 +76,7 @@ func (s *WeightedDigraphSuite) TestArcSubtypeImplementation(c *C) {
 /* WeightedEdgeSetMutatorSuite - tests for mutable weighted graphs */
 
 type WeightedEdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedEdgeSetMutatorSuite) SuiteLabel() string {
@@ -126,7 +126,7 @@ func (s *WeightedEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 /* WeightedArcSetMutatorSuite - tests for mutable weighted graphs */
 
 type WeightedArcSetMutatorSuite struct {
-	Factory  func(GraphSource) WeightedGraph
+	Factory func(GraphSource) WeightedGraph
 }
 
 func (s *WeightedArcSetMutatorSuite) SuiteLabel() string {

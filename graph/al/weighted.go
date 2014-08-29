@@ -18,7 +18,7 @@ type baseWeighted struct {
 
 // Traverses the graph's vertices in random order, passing each vertex to the
 // provided closure.
-func (g *baseWeighted) EachVertex(f VertexStep) {
+func (g *baseWeighted) Vertices(f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -123,18 +123,18 @@ func (g *weightedDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *weightedDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *weightedDirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *weightedDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *weightedDirected) AdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
 			return f(v)
@@ -145,7 +145,7 @@ func (g *weightedDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *weightedDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *weightedDirected) ArcsFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -160,7 +160,7 @@ func (g *weightedDirected) EachArcFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *weightedDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -168,7 +168,7 @@ func (g *weightedDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *weightedDirected) EachArcTo(v Vertex, f ArcStep) {
+func (g *weightedDirected) ArcsTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -187,7 +187,7 @@ func (g *weightedDirected) EachArcTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *weightedDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *weightedDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -196,7 +196,7 @@ func (g *weightedDirected) EachPredecessorOf(v Vertex, f VertexStep) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *weightedDirected) EachEdge(f EdgeStep) {
+func (g *weightedDirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -386,7 +386,7 @@ func (g *weightedUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *weightedUndirected) EachEdge(f EdgeStep) {
+func (g *weightedUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -408,7 +408,7 @@ func (g *weightedUndirected) EachEdge(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *weightedDirected) EachArc(f ArcStep) {
+func (g *weightedDirected) Arcs(f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -422,7 +422,7 @@ func (g *weightedDirected) EachArc(f ArcStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *weightedUndirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -438,7 +438,7 @@ func (g *weightedUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *weightedUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
+func (g *weightedUndirected) AdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

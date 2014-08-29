@@ -45,7 +45,7 @@ func (g *mutableDirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableDirected) EachEdge(f EdgeStep) {
+func (g *mutableDirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -60,7 +60,7 @@ func (g *mutableDirected) EachEdge(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *mutableDirected) EachArc(f ArcStep) {
+func (g *mutableDirected) Arcs(f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -74,18 +74,18 @@ func (g *mutableDirected) EachArc(f ArcStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *mutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *mutableDirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
+func (g *mutableDirected) AdjacentTo(start Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
 			return f(v)
@@ -96,7 +96,7 @@ func (g *mutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *mutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -111,7 +111,7 @@ func (g *mutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *mutableDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -119,7 +119,7 @@ func (g *mutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *mutableDirected) EachArcTo(v Vertex, f ArcStep) {
+func (g *mutableDirected) ArcsTo(v Vertex, f ArcStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -138,7 +138,7 @@ func (g *mutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *mutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *mutableDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -287,7 +287,7 @@ type immutableDirected struct {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *immutableDirected) EachEdge(f EdgeStep) {
+func (g *immutableDirected) Edges(f EdgeStep) {
 	for source, adjacent := range g.list {
 		for target := range adjacent {
 			if f(NewEdge(source, target)) {
@@ -299,7 +299,7 @@ func (g *immutableDirected) EachEdge(f EdgeStep) {
 
 // Traverses the set of arcs in the graph, passing each arc to the
 // provided closure.
-func (g *immutableDirected) EachArc(f ArcStep) {
+func (g *immutableDirected) Arcs(f ArcStep) {
 	for source, adjacent := range g.list {
 		for target := range adjacent {
 			if f(NewArc(source, target)) {
@@ -310,13 +310,13 @@ func (g *immutableDirected) EachArc(f ArcStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *immutableDirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *immutableDirected) IncidentTo(v Vertex, f EdgeStep) {
 	eachEdgeIncidentToDirected(g, v, f)
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
-	g.EachEdgeIncidentTo(start, func(e Edge) bool {
+func (g *immutableDirected) AdjacentTo(start Vertex, f VertexStep) {
+	g.IncidentTo(start, func(e Edge) bool {
 		u, v := e.Both()
 		if u == start {
 			return f(v)
@@ -327,7 +327,7 @@ func (g *immutableDirected) EachAdjacentTo(start Vertex, f VertexStep) {
 }
 
 // Enumerates the set of out-edges for the provided vertex.
-func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
+func (g *immutableDirected) ArcsFrom(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
@@ -339,12 +339,12 @@ func (g *immutableDirected) EachArcFrom(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *immutableDirected) EachSuccessorOf(v Vertex, f VertexStep) {
+func (g *immutableDirected) SuccessorsOf(v Vertex, f VertexStep) {
 	eachVertexInAdjacencyList(g.list, v, f)
 }
 
 // Enumerates the set of in-edges for the provided vertex.
-func (g *immutableDirected) EachArcTo(v Vertex, f ArcStep) {
+func (g *immutableDirected) ArcsTo(v Vertex, f ArcStep) {
 	if !g.hasVertex(v) {
 		return
 	}
@@ -360,7 +360,7 @@ func (g *immutableDirected) EachArcTo(v Vertex, f ArcStep) {
 	}
 }
 
-func (g *immutableDirected) EachPredecessorOf(v Vertex, f VertexStep) {
+func (g *immutableDirected) PredecessorsOf(v Vertex, f VertexStep) {
 	eachPredecessorOf(g.list, v, f)
 }
 
@@ -403,7 +403,7 @@ func (g *immutableDirected) OutDegreeOf(vertex Vertex) (degree int, exists bool)
 // a full scan of the graph's edge set.
 func (g *immutableDirected) InDegreeOf(vertex Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(vertex); exists {
-		g.EachArc(func(e Arc) (terminate bool) {
+		g.Arcs(func(e Arc) (terminate bool) {
 			if vertex == e.Target() {
 				degree++
 			}

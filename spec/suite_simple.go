@@ -36,4 +36,3 @@ func (s *SimpleGraphSuite) TestDensity(c *C) {
 		c.Assert(g.Density(), Equals, float64(2)/float64(3))
 	}
 }
-

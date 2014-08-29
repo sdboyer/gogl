@@ -23,7 +23,7 @@ func (g *mutableUndirected) DegreeOf(vertex Vertex) (degree int, exists bool) {
 
 // Traverses the set of edges in the graph, passing each edge to the
 // provided closure.
-func (g *mutableUndirected) EachEdge(f EdgeStep) {
+func (g *mutableUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -43,7 +43,7 @@ func (g *mutableUndirected) EachEdge(f EdgeStep) {
 }
 
 // Enumerates the set of all edges incident to the provided vertex.
-func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
+func (g *mutableUndirected) IncidentTo(v Vertex, f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
@@ -59,7 +59,7 @@ func (g *mutableUndirected) EachEdgeIncidentTo(v Vertex, f EdgeStep) {
 }
 
 // Enumerates the vertices adjacent to the provided vertex.
-func (g *mutableUndirected) EachAdjacentTo(vertex Vertex, f VertexStep) {
+func (g *mutableUndirected) AdjacentTo(vertex Vertex, f VertexStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 

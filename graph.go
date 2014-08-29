@@ -219,7 +219,7 @@ type VertexStep func(Vertex) (terminate bool)
 type VertexEnumerator interface {
 	// Calls the provided step function once with each vertex in the graph. Type
 	// assert as appropriate in client code.
-	EachVertex(VertexStep)
+	Vertices(VertexStep)
 }
 
 // An EdgeEnumerator iteratively enumerates edges, and can indicate the number of edges present.
@@ -227,7 +227,7 @@ type EdgeEnumerator interface {
 	// Calls the provided step function once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
-	EachEdge(EdgeStep)
+	Edges(EdgeStep)
 }
 
 // An ArcEnumerator iteratively enumerates edges, and can indicate the number of edges present.
@@ -235,7 +235,7 @@ type ArcEnumerator interface {
 	// Calls the provided step function once with each edge in the graph. If a
 	// specialized edge type (e.g., weighted) is known to be used by the
 	// graph, it is the calling code's responsibility to type assert.
-	EachArc(ArcStep)
+	Arcs(ArcStep)
 }
 
 // An IncidentEdgeEnumerator iteratively enumerates a given vertex's incident edges.
@@ -243,7 +243,7 @@ type IncidentEdgeEnumerator interface {
 	// Calls the provided step function once with each edge incident to the
 	// provided vertex. In a directed graph, this must include both
 	// inbound and outbound edges.
-	EachEdgeIncidentTo(v Vertex, incidentEdgeStep EdgeStep)
+	IncidentTo(v Vertex, incidentEdgeStep EdgeStep)
 }
 
 // An IncidentArcEnumerator iteratively enumerates a given vertex's incident arcs (directed edges).
@@ -251,17 +251,17 @@ type IncidentEdgeEnumerator interface {
 type IncidentArcEnumerator interface {
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcFrom(v Vertex, outArcStep ArcStep)
+	ArcsFrom(v Vertex, outArcStep ArcStep)
 	// Calls the provided step function once with each arc outbound from the
 	// provided vertex.
-	EachArcTo(v Vertex, inArcStep ArcStep)
+	ArcsTo(v Vertex, inArcStep ArcStep)
 }
 
 // A ProcessionEnumerator iteratively enumerates a vertex's predecessors or successors
 // into an injected step function.
 type ProcessionEnumerator interface { // TODO ProcessionEnumerator? really?
-	EachSuccessorOf(v Vertex, successorStep VertexStep)
-	EachPredecessorOf(v Vertex, predecessorStep VertexStep)
+	SuccessorsOf(v Vertex, successorStep VertexStep)
+	PredecessorsOf(v Vertex, predecessorStep VertexStep)
 }
 
 // An AdjacencyEnumerator iteratively enumerates a given vertex's adjacent vertices.
@@ -269,7 +269,7 @@ type AdjacencyEnumerator interface {
 	// Calls the provided step function once with each vertex adjacent to the
 	// the provided vertex. In a digraph, this includes both successor
 	// and predecessor vertices.
-	EachAdjacentTo(start Vertex, adjacentVertexStep VertexStep)
+	AdjacentTo(start Vertex, adjacentVertexStep VertexStep)
 }
 
 // A VertexMembershipChecker can indicate the presence of a vertex.

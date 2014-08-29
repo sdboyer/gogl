@@ -65,21 +65,22 @@ type al_dpea interface {
 func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 	vf := func(from GraphSource, to al_graph) {
 		if Order(to) != Order(from) {
-			from.EachVertex(func(vertex Vertex) (terminate bool) {
+			from.Vertices(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return
 			})
+
 		}
 	}
 
 	if g, ok := to.(al_ea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			g.addEdges(edge)
 			return
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_wea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(WeightedEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -90,7 +91,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_lea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(LabeledEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -101,7 +102,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_pea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			if e, ok := edge.(DataEdge); ok {
 				g.addEdges(e)
 			} else {
@@ -112,7 +113,7 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_ea); ok {
-		from.EachEdge(func(edge Edge) (terminate bool) {
+		from.Edges(func(edge Edge) (terminate bool) {
 			g.addEdges(edge)
 			return
 		})
@@ -131,21 +132,22 @@ func functorToAdjacencyList(from GraphSource, to al_graph) Graph {
 func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 	vf := func(from GraphSource, to al_graph) {
 		if Order(to) != Order(from) {
-			from.EachVertex(func(vertex Vertex) (terminate bool) {
+			from.Vertices(func(vertex Vertex) (terminate bool) {
 				to.ensureVertex(vertex)
 				return
 			})
+
 		}
 	}
 
 	if g, ok := to.(al_dea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			g.addArcs(arc)
 			return
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dwea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(WeightedArc); ok {
 				g.addArcs(e)
 			} else {
@@ -155,7 +157,7 @@ func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dlea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(LabeledArc); ok {
 				g.addArcs(e)
 			} else {
@@ -165,7 +167,7 @@ func functorToDirectedAdjacencyList(from DigraphSource, to al_digraph) Digraph {
 		})
 		vf(from, g)
 	} else if g, ok := to.(al_dpea); ok {
-		from.EachArc(func(arc Arc) (terminate bool) {
+		from.Arcs(func(arc Arc) (terminate bool) {
 			if e, ok := arc.(DataArc); ok {
 				g.addArcs(e)
 			} else {
@@ -278,7 +280,7 @@ func eachPredecessorOf(list interface{}, vertex Vertex, vs VertexStep) {
 
 func inDegreeOf(g al_digraph, v Vertex) (degree int, exists bool) {
 	if exists = g.hasVertex(v); exists {
-		g.EachArc(func(e Arc) (terminate bool) {
+		g.Arcs(func(e Arc) (terminate bool) {
 			if v == e.Target() {
 				degree++
 			}
@@ -299,6 +301,6 @@ func eachEdgeIncidentToDirected(g al_digraph, v Vertex, f EdgeStep) {
 		return terminate
 	}
 
-	g.EachArcFrom(v, interloper)
-	g.EachArcTo(v, interloper)
+	g.ArcsFrom(v, interloper)
+	g.ArcsTo(v, interloper)
 }

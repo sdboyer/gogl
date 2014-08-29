@@ -10,20 +10,20 @@ import (
 /* DataGraphSuite - tests for data graphs */
 
 type DataGraphSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataGraphSuite) SuiteLabel() string {
 	return fmt.Sprintf("%T", s.Factory(NullGraph))
 }
 
-func (s *DataGraphSuite) TestEachEdge(c *C) {
+func (s *DataGraphSuite) TestEdges(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachEdge() iterator actually do implement DataEdge.
+	// provided by the Edges() iterator actually do implement DataEdge.
 	g := s.Factory(GraphFixtures["d-2e3v"])
 
 	var we DataEdge
-	g.EachEdge(func(e Edge) (terminate bool) {
+	g.Edges(func(e Edge) (terminate bool) {
 		c.Assert(e, Implements, &we)
 		return
 	})
@@ -33,12 +33,12 @@ func (s *DataGraphSuite) TestHasDataEdge(c *C) {
 	g := s.Factory(GraphFixtures["d-2e3v"])
 
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "foo")), Equals, true)
-	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true) // both directions work
+	c.Assert(g.HasDataEdge(NewDataEdge(2, 1, "foo")), Equals, true)  // both directions work
 	c.Assert(g.HasDataEdge(NewDataEdge(1, 2, "qux")), Equals, false) // wrong data
 }
 
 type DataDigraphSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataDigraphSuite) SuiteLabel() string {
@@ -47,24 +47,24 @@ func (s *DataDigraphSuite) SuiteLabel() string {
 
 func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 	// This method is not redundant with the base Graph suite as it ensures that the edges
-	// provided by the EachArc() iterator actually do implement DataArc.
+	// provided by the Arcs() iterator actually do implement DataArc.
 	g := s.Factory(GraphFixtures["d-2e3v"]).(DataDigraph)
 
 	var hit int // just internal safety check to ensure the fixture is good and hits
 	var wa DataArc
-	g.EachArc(func(e Arc) (terminate bool) {
+	g.Arcs(func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
 	})
 
-	g.EachArcFrom(2, func(e Arc) (terminate bool) {
+	g.ArcsFrom(2, func(e Arc) (terminate bool) {
 		hit++
 		c.Assert(e, Implements, &wa)
 		return
@@ -76,7 +76,7 @@ func (s *DataDigraphSuite) TestArcSubtypeImplementation(c *C) {
 /* DataEdgeSetMutatorSuite - tests for mutable data graphs */
 
 type DataEdgeSetMutatorSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataEdgeSetMutatorSuite) SuiteLabel() string {
@@ -126,7 +126,7 @@ func (s *DataEdgeSetMutatorSuite) TestMultiAddRemoveEdge(c *C) {
 /* DataArcSetMutatorSuite - tests for mutable data graphs */
 
 type DataArcSetMutatorSuite struct {
-	Factory  func(GraphSource) DataGraph
+	Factory func(GraphSource) DataGraph
 }
 
 func (s *DataArcSetMutatorSuite) SuiteLabel() string {

@@ -1,8 +1,8 @@
 package gogl
 
 import (
-	"math"
 	. "github.com/sdboyer/gocheck"
+	"math"
 )
 
 type NullGraphSuite bool
@@ -10,32 +10,32 @@ type NullGraphSuite bool
 var _ = Suite(NullGraphSuite(false))
 
 func (s NullGraphSuite) TestEnumerators(c *C) {
-	NullGraph.EachVertex(func(v Vertex) (terminate bool) {
+	NullGraph.Vertices(func(v Vertex) (terminate bool) {
 		c.Error("The NullGraph should not have any vertices.")
 		return
 	})
 
-	NullGraph.EachEdge(func(e Edge) (terminate bool) {
+	NullGraph.Edges(func(e Edge) (terminate bool) {
 		c.Error("The NullGraph should not have any edges.")
 		return
 	})
 
-	NullGraph.EachEdgeIncidentTo("foo", func(e Edge) (terminate bool) {
+	NullGraph.IncidentTo("foo", func(e Edge) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})
 
-	NullGraph.EachAdjacentTo("foo", func(v Vertex) (terminate bool) {
+	NullGraph.AdjacentTo("foo", func(v Vertex) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})
 
-	NullGraph.EachArcFrom("foo", func(e Arc) (terminate bool) {
+	NullGraph.ArcsFrom("foo", func(e Arc) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})
 
-	NullGraph.EachArcTo("foo", func(e Arc) (terminate bool) {
+	NullGraph.ArcsTo("foo", func(e Arc) (terminate bool) {
 		c.Error("The NullGraph should be empty of edges and vertices.")
 		return
 	})
