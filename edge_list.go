@@ -6,7 +6,7 @@ import (
 
 // Shared helper function for edge lists to enumerate vertices.
 func elVertices(el interface{}, fn VertexStep) {
-	set := set.NewNonTS()
+	set := set.New(set.NonThreadSafe)
 
 	el.(EdgeEnumerator).Edges(func(e Edge) (terminate bool) {
 		set.Add(e.Both())

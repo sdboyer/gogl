@@ -12,7 +12,7 @@ type EdgeListSuite struct{}
 var _ = Suite(&EdgeListSuite{})
 
 func (s *EdgeListSuite) TestVertices(c *C) {
-	set1 := set.NewNonTS()
+	set1 := set.New(set.NonThreadSafe)
 
 	spec.GraphFixtures["2e3v"].Vertices(func(v Vertex) (terminate bool) {
 		set1.Add(v)
@@ -88,7 +88,7 @@ type ArcListSuite struct{}
 var _ = Suite(&ArcListSuite{})
 
 func (s *ArcListSuite) TestVertices(c *C) {
-	set1 := set.NewNonTS()
+	set1 := set.New(set.NonThreadSafe)
 
 	spec.GraphFixtures["2e3v"].Vertices(func(v Vertex) (terminate bool) {
 		set1.Add(v)

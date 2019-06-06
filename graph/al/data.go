@@ -406,7 +406,7 @@ func (g *dataUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	visited := set.NewNonTS()
+	visited := set.New(set.NonThreadSafe)
 
 	var e DataEdge
 	for source, adjacent := range g.list {
