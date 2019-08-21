@@ -165,7 +165,7 @@ func Traverse(g gogl.Graph, visitor Visitor, start ...gogl.Vertex) (Visitor, err
 // Finds all source vertices (vertices with no incoming edges) in the given directed graph.
 func FindSources(g gogl.Digraph) (sources []gogl.Vertex, err error) {
 	// TODO hardly the most efficient way to keep track, i'm sure
-	incomings := set.NewNonTS()
+	incomings := set.New(set.NonThreadSafe)
 
 	g.Arcs(func(e gogl.Arc) (terminate bool) {
 		incomings.Add(e.Target())

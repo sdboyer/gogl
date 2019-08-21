@@ -89,7 +89,7 @@ func (s *DigraphSuite) TestInDegreeOf(c *C) {
 func (s *DigraphSuite) TestArcsTo(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
-	eset := set.NewNonTS()
+	eset := set.New(set.NonThreadSafe)
 	var hit int
 	g.ArcsTo("foo", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'foo' should have no in-edges")
@@ -125,7 +125,7 @@ func (s *DigraphSuite) TestArcsToTermination(c *C) {
 func (s *DigraphSuite) TestPredecessorsOf(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
-	eset := set.NewNonTS()
+	eset := set.New(set.NonThreadSafe)
 	g.PredecessorsOf("foo", func(v Vertex) (terminate bool) {
 		c.Error("Vertex 'foo' should have no predecessors")
 		c.FailNow()
@@ -158,7 +158,7 @@ func (s *DigraphSuite) TestPredecessorsOfTermination(c *C) {
 func (s *DigraphSuite) TestArcsFrom(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
-	eset := set.NewNonTS()
+	eset := set.New(set.NonThreadSafe)
 	var hit int
 	g.ArcsFrom("baz", func(e Arc) (terminate bool) {
 		c.Error("Vertex 'baz' should have no out-edges")
@@ -194,7 +194,7 @@ func (s *DigraphSuite) TestArcsFromTermination(c *C) {
 func (s *DigraphSuite) TestSuccessorsOf(c *C) {
 	g := s.Factory(GraphFixtures["arctest"]).(Digraph)
 
-	eset := set.NewNonTS()
+	eset := set.New(set.NonThreadSafe)
 	g.SuccessorsOf("baz", func(v Vertex) (terminate bool) {
 		c.Error("Vertex 'foo' should have no successors")
 		c.FailNow()

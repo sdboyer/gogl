@@ -35,7 +35,7 @@ func (s *GraphSuite) TestHasEdge(c *C) {
 func (s *GraphSuite) TestVertices(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
-	vset := set.NewNonTS()
+	vset := set.New(set.NonThreadSafe)
 	var hit int
 	g.Vertices(func(v Vertex) (terminate bool) {
 		hit++
@@ -88,7 +88,7 @@ func (s *GraphSuite) TestEdgesTermination(c *C) {
 func (s *GraphSuite) TestAdjacentTo(c *C) {
 	g := s.Factory(GraphFixtures["2e3v"])
 
-	vset := set.NewNonTS()
+	vset := set.New(set.NonThreadSafe)
 	var hit int
 	g.AdjacentTo("bar", func(adj Vertex) (terminate bool) {
 		hit++
@@ -122,7 +122,7 @@ func (s *GraphSuite) TestIncidentTo(c *C) {
 		Swap(GraphFixtures["2e3v"].(ArcList)[1]),
 	}
 
-	eset := set.NewNonTS()
+	eset := set.New(set.NonThreadSafe)
 	var hit int
 	g.IncidentTo("foo", func(e Edge) (terminate bool) {
 		hit++
@@ -141,7 +141,7 @@ func (s *GraphSuite) TestIncidentTo(c *C) {
 		c.Assert(eset.Has(GraphFixtures["2e3v"].(ArcList)[1]), Equals, false)
 	}
 
-	eset = set.NewNonTS()
+	eset = set.New(set.NonThreadSafe)
 	g.IncidentTo("bar", func(e Edge) (terminate bool) {
 		hit++
 		// A more specific edge type may be passed, but in this test we care only about the base

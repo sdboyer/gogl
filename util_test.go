@@ -22,7 +22,7 @@ func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
 
 	c.Assert(len(slice), Equals, 4)
 
-	set1 := set.NewNonTS()
+	set1 := set.New(set.NonThreadSafe)
 	for _, v := range slice {
 		set1.Add(v)
 	}
@@ -36,7 +36,7 @@ func (s *CollectionFunctorsSuite) TestCollectVertices(c *C) {
 
 	c.Assert(len(slice2), Equals, 3)
 
-	set2 := set.NewNonTS()
+	set2 := set.New(set.NonThreadSafe)
 	for _, v := range slice2 {
 		set2.Add(v)
 	}
@@ -51,7 +51,7 @@ func (s *CollectionFunctorsSuite) TestCollectAdjacentVertices(c *C) {
 
 	c.Assert(len(slice), Equals, 2)
 
-	set := set.NewNonTS()
+	set := set.New(set.NonThreadSafe)
 	for _, v := range slice {
 		set.Add(v)
 	}
@@ -65,7 +65,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 
 	c.Assert(len(slice), Equals, 2)
 
-	set1 := set.NewNonTS()
+	set1 := set.New(set.NonThreadSafe)
 	for _, e := range slice {
 		set1.Add(e)
 	}
@@ -77,7 +77,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdges(c *C) {
 
 	c.Assert(len(slice2), Equals, 2)
 
-	set2 := set.NewNonTS()
+	set2 := set.New(set.NonThreadSafe)
 	for _, e := range slice2 {
 		set2.Add(NewEdge(e.Both()))
 	}
@@ -91,7 +91,7 @@ func (s *CollectionFunctorsSuite) TestCollectEdgesIncidentTo(c *C) {
 
 	c.Assert(len(slice), Equals, 1)
 
-	set := set.NewNonTS()
+	set := set.New(set.NonThreadSafe)
 	for _, e := range slice {
 		set.Add(e)
 	}
@@ -104,7 +104,7 @@ func (s *CollectionFunctorsSuite) TestCollectArcsFrom(c *C) {
 
 	c.Assert(len(slice), Equals, 1)
 
-	set := set.NewNonTS()
+	set := set.New(set.NonThreadSafe)
 	for _, e := range slice {
 		set.Add(e)
 	}
@@ -117,7 +117,7 @@ func (s *CollectionFunctorsSuite) TestCollectArcsTo(c *C) {
 
 	c.Assert(len(slice), Equals, 1)
 
-	set := set.NewNonTS()
+	set := set.New(set.NonThreadSafe)
 	for _, e := range slice {
 		set.Add(e)
 	}

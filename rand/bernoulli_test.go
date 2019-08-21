@@ -108,8 +108,8 @@ func (s *BernoulliTest) TestEdgesCount(c *C) {
 }
 
 func (s *BernoulliTest) TestEdgesStability(c *C) {
-	setd := set.NewNonTS()
-	setu := set.NewNonTS()
+	setd := set.New(set.NonThreadSafe)
+	setu := set.New(set.NonThreadSafe)
 	var hitu, hitd int
 
 	dg := BernoulliDistribution(10, 0.5, true, true, nil)
@@ -177,7 +177,7 @@ func (s *BernoulliTest) TestEdgesTermination(c *C) {
 }
 
 func (s *BernoulliTest) TestArcsStability(c *C) {
-	setd := set.NewNonTS()
+	setd := set.New(set.NonThreadSafe)
 	var hitd int
 
 	g := BernoulliDistribution(10, 0.5, true, true, nil).(gogl.DigraphSource)

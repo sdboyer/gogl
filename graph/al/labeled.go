@@ -405,7 +405,7 @@ func (g *labeledUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	visited := set.NewNonTS()
+	visited := set.New(set.NonThreadSafe)
 
 	var e LabeledEdge
 	for source, adjacent := range g.list {

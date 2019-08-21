@@ -27,7 +27,7 @@ func (g *mutableUndirected) Edges(f EdgeStep) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	visited := set.NewNonTS()
+	visited := set.New(set.NonThreadSafe)
 
 	for source, adjacent := range g.list {
 		for target := range adjacent {
